@@ -1,0 +1,141 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # The parser and runner touch the filesystem and spawn processes, so
+        # all three platforms are worth covering.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Verify formatting
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "These files need gofmt:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Test with race detector
+        if: matrix.os != 'windows-latest'
+        run: go test -race ./...
+
+  build:
+    name: build artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      # Catches a broken release config on every PR rather than at tag time,
+      # when it is far more painful to discover.
+      - uses: goreleaser/goreleaser-action@v6
+        with:
+          version: "~> v2"
+          args: release --snapshot --clean --skip=publish,docker
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: snapshot-binaries
+          path: dist/*.tar.gz
+          retention-days: 7
+
+  action:
+    name: self-test the action
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      # The published action installs from GitHub Releases, which do not exist
+      # before the first tag. Until then, exercise the real end-to-end flow
+      # against a locally built binary.
+      - name: Build
+        run: go build -o "$RUNNER_TEMP/bin/flakestat" ./cmd/flakestat
+
+      - name: Hunt a known-flaky suite
+        run: |
+          export PATH="$RUNNER_TEMP/bin:$PATH"
+          mkdir -p /tmp/selftest/reports && cd /tmp/selftest
+
+          cat > flaky.sh <<'SH'
+          #!/bin/sh
+          # Fails on even-numbered runs: deterministic flakiness for the test.
+          if [ $((FLAKESTAT_RUN % 2)) -eq 0 ]; then
+            body='<testcase classname="C" name="test_flaky"><failure message="boom"/></testcase>'
+          else
+            body='<testcase classname="C" name="test_flaky"/>'
+          fi
+          printf '<testsuite name="s" tests="2">%s<testcase classname="C" name="test_stable"/></testsuite>' \
+            "$body" > "reports/junit-${FLAKESTAT_RUN}.xml"
+          SH
+          chmod +x flaky.sh
+
+          flakestat hunt --runs 6 --junit 'reports/junit-{run}.xml' --no-color -- ./flaky.sh
+
+          echo "--- asserting test_flaky was caught ---"
+          flakestat report --format json | tee out.json
+          node -e '
+            const r = require("/tmp/selftest/out.json");
+            const flaky = r.results.filter(x => x.verdict === "flaky").map(x => x.name);
+            if (!flaky.includes("test_flaky")) {
+              console.error("FAIL: test_flaky was not detected. Got:", JSON.stringify(r.results));
+              process.exit(1);
+            }
+            if (flaky.includes("test_stable")) {
+              console.error("FAIL: test_stable was wrongly flagged flaky");
+              process.exit(1);
+            }
+            console.log("OK: detected", flaky);
+          '
+
+      - name: Verify the CI gate exits non-zero
+        run: |
+          export PATH="$RUNNER_TEMP/bin:$PATH"
+          cd /tmp/selftest
+          if flakestat report --fail-on-flaky --no-color; then
+            echo "FAIL: --fail-on-flaky should have exited non-zero"
+            exit 1
+          fi
+          echo "OK: gate exited non-zero as expected"
