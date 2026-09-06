@@ -5,12 +5,26 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/rowhitswami/flakestat/internal/junit"
 )
+
+// requirePOSIXShell skips tests whose *fixture* needs a POSIX shell.
+//
+// The runner itself is OS-agnostic -- it execs whatever argv it is given --
+// but these tests drive it with "sh -c". On Windows, sh treats the backslashes
+// in a temp path as escapes, so redirects silently write nowhere. Skipping is
+// honest here: what cannot run on Windows is the fixture, not the code.
+func requirePOSIXShell(t *testing.T) {
+	t.Helper()
+	if runtime.GOOS == "windows" {
+		t.Skip("fixture needs a POSIX shell; the runner itself is OS-agnostic")
+	}
+}
 
 // writeReportCmd returns a shell command that writes a minimal JUnit report to
 // path, with the given case status.
@@ -24,6 +38,8 @@ func writeReportCmd(path, status string) []string {
 }
 
 func TestRunsExactlyNTimes(t *testing.T) {
+	requirePOSIXShell(t)
+
 	res, err := Run(context.Background(), Options{
 		Command: []string{"sh", "-c", "exit 0"},
 		Runs:    5,
@@ -38,6 +54,8 @@ func TestRunsExactlyNTimes(t *testing.T) {
 
 // Each run must write to its own report file, and all must be parsed.
 func TestRunPlaceholderExpansion(t *testing.T) {
+	requirePOSIXShell(t)
+
 	dir := t.TempDir()
 	pattern := filepath.Join(dir, "junit-"+RunPlaceholder+".xml")
 
@@ -95,6 +113,8 @@ func TestValidateRejectsEmptyCommand(t *testing.T) {
 // With no JUnit report, granularity is lost but the exit code still tells us
 // whether the suite passed.
 func TestMissingReportFallsBackToExitCode(t *testing.T) {
+	requirePOSIXShell(t)
+
 	dir := t.TempDir()
 
 	res, err := Run(context.Background(), Options{
@@ -123,6 +143,8 @@ func TestMissingReportFallsBackToExitCode(t *testing.T) {
 }
 
 func TestUntilFailStopsEarly(t *testing.T) {
+	requirePOSIXShell(t)
+
 	res, err := Run(context.Background(), Options{
 		Command:   []string{"sh", "-c", "exit 1"},
 		Runs:      20,
@@ -142,6 +164,8 @@ func TestUntilFailStopsEarly(t *testing.T) {
 
 // A stale report from a previous run must not be scored against this one.
 func TestStaleReportIsRemoved(t *testing.T) {
+	requirePOSIXShell(t)
+
 	dir := t.TempDir()
 	path := filepath.Join(dir, "junit.xml")
 
@@ -163,6 +187,8 @@ func TestStaleReportIsRemoved(t *testing.T) {
 }
 
 func TestRunNumberIsExportedToCommand(t *testing.T) {
+	requirePOSIXShell(t)
+
 	dir := t.TempDir()
 	out := filepath.Join(dir, "runs.txt")
 
@@ -186,6 +212,8 @@ func TestRunNumberIsExportedToCommand(t *testing.T) {
 }
 
 func TestTimeoutIsReportedAsError(t *testing.T) {
+	requirePOSIXShell(t)
+
 	res, err := Run(context.Background(), Options{
 		Command: []string{"sh", "-c", "sleep 5"},
 		Runs:    1,
@@ -218,6 +246,8 @@ func TestFailedDetectsFailingCase(t *testing.T) {
 }
 
 func TestProgressCallbackFiresPerRun(t *testing.T) {
+	requirePOSIXShell(t)
+
 	var count int
 	var mu = make(chan struct{}, 1)
 	mu <- struct{}{}
