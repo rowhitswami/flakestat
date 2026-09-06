@@ -197,7 +197,7 @@ func TestMarkdownRendersTable(t *testing.T) {
 	if !strings.Contains(out, "## flakestat") {
 		t.Error("missing heading")
 	}
-	if !strings.Contains(out, "| Verdict | Score | Runs | Pass/Fail | Test |") {
+	if !strings.Contains(out, "| Verdict | Score | Confidence | Runs | Pass/Fail | Test |") {
 		t.Error("missing table header")
 	}
 	if !strings.Contains(out, "test_login") {
@@ -297,5 +297,67 @@ func TestMedianRuns(t *testing.T) {
 	}
 	if medianRuns(nil) != 0 {
 		t.Error("medianRuns(nil) should be 0")
+	}
+}
+
+// A score is meaningless without the evidence behind it, so every renderer
+// must carry the confidence level alongside it.
+func TestConfidenceAppearsInEveryFormat(t *testing.T) {
+	results := []score.Result{{
+		Name: "test_a", Class: "C", Suite: "s", Verdict: score.ClassFlaky,
+		Score: 0.71, Level: score.LevelLow, Confidence: 0.12,
+		Runs: 4, Passes: 2, Fails: 2, Transitions: 3,
+	}}
+
+	var table, md, js bytes.Buffer
+	if err := Table(&table, results, Options{NoColor: true}); err != nil {
+		t.Fatalf("Table: %v", err)
+	}
+	if err := Markdown(&md, results, Options{}); err != nil {
+		t.Fatalf("Markdown: %v", err)
+	}
+	if err := JSON(&js, results, Options{}); err != nil {
+		t.Fatalf("JSON: %v", err)
+	}
+
+	if !strings.Contains(table.String(), "low") {
+		t.Errorf("table omits the confidence level:\n%s", table.String())
+	}
+	if !strings.Contains(md.String(), "low") {
+		t.Errorf("markdown omits the confidence level:\n%s", md.String())
+	}
+
+	var got struct {
+		Results []struct {
+			Confidence string  `json:"confidence"`
+			LowerBound float64 `json:"lower_bound"`
+		} `json:"results"`
+	}
+	if err := json.Unmarshal(js.Bytes(), &got); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+	if got.Results[0].Confidence != "low" {
+		t.Errorf("JSON confidence = %q, want \"low\"", got.Results[0].Confidence)
+	}
+	if got.Results[0].LowerBound != 0.12 {
+		t.Errorf("JSON lower_bound = %v, want 0.12", got.Results[0].LowerBound)
+	}
+}
+
+// A high score from a tiny sample must never read as authoritative.
+func TestHighScoreLowSampleShowsLowConfidence(t *testing.T) {
+	results := []score.Result{{
+		Name: "test_payment_callback", Class: "pay", Suite: "s",
+		Verdict: score.ClassFlaky, Score: 0.71, Level: score.LevelLow,
+		Runs: 3, Passes: 1, Fails: 2, Transitions: 2,
+	}}
+
+	var buf bytes.Buffer
+	if err := Table(&buf, results, Options{NoColor: true}); err != nil {
+		t.Fatalf("Table: %v", err)
+	}
+	out := buf.String()
+	if !strings.Contains(out, "0.71") || !strings.Contains(out, "low") {
+		t.Errorf("expected score 0.71 shown next to low confidence:\n%s", out)
 	}
 }

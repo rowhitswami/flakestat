@@ -200,8 +200,8 @@ func Table(w io.Writer, results []score.Result, opts Options) error {
 		return c + s + colorReset
 	}
 
-	headers := []string{"VERDICT", "SCORE", "RUNS", "PASS/FAIL", "TEST"}
-	aligns := []alignment{alignLeft, alignRight, alignRight, alignRight, alignLeft}
+	headers := []string{"VERDICT", "SCORE", "CONF", "RUNS", "PASS/FAIL", "TEST"}
+	aligns := []alignment{alignLeft, alignRight, alignLeft, alignRight, alignRight, alignLeft}
 
 	// Plain cell text, used for both width computation and rendering.
 	cells := make([][]string, 0, len(rows))
@@ -210,9 +210,14 @@ func Table(w io.Writer, results []score.Result, opts Options) error {
 		if r.KnownFlaky {
 			name += " (framework-reported)"
 		}
+		level := string(r.Level)
+		if level == "" {
+			level = "-"
+		}
 		cells = append(cells, []string{
 			string(r.Verdict),
 			fmt.Sprintf("%.2f", r.Score),
+			level,
 			fmt.Sprintf("%d", r.Runs),
 			fmt.Sprintf("%d/%d", r.Passes, r.Fails),
 			name,
@@ -249,7 +254,7 @@ func Table(w io.Writer, results []score.Result, opts Options) error {
 			switch i {
 			case 0:
 				text = paint(verdictColor(rows[ri].Verdict), c)
-			case 4:
+			case 5:
 				if rows[ri].KnownFlaky {
 					text = strings.TrimSuffix(c, " (framework-reported)") +
 						paint(colorGray, " (framework-reported)")
@@ -288,7 +293,8 @@ type jsonResult struct {
 	Class      string  `json:"class,omitempty"`
 	Verdict    string  `json:"verdict"`
 	Score      float64 `json:"score"`
-	Confidence float64 `json:"confidence"`
+	Confidence string  `json:"confidence"`
+	LowerBound float64 `json:"lower_bound"`
 	FlipRate   float64 `json:"flip_rate"`
 	Runs       int     `json:"runs"`
 	Passes     int     `json:"passes"`
@@ -317,7 +323,8 @@ func JSON(w io.Writer, results []score.Result, opts Options) error {
 			Class:      r.Class,
 			Verdict:    string(r.Verdict),
 			Score:      r.Score,
-			Confidence: r.Confidence,
+			Confidence: string(r.Level),
+			LowerBound: r.Confidence,
 			FlipRate:   r.FlipRate,
 			Runs:       r.Runs,
 			Passes:     r.Passes,
@@ -348,15 +355,19 @@ func Markdown(w io.Writer, results []score.Result, opts Options) error {
 	fmt.Fprintf(w, "**%d flaky**, %d suspect, %d consistently failing (of %d tests)\n\n",
 		summary.Flaky, summary.Suspect, summary.ConsistentlyFailing, summary.Total)
 
-	fmt.Fprintln(w, "| Verdict | Score | Runs | Pass/Fail | Test |")
-	fmt.Fprintln(w, "| --- | --: | --: | --: | --- |")
+	fmt.Fprintln(w, "| Verdict | Score | Confidence | Runs | Pass/Fail | Test |")
+	fmt.Fprintln(w, "| --- | --: | --- | --: | --: | --- |")
 	for _, r := range rows {
 		name := escapePipes(r.DisplayName())
 		if r.KnownFlaky {
 			name += " _(framework-reported)_"
 		}
-		fmt.Fprintf(w, "| %s | %.2f | %d | %d/%d | `%s` |\n",
-			r.Verdict, r.Score, r.Runs, r.Passes, r.Fails, name)
+		level := string(r.Level)
+		if level == "" {
+			level = "-"
+		}
+		fmt.Fprintf(w, "| %s | %.2f | %s | %d | %d/%d | `%s` |\n",
+			r.Verdict, r.Score, level, r.Runs, r.Passes, r.Fails, name)
 	}
 	return nil
 }

@@ -494,3 +494,90 @@ func TestRecencyStillDecaysAcrossCommits(t *testing.T) {
 		t.Errorf("recent flakiness (%.3f) should outweigh old (%.3f)", recent.Score, old.Score)
 	}
 }
+
+// Confidence must be driven by how much evidence exists, never by how large
+// the score happens to be. The spec's central requirement: a small sample
+// cannot produce high confidence no matter how flaky the test looks.
+func TestConfidenceLevelBoundaries(t *testing.T) {
+	tests := []struct {
+		name    string
+		pattern string
+		want    Level
+	}{
+		// transitions = observations - 1
+		{"minimal observations", "pf", LevelLow},
+		{"just below medium", strings.Repeat("pf", 5)[:10], LevelLow},   // 9 transitions
+		{"at medium", strings.Repeat("pf", 6)[:12], LevelMedium},        // 11 transitions
+		{"just below high", strings.Repeat("pf", 15)[:30], LevelMedium}, // 29 transitions
+		{"at high", strings.Repeat("pf", 16)[:32], LevelHigh},           // 31 transitions
+		{"large sample", strings.Repeat("pf", 50), LevelHigh},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := Defaults()
+			cfg.MinRuns = 2
+			r := Score(series(tc.pattern, "onecommit"), cfg)
+			if r.Level != tc.want {
+				t.Errorf("pattern of %d obs (%d transitions): Level = %q, want %q",
+					len(tc.pattern), r.Transitions, r.Level, tc.want)
+			}
+		})
+	}
+}
+
+// The pairing that matters most: maximum possible score, minimum evidence.
+func TestHighScoreWithTinySampleIsLowConfidence(t *testing.T) {
+	cfg := Defaults()
+	cfg.MinRuns = 2
+	r := Score(series("pfpf", "onecommit"), cfg)
+
+	if r.Score < 0.9 {
+		t.Fatalf("expected a high score for full alternation, got %.3f", r.Score)
+	}
+	if r.Level != LevelLow {
+		t.Errorf("Level = %q, want %q: 3 transitions cannot justify high confidence", r.Level, LevelLow)
+	}
+}
+
+// Adding supporting observations must raise confidence, never lower it.
+func TestConfidenceIncreasesMonotonicallyWithEvidence(t *testing.T) {
+	rank := map[Level]int{LevelLow: 0, LevelMedium: 1, LevelHigh: 2}
+	prev := -1
+
+	for _, n := range []int{2, 6, 12, 20, 40, 80} {
+		cfg := Defaults()
+		cfg.MinRuns = 2
+		r := Score(series(strings.Repeat("pf", n/2), "onecommit"), cfg)
+		got := rank[r.Level]
+		if got < prev {
+			t.Errorf("%d observations gave %q, which is weaker than the previous sample", n, r.Level)
+		}
+		prev = got
+	}
+}
+
+// Same-commit disagreements are counted separately because they are the
+// strongest single piece of evidence available.
+func TestSameCommitFlipsAreCounted(t *testing.T) {
+	same := Score(series("pfpfpfpf", "deadbeef"), Defaults())
+	if same.SameCommitFlips != 7 {
+		t.Errorf("SameCommitFlips = %d, want 7", same.SameCommitFlips)
+	}
+
+	// Distinct commit per observation: disagreement is real but not proof.
+	across := Score(series("pfpfpfpf", ""), Defaults())
+	if across.SameCommitFlips != 0 {
+		t.Errorf("SameCommitFlips = %d, want 0 across commits", across.SameCommitFlips)
+	}
+}
+
+func TestSkipsAreCountedSeparately(t *testing.T) {
+	r := Score(series("psspsspssp", ""), Defaults())
+	if r.Skips != 6 {
+		t.Errorf("Skips = %d, want 6", r.Skips)
+	}
+	if r.Runs != 4 {
+		t.Errorf("Runs = %d, want 4 (skips excluded from scoring)", r.Runs)
+	}
+}

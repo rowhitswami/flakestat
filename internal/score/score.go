@@ -50,6 +50,39 @@ const (
 	ClassAlwaysSkipped Class = "always-skipped"
 )
 
+// Level describes how much evidence stands behind a verdict.
+//
+// A score alone is misleading: 0.71 from three runs and 0.71 from three
+// hundred are wildly different claims, and printing both as "0.71" invites
+// the reader to trust the first as much as the second.
+type Level string
+
+const (
+	LevelLow    Level = "low"
+	LevelMedium Level = "medium"
+	LevelHigh   Level = "high"
+)
+
+// Evidence thresholds, in observed transitions. These line up with measured
+// detection rates: around 20 runs the tool reliably finds tests failing a
+// quarter of the time, and around 50 it starts catching one-in-ten flakes.
+const (
+	mediumEvidence = 10
+	highEvidence   = 30
+)
+
+// levelFor maps observed transitions onto a confidence label.
+func levelFor(transitions float64) Level {
+	switch {
+	case transitions >= highEvidence:
+		return LevelHigh
+	case transitions >= mediumEvidence:
+		return LevelMedium
+	default:
+		return LevelLow
+	}
+}
+
 // Config tunes scoring. Zero values are replaced by Defaults.
 type Config struct {
 	MinRuns          int     `json:"min_runs,omitempty"`
@@ -123,6 +156,7 @@ type Result struct {
 	Runs   int // scored observations (skips excluded)
 	Passes int
 	Fails  int
+	Skips  int // observed but carrying no pass/fail signal
 
 	// FlipRate is the unweighted transition rate, for display.
 	FlipRate float64
@@ -133,6 +167,15 @@ type Result struct {
 	// Classification uses this, not Score, so a verdict requires evidence
 	// rather than a lucky flip in a short run.
 	Confidence float64
+
+	// Transitions is how many adjacent-observation comparisons were made, and
+	// Level turns that into a plain-language claim about trustworthiness.
+	Transitions int
+	Level       Level
+
+	// SameCommitFlips counts disagreements observed on identical code, the
+	// strongest single piece of evidence a test is flaky.
+	SameCommitFlips int
 
 	Verdict Class
 
@@ -183,6 +226,7 @@ func Score(obs []store.Observation, cfg Config) Result {
 			res.KnownFlaky = true
 		}
 		if o.Status == junit.StatusSkip {
+			res.Skips++
 			continue
 		}
 		passed := o.Status == junit.StatusPass
@@ -221,12 +265,16 @@ func Score(obs []store.Observation, cfg Config) Result {
 	res.Commits = len(seenCommits)
 	res.Branches = len(seenBranches)
 
+	// Evidence is measured before any verdict is reached, so that a test which
+	// cannot be classified still reports how much was actually observed.
+	var effN float64
+	res.FlipRate, res.Score, effN, res.Transitions, res.SameCommitFlips = flipRates(points, cfg)
+	res.Confidence = wilsonLowerBound(res.Score, effN)
+	res.Level = levelFor(effN)
+
 	// A framework that observed fail-then-pass inside a single run has already
 	// proven flakiness; no history threshold applies.
 	if res.KnownFlaky {
-		var effN float64
-		res.FlipRate, res.Score, effN = flipRates(points, cfg)
-		res.Confidence = wilsonLowerBound(res.Score, effN)
 		if res.Score < cfg.FlakyThreshold {
 			res.Score = cfg.FlakyThreshold
 		}
@@ -244,10 +292,6 @@ func Score(obs []store.Observation, cfg Config) Result {
 		res.Verdict = ClassInsufficient
 		return res
 	}
-
-	var effN float64
-	res.FlipRate, res.Score, effN = flipRates(points, cfg)
-	res.Confidence = wilsonLowerBound(res.Score, effN)
 
 	switch {
 	case res.Fails == res.Runs:
@@ -280,9 +324,9 @@ type point struct {
 // passes on main, fails on an in-progress feature branch, then passes on main
 // again reads as two flips in a flat series, when nothing about main changed.
 // Grouping first removes that class of phantom signal entirely.
-func flipRates(points []point, cfg Config) (flat, weighted, effN float64) {
+func flipRates(points []point, cfg Config) (flat, weighted, effN float64, transitions, sameCommitFlips int) {
 	if len(points) < 2 {
-		return 0, 0, 0
+		return 0, 0, 0, 0, 0
 	}
 
 	// Preserve first-seen branch order so results are deterministic.
@@ -299,7 +343,7 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64) {
 	// full statistical weight instead of decaying to its last few runs.
 	newest := float64(points[len(points)-1].gen)
 
-	var flips, transitions int
+	var flips int
 	var num, den, sumSqW float64
 
 	for _, branch := range order {
@@ -333,6 +377,8 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64) {
 			evidence := 1.0
 			if g[i].commit != g[i+1].commit {
 				evidence = 1.0 / cfg.SameCommitWeight
+			} else if t == 1.0 {
+				sameCommitFlips++
 			}
 
 			// Recency uses the newer observation's generation, so a transition
@@ -348,7 +394,7 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64) {
 	}
 
 	if transitions == 0 {
-		return 0, 0, 0
+		return 0, 0, 0, 0, 0
 	}
 	flat = float64(flips) / float64(transitions)
 	if den > 0 {
@@ -357,7 +403,7 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64) {
 		// than the same number of equally weighted observations.
 		effN = (den * den) / sumSqW
 	}
-	return flat, weighted, effN
+	return flat, weighted, effN, transitions, sameCommitFlips
 }
 
 // wilsonLowerBound returns the lower end of a one-sided Wilson score interval
