@@ -1,0 +1,157 @@
+# GoReleaser builds every artifact flakestat ships: cross-compiled archives on
+# GitHub Releases, a Homebrew tap formula, and multi-arch container images.
+#
+# Local dry run (no publishing, no tag required):
+#   goreleaser release --snapshot --clean
+#
+# Real release:
+#   git tag -a v0.1.0 -m "v0.1.0" && git push origin v0.1.0
+version: 2
+
+project_name: flakestat
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: flakestat
+    main: ./cmd/flakestat
+    binary: flakestat
+    env:
+      # A static binary is the whole point: it must drop into any CI image,
+      # including distroless and Alpine, with no runtime to install.
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w -X github.com/rowhitswami/flakestat/internal/cli.Version={{ .Version }}
+    # Reproducible builds: stamp from the commit, not the clock.
+    mod_timestamp: "{{ .CommitTimestamp }}"
+
+archives:
+  - id: default
+    ids:
+      - flakestat
+    # Matches what scripts/install.sh and the npm/PyPI wrappers expect.
+    # Changing this breaks every installer, so keep the three in sync.
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README.md
+      - LICENSE
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  version_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  use: github
+  groups:
+    - title: Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: Fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: Other
+      order: 999
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+      - Merge pull request
+      - Merge branch
+
+homebrew_casks:
+  - name: flakestat
+    ids:
+      - default
+    repository:
+      owner: rowhitswami
+      name: homebrew-tap
+      # A personal access token with contents:write on the tap repository.
+      # GITHUB_TOKEN cannot write to a different repository.
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    directory: Casks
+    homepage: https://github.com/rowhitswami/flakestat
+    description: Find flaky tests in any language, locally, with no SaaS account
+    license: MIT
+    binaries:
+      - flakestat
+    caveats: |
+      flakestat works without git, but reads the commit SHA when one is
+      available. That is what separates genuine flakiness (same code, different
+      result) from a regression that was later fixed.
+    hooks:
+      post:
+        # Binaries downloaded by a cask are quarantined by Gatekeeper, so an
+        # unsigned CLI refuses to run until the attribute is cleared.
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr",
+                           args: ["-dr", "com.apple.quarantine", "#{staged_path}/flakestat"],
+                           must_succeed: false
+          end
+
+dockers_v2:
+  - id: flakestat
+    ids:
+      - flakestat
+    dockerfile: Dockerfile
+    images:
+      - ghcr.io/rowhitswami/flakestat
+    tags:
+      - "{{ .Version }}"
+      - latest
+    # One entry builds and pushes a multi-arch manifest; no separate
+    # per-architecture images or manifest stitching needed.
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.description: Find flaky tests in any language
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.source: https://github.com/rowhitswami/flakestat
+      org.opencontainers.image.licenses: MIT
+
+release:
+  # Declared explicitly rather than inferred from the git remote, so the config
+  # validates in a fresh clone and in CI checkouts with no origin configured.
+  github:
+    owner: rowhitswami
+    name: flakestat
+  draft: false
+  prerelease: auto
+  footer: |
+    ## Install
+
+    ```bash
+    # Homebrew
+    brew install rowhitswami/tap/flakestat
+
+    # Go
+    go install github.com/rowhitswami/flakestat/cmd/flakestat@{{ .Tag }}
+
+    # Script
+    curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh | sh
+
+    # npm / PyPI
+    npx flakestat --help
+    pip install flakestat
+    ```
