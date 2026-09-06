@@ -95,6 +95,23 @@ jobs:
           python -m pip install --upgrade build
           python -m build
 
+      # PyPI uploads are irreversible: a version number cannot be reused even
+      # after yanking. v0.1.0 shipped with the wheel metadata at the right
+      # version while the code still asked for v0.0.0 binaries, so verify the
+      # built wheel actually reports the tag before anything is published.
+      - name: Verify the wheel reports the released version
+        working-directory: pypi
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          python -m venv /tmp/verify
+          /tmp/verify/bin/pip install --quiet dist/*.whl
+          got=$(/tmp/verify/bin/python -c "import flakestat; print(flakestat.__version__)")
+          echo "wheel reports: $got, tag is: $version"
+          if [ "$got" != "$version" ]; then
+            echo "::error::wheel reports $got but the tag is $version; it would download the wrong release"
+            exit 1
+          fi
+
       - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: pypi/dist
