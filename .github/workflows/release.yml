@@ -47,13 +47,23 @@ jobs:
   publish-npm:
     needs: release
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Trusted publishing over OIDC: each publish uses a short-lived,
+      # workflow-scoped credential instead of a long-lived write token that
+      # could leak or need rotating. npm is restricting such tokens anyway.
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Trusted publishing needs Node >= 22.14 and npm >= 11.5.1.
+          node-version: "22"
           registry-url: https://registry.npmjs.org
+
+      - name: Ensure npm supports trusted publishing
+        run: npm install -g npm@latest
 
       - name: Publish to npm
         working-directory: npm
@@ -62,8 +72,6 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           npm version "$version" --no-git-tag-version --allow-same-version
           npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
   publish-pypi:
     needs: release
