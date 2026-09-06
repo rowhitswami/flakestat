@@ -8,14 +8,14 @@ branding:
 
 inputs:
   version:
-    description: Release tag to install, e.g. v0.1.0. Defaults to the latest release.
+    description: Release tag to install, e.g. v0.1.1. Defaults to the latest release.
     required: false
     default: ""
 
   args:
     description: >-
       Arguments passed to flakestat, e.g. "ingest 'reports/**/*.xml'" or
-      "report --fail-on-flaky". Leave empty with install-only to just put the
+      "check --fail-on-new". Leave empty with install-only to just put the
       binary on PATH.
     required: false
     default: ""
@@ -26,9 +26,34 @@ inputs:
     default: "false"
 
   summary:
-    description: Append a markdown flakiness report to the GitHub job summary.
+    description: Append a reliability report to the GitHub job summary.
     required: false
     default: "true"
+
+  comment:
+    description: >-
+      Post the same report as a pull request comment, updating flakestat's
+      existing comment rather than adding a new one. Requires
+      pull-requests:write and is skipped automatically when unavailable.
+    required: false
+    default: "false"
+
+  annotations:
+    description: >-
+      Annotate newly flaky and regressed tests in the diff view, where the test
+      framework reported a source file.
+    required: false
+    default: "false"
+
+  max-rows:
+    description: Cap the report's highlight table so large suites stay readable.
+    required: false
+    default: "20"
+
+  github-token:
+    description: Token used to post the pull request comment.
+    required: false
+    default: ${{ github.token }}
 
   working-directory:
     description: Directory to run in.
@@ -37,8 +62,14 @@ inputs:
 
 outputs:
   flaky-count:
-    description: Number of tests classified as flaky.
-    value: ${{ steps.summarize.outputs.flaky-count }}
+    description: Number of tests currently classified as flaky.
+    value: ${{ steps.report.outputs.flaky-count }}
+  new-flaky-count:
+    description: Number of tests newly flaky against the baseline.
+    value: ${{ steps.report.outputs.new-flaky-count }}
+  report-file:
+    description: Path to the generated markdown report.
+    value: ${{ steps.report.outputs.report-file }}
 
 runs:
   using: composite
@@ -69,26 +100,71 @@ runs:
         set -euo pipefail
         flakestat $FG_ARGS
 
-    - name: Summarize
-      id: summarize
+    - name: Build the reliability report
+      id: report
       if: inputs.install-only != 'true'
       shell: bash
       working-directory: ${{ inputs.working-directory }}
       env:
         FG_SUMMARY: ${{ inputs.summary }}
+        FG_ANNOTATIONS: ${{ inputs.annotations }}
+        FG_MAX_ROWS: ${{ inputs.max-rows }}
       run: |
         set -euo pipefail
 
         if [ ! -f .flakestat/runs.ndjson ]; then
-          echo "flaky-count=0" >> "$GITHUB_OUTPUT"
+          echo "No flakestat history recorded; nothing to report."
+          echo "flaky-count=0"     >> "$GITHUB_OUTPUT"
+          echo "new-flaky-count=0" >> "$GITHUB_OUTPUT"
+          echo "report-file="      >> "$GITHUB_OUTPUT"
           exit 0
         fi
 
-        count=$(flakestat report --format json 2>/dev/null \
-          | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(String(JSON.parse(s).summary.flaky))}catch{process.stdout.write("0")}})' \
-          || echo 0)
-        echo "flaky-count=${count}" >> "$GITHUB_OUTPUT"
+        out="${RUNNER_TEMP}/flakestat-report.md"
+        flags=(--o "$out" --max-rows "$FG_MAX_ROWS")
+        [ "$FG_SUMMARY" = "true" ]     && flags+=(--step-summary)
+        [ "$FG_ANNOTATIONS" = "true" ] && flags+=(--annotations)
 
-        if [ "$FG_SUMMARY" = "true" ]; then
-          flakestat report --format markdown >> "$GITHUB_STEP_SUMMARY" || true
+        # The binary owns every number here; this step only moves the output
+        # around. Annotations reach GitHub by being printed to the log.
+        flakestat ci-report "${flags[@]}"
+
+        counts=$(flakestat report --format json 2>/dev/null || echo '{}')
+        flaky=$(printf '%s' "$counts" | grep -o '"flaky":[0-9]*' | head -1 | cut -d: -f2)
+        echo "flaky-count=${flaky:-0}" >> "$GITHUB_OUTPUT"
+
+        new=$(grep -c '^| .* | New flaky |' "$out" || true)
+        echo "new-flaky-count=${new:-0}" >> "$GITHUB_OUTPUT"
+        echo "report-file=$out" >> "$GITHUB_OUTPUT"
+
+    - name: Comment on the pull request
+      if: inputs.install-only != 'true' && inputs.comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        REPORT: ${{ steps.report.outputs.report-file }}
+        PR: ${{ github.event.pull_request.number }}
+        REPO: ${{ github.repository }}
+      # Commenting is best-effort on purpose: a fork PR carries a read-only
+      # token, and losing a comment must never invalidate the analysis or fail
+      # the build. The marker in the report body is what lets a re-run update
+      # one comment instead of accumulating them.
+      run: |
+        set -uo pipefail
+        [ -n "$REPORT" ] && [ -f "$REPORT" ] || { echo "No report to post."; exit 0; }
+
+        marker='<!-- flakestat-report -->'
+        existing=$(gh api "repos/$REPO/issues/$PR/comments" --paginate \
+          --jq "[.[] | select(.body | contains(\"$marker\"))] | .[0].id" 2>/dev/null || echo "")
+
+        if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+          gh api -X PATCH "repos/$REPO/issues/comments/$existing" \
+            -F body=@"$REPORT" >/dev/null 2>&1 \
+            && echo "Updated the existing flakestat comment." \
+            || echo "Could not update the comment; the report is still in the job summary."
+        else
+          gh api -X POST "repos/$REPO/issues/$PR/comments" \
+            -F body=@"$REPORT" >/dev/null 2>&1 \
+            && echo "Posted a flakestat comment." \
+            || echo "Could not post a comment (a fork pull request has a read-only token); the report is still in the job summary."
         fi
