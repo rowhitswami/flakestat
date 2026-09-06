@@ -1,0 +1,53 @@
+{
+  "name": "flakestat",
+  "version": "0.0.0",
+  "description": "Find flaky tests in any language - Jest, Vitest, pytest, go test, JUnit. Local CLI, no SaaS, no account.",
+  "keywords": [
+    "flaky",
+    "flaky-tests",
+    "flaky-test-detection",
+    "test-flakiness",
+    "flake-detection",
+    "test-stability",
+    "testing",
+    "jest",
+    "vitest",
+    "junit",
+    "ci",
+    "test-retry",
+    "quarantine"
+  ],
+  "homepage": "https://github.com/rowhitswami/flakestat#readme",
+  "bugs": {
+    "url": "https://github.com/rowhitswami/flakestat/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rowhitswami/flakestat.git",
+    "directory": "npm"
+  },
+  "license": "MIT",
+  "bin": {
+    "flakestat": "bin/flakestat.js"
+  },
+  "files": [
+    "bin/flakestat.js",
+    "install.js",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node install.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}
