@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/rowhitswami/flakestat/internal/association"
 	"github.com/rowhitswami/flakestat/internal/junit"
 	"github.com/rowhitswami/flakestat/internal/score"
 	"github.com/rowhitswami/flakestat/internal/store"
@@ -86,8 +87,12 @@ type Explanation struct {
 	LastFailure string `json:"last_failure,omitempty"`
 
 	// Dimensions lists the distinct context values observed for this test.
-	// Reported only; 2A draws no conclusions from them.
 	Dimensions map[string][]string `json:"dimensions,omitempty"`
+
+	// Associations are dimension values where failures concentrate. They
+	// describe where flakiness shows up; they never affect whether a test is
+	// classified flaky, and they are associations rather than causes.
+	Associations []association.Association `json:"associations,omitempty"`
 
 	// History is the most recent events, oldest first.
 	History      []Event `json:"history"`
@@ -137,6 +142,7 @@ func Build(obs []store.Observation, cfg score.Config, historyLimit int) Explanat
 	}
 
 	e.Dimensions = observedDimensions(obs)
+	e.Associations = association.Analyze(obs, association.Config{})
 	e.History = buildHistory(obs, historyLimit)
 	e.LastFailure = lastFailure(obs)
 	e.Reason = reason(res, cfg)

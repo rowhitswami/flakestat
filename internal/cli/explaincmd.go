@@ -163,6 +163,29 @@ func renderExplanation(w io.Writer, e explain.Explanation, noColor bool) {
 		fmt.Fprintf(w, "\n  %s\n", paint(gray, "P pass   F fail   - skip   ^ flip   ! flip on identical code"))
 	}
 
+	if len(e.Associations) > 0 {
+		fmt.Fprintf(w, "\n  Where the failures concentrate\n")
+		for _, a := range e.Associations {
+			fmt.Fprintf(w, "\n    %s=%s\n", a.Dimension, a.Value)
+			fmt.Fprintf(w, "      failures here:  %d / %d (%.1f%%)\n", a.Fail, a.Total, a.Rate*100)
+			fmt.Fprintf(w, "      elsewhere:      %d / %d (%.1f%%)\n", a.OtherFail, a.OtherTotal, a.OtherRate*100)
+			fmt.Fprintf(w, "      difference:     %+.1f pp\n", a.Difference*100)
+		}
+		// Deliberately "associated with", not "caused by": observations cannot
+		// separate a cause from anything that varies alongside it.
+		if len(e.Associations) == 1 {
+			a := e.Associations[0]
+			fmt.Fprintf(w, "\n  %s\n", paint(gray,
+				fmt.Sprintf("Failures are strongly associated with %s=%s. That is a correlation,", a.Dimension, a.Value)))
+			fmt.Fprintf(w, "  %s\n", paint(gray, "not an established cause."))
+		} else {
+			fmt.Fprintf(w, "\n  %s\n", paint(gray,
+				"Several dimensions are associated with these failures. They may vary"))
+			fmt.Fprintf(w, "  %s\n", paint(gray,
+				"together, so the observations cannot tell which one matters."))
+		}
+	}
+
 	fmt.Fprintf(w, "\n  Why %s?\n\n", e.Verdict)
 	for _, line := range wrap(e.Reason, 72) {
 		fmt.Fprintf(w, "  %s\n", line)
