@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="3" failures="1" errors="0" time="2.51">
+  <testsuite name="src/auth.test.js" tests="3" errors="0" failures="1" skipped="0" timestamp="2026-08-17T10:00:00" time="2.51">
+    <testcase classname="Auth should sign a user in" name="Auth should sign a user in" time="0.42"/>
+    <testcase classname="Auth should reject a bad password" name="Auth should reject a bad password" time="0.11"/>
+    <testcase classname="Auth should refresh an expired token" name="Auth should refresh an expired token" time="1.98">
+      <failure>Error: expect(received).toBe(expected)
+
+Expected: "refreshed"
+Received: undefined
+    at Object.&lt;anonymous&gt; (src/auth.test.js:31:24)</failure>
+    </testcase>
+  </testsuite>
+</testsuites>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="rspec" tests="2" skipped="0" failures="1" errors="0" time="0.19312" timestamp="2026-08-17T10:00:00+00:00" hostname="ci-runner">
+  <properties/>
+  <testcase classname="spec.models.user_spec" name="User is valid with a name" file="./spec/models/user_spec.rb" time="0.00812"/>
+  <testcase classname="spec.models.user_spec" name="User expires a stale session" file="./spec/models/user_spec.rb" time="0.18500">
+    <failure message="expected: false, got: true" type="RSpec::Expectations::ExpectationNotMetError">Failure/Error: expect(user.session_expired?).to be false</failure>
+  </testcase>
+</testsuite>

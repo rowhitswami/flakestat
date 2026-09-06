@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="com.acme.OrderTest" time="4,521" tests="3" errors="0" skipped="0" failures="1">
+  <properties>
+    <property name="java.version" value="21.0.2"/>
+  </properties>
+  <testcase name="testCreateOrder" classname="com.acme.OrderTest" time="0,412"/>
+  <testcase name="testConcurrentCheckout" classname="com.acme.OrderTest" time="2,109">
+    <flakyFailure message="expected:&lt;2&gt; but was:&lt;1&gt;" type="java.lang.AssertionError">
+      <stackTrace>java.lang.AssertionError: expected:&lt;2&gt; but was:&lt;1&gt;
+	at com.acme.OrderTest.testConcurrentCheckout(OrderTest.java:71)</stackTrace>
+    </flakyFailure>
+  </testcase>
+  <testcase name="testPaymentTimeout" classname="com.acme.OrderTest" time="2,000">
+    <rerunFailure message="gateway did not respond" type="java.net.SocketTimeoutException">
+      <stackTrace>java.net.SocketTimeoutException: gateway did not respond</stackTrace>
+    </rerunFailure>
+  </testcase>
+</testsuite>

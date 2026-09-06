@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="3" failures="1" errors="0" time="0.481">
+  <testsuite tests="3" failures="1" time="0.481" name="github.com/acme/widget/internal/store" timestamp="2026-08-17T10:00:00Z">
+    <properties>
+      <property name="go.version" value="go1.25.4"></property>
+    </properties>
+    <testcase classname="github.com/acme/widget/internal/store" name="TestOpen" time="0.010"></testcase>
+    <testcase classname="github.com/acme/widget/internal/store" name="TestConcurrentWrite" time="0.451">
+      <failure message="Failed" type="">    store_test.go:88: race detected during execution of test</failure>
+    </testcase>
+    <testcase classname="github.com/acme/widget/internal/store" name="TestClose" time="0.020"></testcase>
+  </testsuite>
+</testsuites>

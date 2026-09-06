@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="nextest-run" tests="2" failures="0" errors="0" uuid="7f9a1c2e-0000-4000-8000-000000000000" timestamp="2026-08-17T10:00:00.000000+00:00" time="0.093">
+  <testsuite name="widget::integration" tests="2" disabled="0" errors="0" failures="0">
+    <testcase name="tests::parses_config" classname="widget::integration" timestamp="2026-08-17T10:00:00.000000+00:00" time="0.001"/>
+    <testcase name="tests::round_trips_encoding" classname="widget::integration" timestamp="2026-08-17T10:00:00.000000+00:00" time="0.092"/>
+  </testsuite>
+</testsuites>
