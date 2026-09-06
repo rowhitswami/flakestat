@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"sort"
 	"strings"
 
 	"github.com/rowhitswami/flakestat/internal/explain"
@@ -137,6 +138,18 @@ func renderExplanation(w io.Writer, e explain.Explanation, noColor bool) {
 	fmt.Fprintf(w, "  Same-commit disagreements: %d\n", e.SameCommitFlips)
 	if e.Commits > 0 || e.Branches > 0 {
 		fmt.Fprintf(w, "  Seen across:               %d commit(s), %d branch(es)\n", e.Commits, e.Branches)
+	}
+
+	if len(e.Dimensions) > 0 {
+		fmt.Fprintf(w, "\n  Observed in\n")
+		keys := make([]string, 0, len(e.Dimensions))
+		for k := range e.Dimensions {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			fmt.Fprintf(w, "    %-18s %s\n", k, strings.Join(e.Dimensions[k], ", "))
+		}
 	}
 
 	if len(e.History) > 0 {

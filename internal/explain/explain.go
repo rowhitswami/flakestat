@@ -85,6 +85,10 @@ type Explanation struct {
 	KnownFlaky  bool   `json:"framework_reported_flaky,omitempty"`
 	LastFailure string `json:"last_failure,omitempty"`
 
+	// Dimensions lists the distinct context values observed for this test.
+	// Reported only; 2A draws no conclusions from them.
+	Dimensions map[string][]string `json:"dimensions,omitempty"`
+
 	// History is the most recent events, oldest first.
 	History      []Event `json:"history"`
 	HistoryTotal int     `json:"history_total"`
@@ -132,6 +136,7 @@ func Build(obs []store.Observation, cfg score.Config, historyLimit int) Explanat
 		e.FailureRate = float64(res.Fails) / float64(res.Runs)
 	}
 
+	e.Dimensions = observedDimensions(obs)
 	e.History = buildHistory(obs, historyLimit)
 	e.LastFailure = lastFailure(obs)
 	e.Reason = reason(res, cfg)
@@ -252,6 +257,38 @@ func reason(r score.Result, cfg score.Config) string {
 			"%.2f suspect threshold once sample size is accounted for.",
 			flips, r.Transitions, cfg.SuspectThreshold)
 	}
+}
+
+// observedDimensions collects the distinct values seen per dimension. Showing
+// them is deliberately all this does: whether failures cluster on any of them
+// is a question for correlation analysis, not for a display helper.
+func observedDimensions(obs []store.Observation) map[string][]string {
+	seen := map[string]map[string]bool{}
+	for _, o := range obs {
+		for k, v := range o.Dimensions {
+			if v == "" {
+				continue
+			}
+			if seen[k] == nil {
+				seen[k] = map[string]bool{}
+			}
+			seen[k][v] = true
+		}
+	}
+	if len(seen) == 0 {
+		return nil
+	}
+
+	out := make(map[string][]string, len(seen))
+	for k, vals := range seen {
+		list := make([]string, 0, len(vals))
+		for v := range vals {
+			list = append(list, v)
+		}
+		sort.Strings(list)
+		out[k] = list
+	}
+	return out
 }
 
 func lastFailure(obs []store.Observation) string {

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/rowhitswami/flakestat/internal/config"
+	"github.com/rowhitswami/flakestat/internal/dimension"
 	"github.com/rowhitswami/flakestat/internal/score"
 	"github.com/rowhitswami/flakestat/internal/store"
 )
@@ -190,6 +191,45 @@ func loadConfigDefaults(fs *flag.FlagSet, cfg *score.Config, dir *string, stderr
 	}
 	mergeScoring(cfg, conf.Scoring, set)
 	return nil
+}
+
+// dimensionFlag collects repeated --dimension key=value flags.
+type dimensionFlag []string
+
+func (d *dimensionFlag) String() string { return strings.Join(*d, ",") }
+func (d *dimensionFlag) Set(v string) error {
+	*d = append(*d, v)
+	return nil
+}
+
+// registerDimensionFlag makes --dimension available wherever observations are
+// created. Offering it on only one command would leave users with metadata
+// that silently differs between hunt and ingest.
+func registerDimensionFlag(fs *flag.FlagSet, d *dimensionFlag) {
+	fs.Var(d, "dimension",
+		"attach `key=value` context to these observations; repeatable (e.g. runtime.version=3.13)")
+}
+
+// resolveDimensions layers context in precedence order: automatic detection,
+// then recognized JUnit properties, then the user's explicit flags.
+//
+// hostIsExecutor must be true only when flakestat launched the tests itself.
+// An ingest of a report produced elsewhere has no idea what ran it, and
+// stamping it with this machine's platform would manufacture evidence that a
+// later correlation would report as fact.
+func resolveDimensions(explicit dimensionFlag, props map[string]string, hostIsExecutor bool) (dimension.Set, error) {
+	user, err := dimension.Parse(explicit)
+	if err != nil {
+		return nil, err
+	}
+
+	var layers []dimension.Set
+	if hostIsExecutor {
+		layers = append(layers, dimension.Host())
+	}
+	layers = append(layers, dimension.DetectCI(), dimension.FromProperties(props), user)
+
+	return dimension.Merge(layers...), nil
 }
 
 // gitDefaultBranch resolves the repository's default branch, falling back to

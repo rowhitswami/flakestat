@@ -65,6 +65,11 @@ type Report struct {
 	Name   string
 	Cases  []Case
 	Suites int
+
+	// Properties are the suite-level <property> entries, merged across suites.
+	// The parser makes no judgement about them; callers decide which names
+	// they recognize, so that unknown properties are never stored.
+	Properties map[string]string
 }
 
 // ID is a stable identifier for a test across runs.
@@ -121,9 +126,15 @@ type xmlSuites struct {
 }
 
 type xmlSuite struct {
-	Name   string     `xml:"name,attr"`
-	Suites []xmlSuite `xml:"testsuite"` // PHPUnit nests suites
-	Cases  []xmlCase  `xml:"testcase"`
+	Name       string        `xml:"name,attr"`
+	Suites     []xmlSuite    `xml:"testsuite"` // PHPUnit nests suites
+	Cases      []xmlCase     `xml:"testcase"`
+	Properties []xmlProperty `xml:"properties>property"`
+}
+
+type xmlProperty struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
 }
 
 type xmlCase struct {
@@ -255,6 +266,14 @@ func ParseGlob(pattern string) (*Report, []error) {
 		}
 		merged.Cases = append(merged.Cases, rep.Cases...)
 		merged.Suites += rep.Suites
+		for k, v := range rep.Properties {
+			if merged.Properties == nil {
+				merged.Properties = map[string]string{}
+			}
+			if _, seen := merged.Properties[k]; !seen {
+				merged.Properties[k] = v
+			}
+		}
 	}
 	return merged, errs
 }
@@ -266,6 +285,20 @@ func flatten(s xmlSuite, parent string, rep *Report) {
 		name = parent
 	}
 	rep.Suites++
+
+	for _, p := range s.Properties {
+		if p.Name == "" {
+			continue
+		}
+		if rep.Properties == nil {
+			rep.Properties = map[string]string{}
+		}
+		// First value wins: a nested suite should not silently override the
+		// outer one it inherits from.
+		if _, seen := rep.Properties[p.Name]; !seen {
+			rep.Properties[p.Name] = p.Value
+		}
+	}
 
 	for _, c := range s.Cases {
 		rep.Cases = append(rep.Cases, convert(c, name))

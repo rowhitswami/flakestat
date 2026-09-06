@@ -75,6 +75,9 @@ func runHunt(args []string, stdout, stderr io.Writer) error {
 		verify    = fs.Int("verify", -1,
 			"sequential runs used to confirm candidates found under --parallel (-1 auto, 0 off)")
 	)
+	var dims dimensionFlag
+	registerDimensionFlag(fs, &dims)
+
 	var cfg score.Config
 	scoringFlags(fs, &cfg)
 
@@ -175,6 +178,13 @@ func runHunt(args []string, stdout, stderr io.Writer) error {
 	commit, branch := gitInfo()
 	burstID := store.NewRunID()
 
+	// flakestat spawns the test command here, so this machine really is the
+	// execution host.
+	dimensions, err := resolveDimensions(dims, nil, true)
+	if err != nil {
+		return err
+	}
+
 	// With a machine-readable format, stdout must contain only the document.
 	// Progress goes to stderr so "flakestat hunt --format json | jq" works.
 	progressOut := stdout
@@ -187,6 +197,7 @@ func runHunt(args []string, stdout, stderr io.Writer) error {
 	start := time.Now()
 	results, err := executeAndRecord(st, opts, store.Meta{
 		RunID: burstID, Commit: commit, Branch: branch, Source: store.SourceHunt,
+		Dimensions: dimensions,
 	}, progressOut, stderr, *quiet, *runs)
 	if err != nil {
 		return err
@@ -224,6 +235,7 @@ func runHunt(args []string, stdout, stderr io.Writer) error {
 			verifyID := store.NewRunID()
 			if _, err := executeAndRecord(st, verifyOpts, store.Meta{
 				RunID: verifyID, Commit: commit, Branch: branch, Source: store.SourceHunt,
+				Dimensions: dimensions,
 			}, progressOut, stderr, true, verifyRuns); err != nil {
 				return err
 			}

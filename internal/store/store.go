@@ -58,6 +58,12 @@ type Observation struct {
 	// KnownFlaky is carried through from frameworks that report flakiness
 	// themselves (Surefire <flakyFailure>).
 	KnownFlaky bool `json:"known_flaky,omitempty"`
+
+	// Dimensions record the context this observation was made in -- platform,
+	// runtime, CI worker and any user-supplied axes. Analysis groups by these
+	// to ask whether failures cluster somewhere. Absent on older records,
+	// which read back as an empty map.
+	Dimensions map[string]string `json:"dimensions,omitempty"`
 }
 
 // Meta describes the run an observation batch belongs to.
@@ -67,6 +73,9 @@ type Meta struct {
 	Branch  string
 	Source  string
 	Attempt int
+
+	// Dimensions are attached to every observation in the batch.
+	Dimensions map[string]string
 }
 
 // Store is an append-only observation log on disk.
@@ -120,6 +129,7 @@ func FromCases(cases []junit.Case, meta Meta) []Observation {
 			DurationMS: c.Duration.Milliseconds(),
 			Message:    c.Message,
 			KnownFlaky: c.KnownFlaky,
+			Dimensions: meta.Dimensions,
 		})
 	}
 	return out

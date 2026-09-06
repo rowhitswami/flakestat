@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/rowhitswami/flakestat/internal/dimension"
 	"github.com/rowhitswami/flakestat/internal/junit"
 	"github.com/rowhitswami/flakestat/internal/store"
 )
@@ -37,6 +38,8 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 		branch = fs.String("branch", "", "branch name (default: current git branch)")
 		runID  = fs.String("run-id", "", "identifier for this CI run (default: generated)")
 	)
+	var dims dimensionFlag
+	registerDimensionFlag(fs, &dims)
 
 	// Flags may follow the file patterns; normalize before parsing.
 	if err := fs.Parse(permute(fs, args)); err != nil {
@@ -75,11 +78,17 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 	}
 
 	var cases []junit.Case
+	props := map[string]string{}
 	for _, p := range patterns {
 		rep, errs := junit.ParseGlob(p)
 		warnAll(stderr, errs)
 		if rep != nil {
 			cases = append(cases, rep.Cases...)
+			for k, v := range rep.Properties {
+				if _, seen := props[k]; !seen {
+					props[k] = v
+				}
+			}
 		}
 	}
 
@@ -87,11 +96,30 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("no test cases found in %v", patterns)
 	}
 
+	// Ingesting inside a recognized CI provider means this machine ran the
+	// tests, so its platform is real evidence. Ingesting a report produced
+	// elsewhere -- a file copied from a Windows runner to a laptop, say --
+	// says nothing about where the tests actually ran, and recording the
+	// laptop's platform would let later analysis claim the test only fails on
+	// macOS when it never ran there.
+	inCI := dimension.InCI()
+	dimensions, err := resolveDimensions(dims, props, inCI)
+	if err != nil {
+		return err
+	}
+	if !inCI && dimensions[dimension.OS] == "" {
+		fmt.Fprintln(stderr,
+			"note: no execution platform recorded. flakestat only assumes this machine ran the\n"+
+				"      tests when it detects a CI provider. Pass --dimension os=... --dimension arch=...\n"+
+				"      if you know where these results came from.")
+	}
+
 	obs := store.FromCases(cases, store.Meta{
-		RunID:  *runID,
-		Commit: *commit,
-		Branch: *branch,
-		Source: store.SourceCI,
+		RunID:      *runID,
+		Commit:     *commit,
+		Branch:     *branch,
+		Source:     store.SourceCI,
+		Dimensions: dimensions,
 	})
 	if err := st.Append(obs); err != nil {
 		return err
