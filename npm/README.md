@@ -71,6 +71,19 @@ npx flakestat report --top 20
 npx flakestat report --fail-on-flaky      # exit 1 to gate a pipeline
 ```
 
+## Working out why a test is flaky
+
+```bash
+npx flakestat explain test_checkout_timeout
+```
+
+Shows the evidence behind a verdict: pass/fail counts, how often the outcome
+changed, how much of that happened on identical code, and a history strip
+(`P P F P P F`) marking each flip. `--json` emits the same for tooling.
+
+Every verdict also carries a confidence level, because `0.41` from three runs
+and `0.41` from three hundred are different claims.
+
 ## Environment variables
 
 | Variable | Effect |
