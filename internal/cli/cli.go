@@ -26,6 +26,7 @@ COMMANDS
   hunt        Run a test command N times and detect disagreement
   ingest      Load JUnit XML from CI into the history
   report      Score recorded history and print a report
+  explain     Show why one test received its verdict
   check       Fail CI when flakiness gets worse, not when it exists
   quarantine  Emit a skip list your test runner accepts
   version     Print the version
@@ -70,6 +71,8 @@ func Main(args []string, stdout, stderr io.Writer) int {
 		err = runHunt(rest, stdout, stderr)
 	case "ingest":
 		err = runIngest(rest, stdout, stderr)
+	case "explain":
+		err = runExplain(rest, stdout, stderr)
 	case "report":
 		err = runReport(rest, stdout, stderr)
 	case "check":
