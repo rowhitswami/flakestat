@@ -1,0 +1,94 @@
+name: flakestat
+description: Find flaky tests in any language. No SaaS, no account, no data leaving your CI.
+author: flakestat contributors
+
+branding:
+  icon: alert-triangle
+  color: red
+
+inputs:
+  version:
+    description: Release tag to install, e.g. v0.1.0. Defaults to the latest release.
+    required: false
+    default: ""
+
+  args:
+    description: >-
+      Arguments passed to flakestat, e.g. "ingest 'reports/**/*.xml'" or
+      "report --fail-on-flaky". Leave empty with install-only to just put the
+      binary on PATH.
+    required: false
+    default: ""
+
+  install-only:
+    description: Install the binary and add it to PATH without running it.
+    required: false
+    default: "false"
+
+  summary:
+    description: Append a markdown flakiness report to the GitHub job summary.
+    required: false
+    default: "true"
+
+  working-directory:
+    description: Directory to run in.
+    required: false
+    default: "."
+
+outputs:
+  flaky-count:
+    description: Number of tests classified as flaky.
+    value: ${{ steps.summarize.outputs.flaky-count }}
+
+runs:
+  using: composite
+
+  steps:
+    - name: Install flakestat
+      shell: bash
+      env:
+        FG_VERSION: ${{ inputs.version }}
+        # Lifts the unauthenticated 60/hour API limit that shared CI runners
+        # routinely exhaust when resolving the latest release.
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        dir="${RUNNER_TEMP}/flakestat-bin"
+        sh "${GITHUB_ACTION_PATH}/scripts/install.sh" -b "$dir" ${FG_VERSION:+"$FG_VERSION"}
+        echo "$dir" >> "$GITHUB_PATH"
+
+    - name: Run flakestat
+      if: inputs.install-only != 'true' && inputs.args != ''
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      # Arguments go through the environment rather than being interpolated
+      # into the script, so untrusted input cannot inject shell commands.
+      env:
+        FG_ARGS: ${{ inputs.args }}
+      run: |
+        set -euo pipefail
+        flakestat $FG_ARGS
+
+    - name: Summarize
+      id: summarize
+      if: inputs.install-only != 'true'
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      env:
+        FG_SUMMARY: ${{ inputs.summary }}
+      run: |
+        set -euo pipefail
+
+        if [ ! -f .flakestat/runs.ndjson ]; then
+          echo "flaky-count=0" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        count=$(flakestat report --format json 2>/dev/null \
+          | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{process.stdout.write(String(JSON.parse(s).summary.flaky))}catch{process.stdout.write("0")}})' \
+          || echo 0)
+        echo "flaky-count=${count}" >> "$GITHUB_OUTPUT"
+
+        if [ "$FG_SUMMARY" = "true" ]; then
+          flakestat report --format markdown >> "$GITHUB_STEP_SUMMARY" || true
+        fi
