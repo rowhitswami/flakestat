@@ -1,0 +1,23 @@
+# Build output
+/flakestat
+/dist/
+npm/dist/
+npm/bin/flakestat
+npm/bin/flakestat.exe
+npm/node_modules/
+npm/*.tgz
+pypi/dist/
+pypi/build/
+pypi/*.egg-info/
+__pycache__/
+
+# flakestat's own state directory (users may choose to commit theirs)
+.flakestat/
+
+# Test reports
+reports/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
