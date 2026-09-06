@@ -37,6 +37,8 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 		commit = fs.String("commit", "", "commit SHA for these results (default: current git HEAD)")
 		branch = fs.String("branch", "", "branch name (default: current git branch)")
 		runID  = fs.String("run-id", "", "identifier for this CI run (default: generated)")
+		noHost = fs.Bool("no-host", false,
+			"never record this machine's platform, even in CI (use when aggregating reports produced elsewhere)")
 	)
 	var dims dimensionFlag
 	registerDimensionFlag(fs, &dims)
@@ -102,7 +104,13 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 	// says nothing about where the tests actually ran, and recording the
 	// laptop's platform would let later analysis claim the test only fails on
 	// macOS when it never ran there.
-	inCI := dimension.InCI()
+	// Being inside CI normally means this machine ran the tests. It does not
+	// when a job downloads JUnit artifacts produced by other matrix jobs and
+	// ingests them centrally: that aggregator's platform is not where anything
+	// ran, and recording it would let analysis conclude the opposite of the
+	// truth. --no-host disables the assumption; merging the NDJSON each job
+	// produced avoids the situation altogether.
+	inCI := dimension.InCI() && !*noHost
 	dimensions, err := resolveDimensions(dims, props, inCI)
 	if err != nil {
 		return err
