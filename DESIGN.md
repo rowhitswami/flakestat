@@ -303,6 +303,48 @@ rejected for reintroducing lottery verdicts on `p=0.05`.
 Still uncalibrated: `same_commit_weight` and `branch_weight`, since every
 validation run so far has been single-commit and single-branch.
 
+### Two orthogonal questions
+
+Observations answer two questions that must not be collapsed into one:
+
+```
+Observations
+   |
+   +-- temporal evidence  -> classification + score + confidence
+   |
+   +-- contextual evidence -> associations + effect size + significance
+                                    |
+                                    v
+                               Explanation
+```
+
+Neither branch may rewrite the other's conclusion. A test is flaky because its
+outcomes demonstrate flakiness; an association only says where that behaviour
+concentrates.
+
+Keeping them separate preserves information that a single label would destroy.
+`stable` with a strong `os=windows` association means the test is deterministic
+within each environment but behaves differently between them -- a different
+phenomenon from `flaky` with the same association, where one platform appears
+to increase nondeterminism. One combined class could not express both.
+
+If a vocabulary for that is ever added it should be a *secondary* descriptor
+("context pattern"), not a sixth primary class.
+
+### Diagnosis is deliberately deferred
+
+Categorising causes -- timing, race condition, network, shared state -- is
+**not** unfinished work. It is deferred until observed signals justify each
+category.
+
+Nothing currently captured distinguishes a race from a slow network. Inferring
+it anyway would be the one failure this project exists to avoid: presenting a
+guess with the confidence of a measurement. The correlation layer states where
+failures concentrate and explicitly declines to say why, including when two
+dimensions are perfectly confounded and the data cannot separate them.
+
+Not making a diagnosis is a feature of the evidence model, not a gap in it.
+
 ### Branch awareness
 
 Transitions are computed **within a branch, never across one**. The original
