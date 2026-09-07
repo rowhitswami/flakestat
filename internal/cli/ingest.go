@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/rowhitswami/flakestat/internal/dimension"
 	"github.com/rowhitswami/flakestat/internal/junit"
@@ -79,31 +80,47 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 		return err
 	}
 
-	var cases []junit.Case
+	// Reports are read one file at a time rather than merged, because a case's
+	// position within its own report is part of its execution identity. Merge
+	// first and re-ingesting the same files renumbers everything.
+	paths, errs := junit.Expand(patterns)
+	warnAll(stderr, errs)
+
+	type parsed struct {
+		report *junit.Report
+		digest string
+		path   string
+	}
+	var (
+		reports []parsed
+		total   int
+	)
 	props := map[string]string{}
-	for _, p := range patterns {
-		rep, errs := junit.ParseGlob(p)
-		warnAll(stderr, errs)
-		if rep != nil {
-			cases = append(cases, rep.Cases...)
-			for k, v := range rep.Properties {
-				if _, seen := props[k]; !seen {
-					props[k] = v
-				}
+
+	for _, path := range paths {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			warnAll(stderr, []error{err})
+			continue
+		}
+		rep, err := junit.ParseBytes(data)
+		if err != nil {
+			warnAll(stderr, []error{fmt.Errorf("%s: %w", path, err)})
+			continue
+		}
+		reports = append(reports, parsed{report: rep, digest: store.Digest(data), path: path})
+		total += len(rep.Cases)
+		for k, v := range rep.Properties {
+			if _, seen := props[k]; !seen {
+				props[k] = v
 			}
 		}
 	}
 
-	if len(cases) == 0 {
+	if total == 0 {
 		return fmt.Errorf("no test cases found in %v", patterns)
 	}
 
-	// Ingesting inside a recognized CI provider means this machine ran the
-	// tests, so its platform is real evidence. Ingesting a report produced
-	// elsewhere -- a file copied from a Windows runner to a laptop, say --
-	// says nothing about where the tests actually ran, and recording the
-	// laptop's platform would let later analysis claim the test only fails on
-	// macOS when it never ran there.
 	// Being inside CI normally means this machine ran the tests. It does not
 	// when a job downloads JUnit artifacts produced by other matrix jobs and
 	// ingests them centrally: that aggregator's platform is not where anything
@@ -122,17 +139,56 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 				"      if you know where these results came from.")
 	}
 
-	obs := store.FromCases(cases, store.Meta{
-		RunID:      *runID,
-		Commit:     *commit,
-		Branch:     *branch,
-		Source:     store.SourceCI,
-		Dimensions: dimensions,
-	})
-	if err := st.Append(obs); err != nil {
-		return err
+	// What is already recorded decides what is worth appending. Re-ingesting
+	// the same artifact must not add evidence, because the tests did not run
+	// again -- and to every downstream calculation a second copy is
+	// indistinguishable from a second execution that happened to agree.
+	known, errs := st.Keys()
+	warnAll(stderr, errs)
+
+	var (
+		obs       []store.Observation
+		duplicate int
+	)
+	for _, r := range reports {
+		batch := store.FromCases(r.report.Cases, store.Meta{
+			RunID:      *runID,
+			Commit:     *commit,
+			Branch:     *branch,
+			Source:     store.SourceCI,
+			Dimensions: dimensions,
+			Scope: store.ExecutionScope{
+				Provider: dimensions[dimension.CIProvider],
+				Run:      dimensions[dimension.CIRunID],
+				Job:      dimensions[dimension.CIJobID],
+				Shard:    dimensions[dimension.CIShard],
+				Attempt:  dimensions[dimension.CIAttempt],
+				Report:   r.path,
+				Digest:   r.digest,
+			},
+		})
+		for _, o := range batch {
+			if o.ExecKey != "" {
+				if _, seen := known[o.ExecKey]; seen {
+					duplicate++
+					continue
+				}
+				known[o.ExecKey] = struct{}{}
+			}
+			obs = append(obs, o)
+		}
+	}
+
+	if len(obs) > 0 {
+		if err := st.Append(obs); err != nil {
+			return err
+		}
 	}
 
 	fmt.Fprintf(stdout, "Ingested %d test result(s) as run %s into %s\n", len(obs), *runID, st.Path())
+	if duplicate > 0 {
+		fmt.Fprintf(stdout,
+			"Skipped %d result(s) already recorded; these executions were ingested before.\n", duplicate)
+	}
 	return nil
 }
