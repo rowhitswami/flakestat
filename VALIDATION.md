@@ -159,6 +159,94 @@ both commits, so C2 has every opportunity to flake that C1 does.
 This is the only subject where catching a real flake is genuinely attempted. It
 is a bonus result, not a requirement.
 
+
+## Subject A — results
+
+`uppadhyayraj/playwright-flaky-tests @ dd4738a4`, 100 independent executions,
+`--workers=1 --retries=0`, scored with the frozen build.
+
+| Test | Advertised | Observed | flakestat | Score |
+| --- | --- | --- | --- | --- |
+| docs sidebar loads before content | 30% | 100/100 | `consistently-failing` | 0.00 |
+| API reference loads all section headings | 15% | 100/100 | `consistently-failing` | 0.00 |
+| cookie-reader: checks consent state | — | 100/100 | `consistently-failing` | 0.00 |
+| docs page loads within strict threshold | 25% | 44/100 | `flaky` | 0.35 |
+| homepage CTA renders in time | 40% | 40/100 | `flaky` | 0.45 |
+| concurrent page loads complete without timeout | 20% | 38/100 | `flaky` | 0.34 |
+| version badge matches expected | 25% | 32/100 | `flaky` | 0.38 |
+| docs search index loaded | 30% | 31/100 | `flaky` | 0.44 |
+| back navigation preserves scroll position | 25% | 29/100 | `flaky` | 0.42 |
+| cookie-polluter: sets analytics consent | — | 24/100 | `flaky` | 0.41 |
+| step-2: validate title from shared state | — | 20/100 | `flaky` | 0.32 |
+| step-3: assert visit count | — | 20/100 | `flaky` | 0.32 |
+| homepage loads within strict threshold | 30% | 18/100 | `flaky` | 0.20 |
+| navbar renders before JS finishes loading | 35% | 2/100 | `stable` | 0.04 |
+| image assets load before scroll interaction | 20% | 1/100 | `stable` | 0.02 |
+| step-1: capture homepage title | — | 0/100 | `stable` | 0.00 |
+| **control** · homepage has correct title | control | 0/100 | `stable` | 0.00 |
+| **control** · homepage has Get Started link | control | 0/100 | `stable` | 0.00 |
+| **control** · docs intro page loads | control | 0/100 | `stable` | 0.00 |
+| **control** · API reference page loads | control | 0/100 | `stable` | 0.00 |
+| **control** · navbar is present on all pages | control | 0/100 | `stable` | 0.00 |
+
+Against the contract:
+
+- **Positive validation.** Ten intentionally flaky tests reached `flaky`, every
+  one at high confidence.
+- **Negative validation.** All five controls sat at 0/100 and stayed `stable`.
+  No false positive anywhere in the run.
+- **No bug row fired.** Three tests failed 100/100 and were called
+  `consistently-failing`, not flaky. Nothing healthy was called flaky. No
+  association was reported from sparse evidence.
+
+### Detection latency
+
+Measured from a verdict snapshot taken after every execution.
+
+| Test | 1st failure | 1st contradiction | → suspect | → flaky |
+| --- | --- | --- | --- | --- |
+| homepage CTA renders in time (40%) | 1 | 5 | 5 | 5 |
+| docs page loads within threshold (25%) | 1 | 2 | 5 | 5 |
+| version badge matches expected (25%) | 3 | 3 | 5 | 5 |
+| docs search index loaded (30%) | 6 | 6 | 6 | 8 |
+| step-2 / step-3 shared state | 9 | 9 | 9 | 10 |
+
+Nothing was classified before `--min-runs` allowed it, which is why the earliest
+`suspect` is run 5. Every test failing 18% or more of the time was `flaky`
+within ten executions.
+
+### Three fixtures were deterministic here, not flaky
+
+Named as flaky, they failed 100/100:
+
+- *docs sidebar loads before content* — `toBeVisible()` fails outright.
+  playwright.dev's DOM has changed since the fixture was written.
+- *API reference loads all section headings* — "Expected ≥2 headings, found 1".
+  Same cause.
+- *cookie-reader: checks consent state* — needs a cookie set by an earlier test
+  in the same browser context, which Playwright's per-test isolation prevents.
+
+flakestat called all three `consistently-failing`. That is the contract's
+"an always-failing test called flaky" bug row **not** firing, on data that
+would trip a failure-rate-based detector: each has a 100% failure rate and zero
+flakiness.
+
+### Two fixtures barely fired, and were correctly not flagged
+
+*navbar renders before JS finishes loading* advertises 35% and failed **2/100**.
+*image assets load before scroll interaction* advertises 20% and failed
+**1/100**.
+
+flakestat scored them 0.04 and 0.02 and left both `stable`. For a Bernoulli
+process at p = 0.02 the expected flip rate is 2p(1-p) ≈ 0.039, so 0.04 is the
+right measurement of what actually happened. The gap is between the fixture's
+advertised rate and its behaviour in this environment, not between the evidence
+and the verdict — which is exactly why the contract forbids grading a score
+against an advertised probability.
+
+The honest reading: these two are **inconclusive for sensitivity**. A detector
+cannot be graded on an event that occurred twice in its input.
+
 ## Protocol amendments
 
 Recorded as additions with their reasoning. Earlier entries are left standing,
@@ -327,7 +415,7 @@ states an expectation as though it were an observation:
 
 | Subject | State |
 | --- | --- |
-| A. playwright-flaky-tests | running — 100 executions, retries=0, workers=1 |
+| A. playwright-flaky-tests | **complete** — see results below |
 | B. techstories-demo-app | not started |
 | C1. conduit @ 612f5bfb (pre-fix) | not started |
 | C2. conduit @ 104f91a9 (post-fix) | not started |
