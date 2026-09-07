@@ -51,6 +51,44 @@ jobs:
         if: matrix.os != 'windows-latest'
         run: go test -race ./...
 
+      # Each matrix job ingests its own results, on the machine that produced
+      # them. An aggregation job that re-ingested downloaded artifacts would
+      # stamp its own platform onto all three, which is precisely the false
+      # metadata dimension analysis must never see.
+      - name: Record observations
+        if: always()
+        shell: bash
+        run: |
+          set -uo pipefail
+          go build -o "${RUNNER_TEMP}/flakestat" ./cmd/flakestat
+          go install gotest.tools/gotestsum@latest
+
+          case "${{ matrix.os }}" in
+            ubuntu*)  OS=linux   ;;
+            macos*)   OS=darwin  ;;
+            windows*) OS=windows ;;
+            *)        OS=unknown ;;
+          esac
+
+          mkdir -p reports
+          # The suite may legitimately fail; the observation is the point.
+          gotestsum --junitfile reports/junit.xml --format none -- ./... || true
+
+          # The controlled differential lives behind a build tag so it never
+          # runs in the normal suite. Its whole job is to prove the pipeline
+          # carries platform context end to end.
+          gotestsum --junitfile reports/platform.xml --format none --             -tags ciplatform ./internal/platformcheck/ || true
+
+          "${RUNNER_TEMP}/flakestat" ingest 'reports/*.xml'             --dimension "os=${OS}"             --dimension "runtime.name=go"             --dimension "runtime.version=$(go env GOVERSION)"             --commit "${GITHUB_SHA}"             --branch "${GITHUB_REF_NAME}"
+
+      - name: Upload observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: observations-${{ matrix.os }}
+          path: .flakestat/runs.ndjson
+          retention-days: 7
+
   build:
     name: build artifacts
     runs-on: ubuntu-latest
@@ -139,3 +177,99 @@ jobs:
             exit 1
           fi
           echo "OK: gate exited non-zero as expected"
+
+  longitudinal:
+    name: longitudinal validation
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      - name: Download every matrix job's observations
+        uses: actions/download-artifact@v4
+        with:
+          pattern: observations-*
+          path: incoming
+
+      # NDJSON is append-only and one observation per line specifically so
+      # shards can be concatenated with no merge step and no re-ingestion.
+      # Merging preserves the context each job recorded about itself.
+      - name: Merge observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .flakestat
+          find incoming -name runs.ndjson -exec cat {} + > .flakestat/runs.ndjson
+          echo "merged $(wc -l < .flakestat/runs.ndjson) observations from $(find incoming -name runs.ndjson | wc -l) jobs"
+
+      - name: Verify the pipeline preserved execution context
+        shell: bash
+        run: |
+          set -euo pipefail
+          go build -o /tmp/flakestat ./cmd/flakestat
+
+          # Every platform that ran must be present, and the aggregation host
+          # must not have overwritten any of them.
+          for want in linux darwin windows; do
+            grep -q "\"os\":\"$want\"" .flakestat/runs.ndjson \
+              || { echo "::error::no observations recorded for os=$want"; exit 1; }
+          done
+          echo "all three platforms survived artifact transport"
+
+          # Branch must be preserved for cross-branch scoring to mean anything.
+          grep -q "\"branch\":" .flakestat/runs.ndjson \
+            || { echo "::error::branch was not recorded"; exit 1; }
+
+      - name: The controlled differential must be described correctly
+        shell: bash
+        run: |
+          set -euo pipefail
+          out=$(/tmp/flakestat explain TestPlatformDifferential --no-color 2>&1 || true)
+          echo "$out"
+
+          # It is deterministic on every platform, so it is not flaky. The
+          # platform difference belongs in the association, not the verdict.
+          echo "$out" | grep -qE "Classification: +stable" \
+            || { echo "::error::a deterministic platform difference must not be classified flaky"; exit 1; }
+
+          echo "$out" | grep -q "os=windows" \
+            || { echo "::error::expected an association with os=windows"; exit 1; }
+
+          # Correlation, never causation.
+          echo "$out" | grep -q "not an established cause" \
+            || { echo "::error::association wording must not imply causation"; exit 1; }
+
+      - name: The healthy suite should stay silent
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Silence is the expected and correct result for a healthy matrix.
+          # The control test runs on every platform and always passes, so any
+          # association for it would be a false positive.
+          out=$(/tmp/flakestat explain TestPlatformControl --no-color 2>&1 || true)
+          echo "$out"
+          if echo "$out" | grep -q "Where the failures concentrate"; then
+            echo "::error::reported an association for a test that never fails"
+            exit 1
+          fi
+
+          echo "--- full report ---"
+          /tmp/flakestat report --no-color --top 20 || true
+
+      - name: Report
+        shell: bash
+        run: /tmp/flakestat ci-report --step-summary --max-rows 20 || true
+
+      - name: Publish merged history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: flakestat-history
+          path: .flakestat/runs.ndjson
+          retention-days: 30
