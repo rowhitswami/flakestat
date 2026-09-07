@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://rowhitswami.github.io/flakestat/assets/logo-wordmark.png" alt="flakestat" width="520">
+  <img src="https://rowhitswami.github.io/flakestat/assets/logo-lockup.png" alt="flakestat" width="460">
 </p>
 
 <p align="center">
