@@ -1,6 +1,11 @@
 package association
 
 import (
+	"github.com/rowhitswami/flakestat/internal/junit"
+	"github.com/rowhitswami/flakestat/internal/store"
+
+	"time"
+
 	"math"
 	"math/rand"
 	"sort"
@@ -200,5 +205,56 @@ func TestBHPenalisesMoreComparisons(t *testing.T) {
 	if many[0].Q <= one[0].Q {
 		t.Errorf("q was %.6f among 20 comparisons and %.6f alone; it should be larger",
 			many[0].Q, one[0].Q)
+	}
+}
+
+// A skipped run carries no pass/fail signal, so it must not enter either cell
+// of the 2x2 table. If skips landed in the denominator, a dimension whose runs
+// were mostly skipped would show an artificially low failure rate and could be
+// reported as protective, or mask a real concentration elsewhere.
+func TestSkipsDoNotEnterTheTable(t *testing.T) {
+	base := time.Date(2026, 9, 7, 12, 0, 0, 0, time.UTC)
+	var withSkips, without []store.Observation
+
+	add := func(dst *[]store.Observation, os string, status junit.Status, i int) {
+		*dst = append(*dst, store.Observation{
+			TS: base.Add(time.Duration(i) * time.Second), TestID: "t1", Name: "t",
+			Status: status, Commit: "c1", Branch: "main",
+			Dimensions: map[string]string{"os": os},
+		})
+	}
+
+	i := 0
+	for n := 0; n < 20; n++ {
+		st := junit.StatusPass
+		if n < 8 {
+			st = junit.StatusFail
+		}
+		add(&withSkips, "windows", st, i)
+		add(&without, "windows", st, i)
+		i++
+		add(&withSkips, "linux", junit.StatusPass, i)
+		add(&without, "linux", junit.StatusPass, i)
+		i++
+	}
+	// Skips only in the group being examined, which is where they would do the
+	// most damage to its measured rate.
+	for n := 0; n < 40; n++ {
+		add(&withSkips, "windows", junit.StatusSkip, i)
+		i++
+	}
+
+	a := Analyze(withSkips, Defaults())
+	b := Analyze(without, Defaults())
+
+	if len(a) != len(b) {
+		t.Fatalf("skips changed the number of associations: %d vs %d", len(a), len(b))
+	}
+	for i := range a {
+		if a[i].Total != b[i].Total || a[i].Fail != b[i].Fail || a[i].Rate != b[i].Rate {
+			t.Errorf("%s=%s: %d/%d (%.3f) with skips, %d/%d (%.3f) without",
+				a[i].Dimension, a[i].Value, a[i].Fail, a[i].Total, a[i].Rate,
+				b[i].Fail, b[i].Total, b[i].Rate)
+		}
 	}
 }

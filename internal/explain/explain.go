@@ -72,6 +72,10 @@ type Explanation struct {
 	// LowerBound is the numeric bound behind the confidence label.
 	LowerBound float64 `json:"lower_bound"`
 
+	// Observations counts scored runs: Passed + Failed. Skipped is reported
+	// beside it rather than folded in, because a skip is not evidence either
+	// way and including it would put runs in the denominator of a failure rate
+	// they never contributed to.
 	Observations int     `json:"observations"`
 	Passed       int     `json:"passed"`
 	Failed       int     `json:"failed"`
@@ -149,8 +153,14 @@ func Build(obs []store.Observation, cfg score.Config, historyLimit int) Explanat
 	return e
 }
 
-// buildHistory converts observations to events, marking transitions the same
-// way scoring does: within a branch, never across one.
+// buildHistory converts observations to events, marking transitions exactly
+// where scoring does: within one execution context, never across one.
+//
+// It calls score.ExecutionContext rather than reimplementing the rule. When
+// this grouped by branch alone while scoring grouped by branch and platform,
+// the strip printed "flip on identical code" at every platform boundary --
+// claiming direct evidence of nondeterminism at precisely the points the
+// verdict had already ruled out as incomparable.
 func buildHistory(obs []store.Observation, limit int) []Event {
 	type prev struct {
 		passed bool
@@ -176,12 +186,13 @@ func buildHistory(obs []store.Observation, limit int) []Event {
 			ev.Outcome = OutcomeFail
 		}
 
-		p := last[o.Branch]
+		ctx := score.ExecutionContext(o)
+		p := last[ctx]
 		if p.seen && p.passed != passed {
 			ev.Flip = true
 			ev.SameCommit = p.commit == o.Commit
 		}
-		last[o.Branch] = prev{passed: passed, commit: o.Commit, seen: true}
+		last[ctx] = prev{passed: passed, commit: o.Commit, seen: true}
 
 		events = append(events, ev)
 	}
