@@ -363,6 +363,53 @@ The general shape is worth remembering when adding any new axis: two outcomes
 are evidence of nondeterminism only if everything that could legitimately
 change the outcome was held constant.
 
+### Counting: the execution identity invariant
+
+    Re-recording an execution must not create evidence.
+
+An observation describes one execution of one test. The log is append-only and
+designed to be merged with `cat`, so the same execution can reach it more than
+once: an artifact uploaded twice, a job re-run, a shard collected by two
+aggregators. Nothing in the record previously distinguished that from a second
+execution that happened to agree.
+
+Identity is derived from the evidence, never from ingestion:
+
+    provider + run + job + shard + attempt + report path + report digest
+      + test id + repetition index
+
+Each part earns its place. `attempt` is what separates a legitimate retry --
+which really did run the tests again -- from a duplicate. The report digest
+separates a file from the file that later replaced it; the report path
+separates two shards that emitted byte-identical XML. The repetition index is
+not defensive: `-count=12` puts twelve executions of one test in one document,
+and without it eleven results would vanish.
+
+Nothing about *when* ingestion happened may enter the key, or re-ingesting
+would mint a fresh one and restore the problem.
+
+**The harm was the opposite of the one anticipated.** The expectation was that
+a duplicate would inflate confidence -- more agreeing observations, a tighter
+bound, a smaller p-value. Measured, it does the reverse. A copy carries its
+original's timestamp, so it sorts adjacent to it, and a duplicate always agrees
+with itself. Duplication therefore injects artificial *agreements*:
+
+    a test failing 4 of 12 runs, ingested twice
+    score        0.64 -> 0.30
+    lower bound  0.510 -> 0.230
+    transitions  11 -> 23
+
+The evidence appears to double while the measured flip rate halves. The error
+runs towards **false negatives** -- a flaky test made to look stable, with more
+apparent support for the wrong answer. Duplication is not a bookkeeping
+nuisance; it is a way of losing flaky tests quietly.
+
+Dedup runs on read as well as on write, because `cat` never passes through the
+write path. Observations carrying no key -- `hunt` results, or records written
+before identity existed -- are always kept: `hunt` watched every execution
+happen, so its results cannot be duplicates, and discarding evidence that
+merely might be duplicated would be the worse error.
+
 ### Diagnosis is deliberately deferred
 
 Categorising causes -- timing, race condition, network, shared state -- is

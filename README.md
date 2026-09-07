@@ -223,6 +223,49 @@ History lives in `.flakestat/runs.ndjson` — one JSON object per line. Commit i
 for shared team history, or keep it as a CI artifact. Because it's append-only
 NDJSON, results from parallel CI shards concatenate with no merge step.
 
+Re-ingesting the same reports is safe. Each observation carries the identity of
+the execution it describes, so an artifact uploaded twice, a job re-run, or a
+shard collected by two aggregators is counted once — while a genuine retry,
+which really did run the tests again, still counts. Duplication is not
+harmless: a copy always agrees with itself, so uncounted duplicates make a
+flaky test look stable.
+
+### Recording where tests ran
+
+Pass `--dimension key=value` (repeatable) to record the context a run happened
+in. flakestat then reports where failures concentrate:
+
+```bash
+flakestat ingest 'reports/**/*.xml' \
+  --dimension os=windows \
+  --dimension runtime.version=3.13 \
+  --dimension database=postgres-17
+```
+
+```
+Where the failures concentrate
+
+  os=windows
+    failures here:  12 / 12 (100.0%)
+    elsewhere:      0 / 24 (0.0%)
+    difference:     +100.0 pp
+```
+
+Inside a recognized CI provider, `os`, `arch` and the run/job identity are
+detected automatically. Two rules keep that honest:
+
+- Only a whitelist of known CI variables is ever read, and only JUnit
+  `<property>` names flakestat recognizes. The process environment is never
+  scraped, so secrets and build ids cannot end up in your history.
+- Host details are recorded only when flakestat ran the tests. If one job
+  downloads other jobs' artifacts and ingests them centrally, pass `--no-host`
+  — otherwise the aggregator's platform gets stamped onto results from
+  everywhere else. Merging each job's NDJSON with `cat` avoids the problem
+  entirely.
+
+Associations are correlations, never causes. flakestat says failures *cluster*
+on Windows; it will not claim Windows is why.
+
 ### Gating CI without turning the build permanently red
 
 Most repos already have flaky tests when they adopt a tool like this. Failing on
@@ -386,126 +429,6 @@ than flaky, and an unclassified one explains exactly what is missing.
 
 `--json` emits the same evidence for tooling, and `--history N` widens the
 strip.
-
-## Works with your test runner
-
-flakestat reads **JUnit XML**, which every major framework already emits:
-
-| Ecosystem | Flag |
-|---|---|
-| Python | `pytest --junitxml=reports/junit-{run}.xml` |
-| JS/TS | `jest --reporters=jest-junit` · `vitest --reporter=junit` |
-| Go | `gotestsum --junitfile reports/junit-{run}.xml` |
-| Rust | `cargo nextest run --profile ci` |
-| Java | Surefire / Gradle, native |
-| Ruby | `rspec --format RspecJunitFormatter --out reports/junit-{run}.xml` |
-| PHP | `phpunit --log-junit reports/junit-{run}.xml` |
-| .NET | `dotnet test --logger junit` |
-
-No JUnit XML? flakestat falls back to exit codes and reports suite-level
-flakiness — less precise, but it still works.
-
-## Tracking flakiness over time
-
-A burst proves flakiness exists. Scoring history *measures* it, and catches
-environment-dependent flakes a local burst never will.
-
-```bash
-# In CI, after your tests run:
-flakestat ingest 'reports/**/*.xml'
-
-# Any time:
-flakestat report --top 20
-```
-
-History lives in `.flakestat/runs.ndjson` — one JSON object per line. Commit it
-for shared team history, or keep it as a CI artifact. Because it's append-only
-NDJSON, results from parallel CI shards concatenate with no merge step.
-
-### Gating CI without turning the build permanently red
-
-Most repos already have flaky tests when they adopt a tool like this. Failing on
-*all* of them means a red build on day one, and the gate gets deleted by day
-three. So `check` is a **ratchet** instead: accept today's flakiness, then fail
-only on what's new.
-
-```bash
-flakestat check --update-baseline   # once; commit .flakestat/baseline.json
-flakestat check --fail-on-new       # in CI from then on
-```
-
-```
-NEWLY FLAKY (1)
-  0.60  test_demo::test_newly_flaky
-
-1 new, 0 regressed, 1 accepted, 0 fixed
-```
-
-Exit codes: `0` nothing new, `1` newly flaky (`--fail-on-new`), `2` an accepted
-test measurably worsened (`--fail-on-regression`). Regressions are judged
-against `--regression-delta` (default `0.10`) so ordinary scoring jitter doesn't
-fail builds. Tests that stop being flaky are reported as `FIXED`, which is your
-cue to re-run `--update-baseline` and tighten the ratchet.
-
-`report --format markdown` produces output suited to a PR comment;
-`--format json` is for scripting.
-
-## Unblocking the pipeline
-
-Knowing which tests are flaky doesn't help if you're still blocked by them.
-`quarantine` emits a skip list **in the format your runner actually accepts**:
-
-```bash
-flakestat quarantine --format pytest -o quarantine.txt
-pytest $(grep -v '^#' quarantine.txt | sed 's/^/--deselect /')
-```
-
-```bash
-flakestat quarantine --format go -o skip.txt
-go test -skip "$(grep -v '^#' skip.txt)" ./...
-```
-
-| Format | Output |
-|---|---|
-| `pytest` | node IDs for `--deselect` |
-| `go` | an escaped regex for `go test -skip` |
-| `jest` | `testPathIgnorePatterns` (file-level — jest can't deselect single tests) |
-| `yaml` / `json` | structured, for your own tooling |
-
-Consistently failing tests are **excluded by default**. They're broken rather
-than flaky, and quietly skipping them would hide a real defect — pass
-`--include-broken` if you really want them.
-
-### GitHub Actions
-
-```yaml
-- name: Run tests
-  run: pytest --junitxml=reports/junit.xml
-  continue-on-error: true
-
-- uses: rowhitswami/flakestat@v1
-  with:
-    args: ingest 'reports/**/*.xml'
-```
-
-The action installs flakestat, records the run, and appends a flakiness table
-to your job summary. It exposes `flaky-count` as an output, so you can gate or
-notify on it:
-
-```yaml
-- uses: rowhitswami/flakestat@v1
-  id: flakes
-  with:
-    args: report --fail-on-flaky
-```
-
-| Input | Default | Purpose |
-|---|---|---|
-| `args` | — | Arguments passed to flakestat |
-| `version` | latest | Release tag to install |
-| `install-only` | `false` | Put the binary on PATH without running it |
-| `summary` | `true` | Append a report to the job summary |
-| `working-directory` | `.` | Directory to run in |
 
 ## How scoring works
 
