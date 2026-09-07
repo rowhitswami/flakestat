@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en" data-base="/flakestat/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reproduce a flaky test locally — flakestat hunt</title>
+<meta name="description" content="Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.">
+<link rel="canonical" href="https://rowhitswami.github.io/flakestat/docs/hunting/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="reproduce flaky test, rerun tests to find flaky, flakestat hunt">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="Hunting flaky tests locally">
+<meta property="og:description" content="Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.">
+<meta property="og:url" content="https://rowhitswami.github.io/flakestat/docs/hunting/">
+<meta property="og:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hunting flaky tests locally">
+<meta name="twitter:description" content="Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.">
+<meta name="twitter:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/flakestat/assets/favicon.png">
+<link rel="apple-touch-icon" href="/flakestat/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://rowhitswami.github.io/flakestat/llms.txt" title="llms.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/flakestat/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://rowhitswami.github.io/flakestat/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://rowhitswami.github.io/flakestat/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://rowhitswami.github.io/flakestat/#website","url":"https://rowhitswami.github.io/flakestat/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://rowhitswami.github.io/flakestat/#person"}},{"@type":"Person","@id":"https://rowhitswami.github.io/flakestat/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://rowhitswami.github.io/flakestat/docs/hunting/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://rowhitswami.github.io/flakestat/"},{"@type":"ListItem","position":2,"name":"Docs","item":"https://rowhitswami.github.io/flakestat/docs/"},{"@type":"ListItem","position":3,"name":"Hunting flaky tests locally","item":"https://rowhitswami.github.io/flakestat/docs/hunting/"}]},{"@type":"TechArticle","@id":"https://rowhitswami.github.io/flakestat/docs/hunting/#article","headline":"Hunting flaky tests locally","description":"Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.","url":"https://rowhitswami.github.io/flakestat/docs/hunting/","datePublished":"2026-09-06","dateModified":"2026-09-07","author":{"@id":"https://rowhitswami.github.io/flakestat/#person"},"about":{"@id":"https://rowhitswami.github.io/flakestat/#software"},"inLanguage":"en"}]}</script>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/flakestat/" aria-label="flakestat home">
+      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
+           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/quickstart/">Docs</a><a href="/flakestat/docs/commands/">Commands</a><a href="/flakestat/compare/trunk/">Compare</a><a href="/flakestat/docs/faq/">FAQ</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="theme" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/flakestat/docs/install/">Install</a><a href="/flakestat/docs/quickstart/">Quickstart</a><a href="/flakestat/docs/reading-a-report/">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/flakestat/docs/hunting/" aria-current="page">Hunting locally</a><a href="/flakestat/docs/history/">History over time</a><a href="/flakestat/docs/dimensions/">Recording context</a><a href="/flakestat/docs/ci-gate/">Gating CI</a><a href="/flakestat/docs/quarantine/">Unblocking the pipeline</a><a href="/flakestat/docs/explain/">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/flakestat/docs/ci/github-actions/">GitHub Actions</a><a href="/flakestat/docs/ci/gitlab/">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/flakestat/docs/commands/">Commands</a><a href="/flakestat/docs/config/">Configuration</a><a href="/flakestat/docs/scoring/">How scoring works</a><a href="/flakestat/docs/runners/">Supported runners</a><a href="/flakestat/docs/faq/">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/flakestat/compare/trunk/">vs Trunk</a><a href="/flakestat/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/flakestat/">Home</a><span>/</span><span>Docs</span><span>/</span><span>Hunting flaky tests locally</span></nav><h1>Hunting flaky tests locally</h1><p class="lede">Run the suite many times on unchanged code and see what disagrees.</p>
+<div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">hunt for flaky tests</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="pytest">pytest</button><button class="tab" role="tab" aria-selected="false" data-lang="jest">Jest</button><button class="tab" role="tab" aria-selected="false" data-lang="go">go test</button><button class="tab" role="tab" aria-selected="false" data-lang="maven">Maven</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- pytest --junitxml=&#x27;{junit}&#x27;</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- npx jest --reporters=jest-junit</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- gotestsum --junitfile=&#x27;{junit}&#x27; -- ./...</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;target/surefire-reports/*.xml&#x27; \
+  -- mvn -q test</code></pre></div></div>
+
+<h2 id="how-many-runs-do-i-need">How many runs do I need?<a class="anchor" href="#how-many-runs-do-i-need" aria-label="Link to this section">#</a></h2>
+<p>It depends entirely on how rare the flake is. These are measured against synthetic tests with
+known failure probabilities:</p>
+<div class="tablewrap"><table><thead><tr><th>Flake rate</th><th>Runs for reliable detection</th></tr></thead><tbody><tr><td>25% or higher</td><td>20 runs is plenty</td></tr><tr><td>10%</td><td>50 or more</td></tr><tr><td>5%</td><td>100+, and a local burst is starting to be the wrong instrument</td></tr><tr><td>Below 5%</td><td>Record <a href='/flakestat/docs/history/'>CI history</a> instead</td></tr></tbody></table></div>
+
+<h2 id="chasing-one-test">Chasing one test<a class="anchor" href="#chasing-one-test" aria-label="Link to this section">#</a></h2>
+<div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat hunt --runs 50 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- pytest tests/test_checkout.py::test_race --junitxml=&#x27;{junit}&#x27;</code></pre></div>
+<p>Narrowing to one test is usually much faster per run, so you can afford far more runs — which
+is exactly what a rare flake needs.</p>
+
+<h2 id="if-it-finds-nothing">If it finds nothing<a class="anchor" href="#if-it-finds-nothing" aria-label="Link to this section">#</a></h2>
+<p>That is a real result. It means nothing disagreed in that many runs, which is evidence the test
+is not flaky <em>at a rate this sample could detect</em>. It is not evidence the test is clean.
+Raise <code>--runs</code>, or let CI history accumulate.</p>
+
+<div class="callout flag"><b>A warning about --parallel</b>
+<p><code>--parallel N</code> runs N copies of your command <em>in the same working directory</em>.
+A suite that writes fixed paths, binds a fixed port or shares a database will collide with itself
+and look flaky when it isn't.</p>
+<p>This is real, not theoretical. Running against <code>spf13/cobra</code> with
+<code>--parallel 4</code> reported <code>TestDeadcodeElimination</code> as flaky at 0.60. It isn't —
+the test builds a binary at a fixed path, and concurrent copies deleted each other's build.
+Sequentially, cobra is completely clean.</p>
+<p>So flakestat verifies its own findings. Candidates found under <code>--parallel</code> are
+re-run sequentially and demoted from <code>flaky</code> to <code>suspect</code> if they don't
+reproduce. Sequential (the default) is always trustworthy — use <code>--parallel</code> to hunt
+faster and let verification sort out the difference, or <code>--verify 0</code> to opt out.</p></div>
+
+<h2 id="scoring-the-whole-history-instead">Scoring the whole history instead<a class="anchor" href="#scoring-the-whole-history-instead" aria-label="Link to this section">#</a></h2>
+<p>By default <code>hunt</code> scores only the burst it just ran. Add <code>--history</code> to
+score everything recorded so far, burst and CI runs together.</p>
+<div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat hunt --runs 20 --history</code></pre></div>
+<nav class="pager"><a href="/flakestat/docs/reading-a-report/"><span>Previous</span><b>Reading a report</b></a><a class="next" href="/flakestat/docs/history/"><span>Next</span><b>History over time</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#how-many-runs-do-i-need">How many runs do I need?</a><a class="lvl2" href="#chasing-one-test">Chasing one test</a><a class="lvl2" href="#if-it-finds-nothing">If it finds nothing</a><a class="lvl2" href="#scoring-the-whole-history-instead">Scoring the whole history instead</a></div></div>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
+           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
+    </div>
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/flakestat/docs/install/">Install</a>
+      <a href="/flakestat/docs/quickstart/">Quickstart</a>
+      <a href="/flakestat/docs/commands/">Commands</a>
+      <a href="/flakestat/docs/scoring/">How scoring works</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/flakestat/docs/ci/github-actions/">GitHub Actions</a>
+      <a href="/flakestat/docs/history/">Tracking over time</a>
+      <a href="/flakestat/docs/ci-gate/">Gating CI</a>
+      <a href="/flakestat/docs/runners/">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
+      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
+      <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
+      <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
+      <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
+    </div>
+  </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a> · <a href="https://rowhitswami.github.io/flakestat/llms.txt">llms.txt</a></div></div>
+</footer>
+
+<div class="scrim" id="scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script src="/flakestat/app.js" defer></script>
+</body>
+</html>

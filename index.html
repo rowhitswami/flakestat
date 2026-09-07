@@ -1,1055 +1,186 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-base="/flakestat/">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>flakestat — find flaky tests in any language</title>
-<meta name="description" content="flakestat finds flaky tests from the JUnit XML your test runner already writes. One static binary, no SaaS, no account, and your test results never leave your machine.">
-<link rel="icon" href="assets/favicon.png">
-<meta property="og:title" content="flakestat — find flaky tests in any language">
-<meta property="og:description" content="One static binary. No SaaS, no account, and your test results never leave your machine.">
-<meta property="og:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta name="description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
+<link rel="canonical" href="https://rowhitswami.github.io/flakestat/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="flaky test detector, find flaky tests, flaky test detection, open source flaky tests, pytest flaky tests, jest flaky tests, go test flaky, junit xml flaky tests, ci flaky tests">
 <meta property="og:type" content="website">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="flakestat — find flaky tests in any language">
+<meta property="og:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
+<meta property="og:url" content="https://rowhitswami.github.io/flakestat/">
+<meta property="og:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="flakestat — find flaky tests in any language">
+<meta name="twitter:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
+<meta name="twitter:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/flakestat/assets/favicon.png">
+<link rel="apple-touch-icon" href="/flakestat/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://rowhitswami.github.io/flakestat/llms.txt" title="llms.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-/* ============================================================
-   Brand palette, taken from the logo.
-
-     #005CFC  electric blue   primary, links, structure
-     #FD6001  orange          reserved for the odd one out
-     #08142A  navy            text, and the dark surface
-
-   Orange is semantic, never decorative: in the mark it is the one
-   node that disagrees with its neighbours, so on this page it means
-   flaky and nothing else.
-   ============================================================ */
-:root {
-  --blue:        #005CFC;
-  --blue-ink:    #0043C4;
-  --blue-wash:   #EEF3FF;
-  --orange:      #FD6001;
-  --orange-ink:  #C44700;
-  --orange-wash: #FFF1E8;
-  --navy:        #08142A;
-  --navy-2:      #0F1E3A;
-  --navy-3:      #17284A;
-
-  --bg:        #FFFFFF;
-  --surface:   #F7F9FC;
-  --surface-2: #EEF2F8;
-  --fg:        #08142A;
-  --fg-muted:  #56637A;
-  --fg-faint:  #8A94A6;
-  --border:    #DDE3ED;
-  --border-2:  #C8D2E0;
-  --green:     #00A163;
-
-  --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --radius: 10px;
-  --shadow: 0 1px 2px rgba(8,20,42,.05), 0 8px 24px -12px rgba(8,20,42,.12);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg:        #08142A;
-    --surface:   #0F1E3A;
-    --surface-2: #17284A;
-    --fg:        #E9EEF6;
-    --fg-muted:  #9FAEC6;
-    --fg-faint:  #6C7C99;
-    --border:    #1E3055;
-    --border-2:  #2A3F6B;
-    --blue:      #4D8DFF;
-    --blue-ink:  #8CB4FF;
-    --blue-wash: #12244A;
-    --orange:    #FF7A29;
-    --orange-ink:#FF9A5C;
-    --orange-wash:#2A1A10;
-    --green:     #2FCB8B;
-    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
-  }
-}
-:root[data-theme="dark"] {
-  --bg:        #08142A;
-  --surface:   #0F1E3A;
-  --surface-2: #17284A;
-  --fg:        #E9EEF6;
-  --fg-muted:  #9FAEC6;
-  --fg-faint:  #6C7C99;
-  --border:    #1E3055;
-  --border-2:  #2A3F6B;
-  --blue:      #4D8DFF;
-  --blue-ink:  #8CB4FF;
-  --blue-wash: #12244A;
-  --orange:    #FF7A29;
-  --orange-ink:#FF9A5C;
-  --orange-wash:#2A1A10;
-  --green:     #2FCB8B;
-  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.6);
-}
-
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
-body {
-  margin: 0; background: var(--bg); color: var(--fg);
-  font-family: var(--sans); font-size: 16.5px; line-height: 1.65;
-  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
-}
-a { color: var(--blue); text-decoration: none; font-weight: 500; }
-a:hover { color: var(--blue-ink); text-decoration: underline; text-underline-offset: 3px; }
-code { font-family: var(--mono); font-size: 0.86em; background: var(--surface-2);
-  padding: 0.15em 0.42em; border-radius: 5px; font-weight: 500; }
-pre {
-  font-family: var(--mono); background: var(--navy); color: #DDE6F5;
-  border-radius: var(--radius); padding: 1.15rem 1.3rem; overflow-x: auto;
-  font-size: 0.8rem; line-height: 1.7; margin: 1.1rem 0; box-shadow: var(--shadow);
-}
-pre code { background: none; padding: 0; font-size: inherit; color: inherit; font-weight: 400; }
-img { max-width: 100%; }
-h1,h2,h3,h4 { line-height: 1.22; letter-spacing: -0.022em; font-weight: 800; }
-p { margin: 0.75rem 0; }
-ul, ol { padding-left: 1.25rem; }
-li { margin: 0.35rem 0; }
-strong { font-weight: 700; }
-
-/* ---------------- top bar ---------------- */
-.topbar {
-  position: sticky; top: 0; z-index: 50;
-  background: color-mix(in srgb, var(--bg) 88%, transparent);
-  backdrop-filter: saturate(150%) blur(12px);
-  border-bottom: 1px solid var(--border);
-}
-.topbar-in { max-width: 1280px; margin: 0 auto; padding: 0.65rem 1.5rem;
-  display: flex; align-items: center; gap: 1rem; }
-.topbar .logo { display: flex; align-items: center; gap: 0.5rem; font-weight: 800;
-  letter-spacing: -0.03em; font-size: 1.05rem; color: var(--fg); }
-.topbar .logo img { width: 24px; height: 24px; }
-.topbar .logo:hover { text-decoration: none; }
-.topbar nav { margin-left: auto; display: flex; gap: 1.1rem; align-items: center; font-size: 0.9rem; }
-.topbar nav a { color: var(--fg-muted); font-weight: 500; }
-.topbar nav a:hover { color: var(--blue); text-decoration: none; }
-.iconbtn { border: 1px solid var(--border); background: var(--surface); color: var(--fg);
-  border-radius: 8px; width: 32px; height: 32px; cursor: pointer; font-size: 0.9rem;
-  display: grid; place-items: center; font-family: var(--sans); }
-.iconbtn:hover { border-color: var(--blue); color: var(--blue); }
-
-/* ---------------- hero ---------------- */
-.hero { position: relative; overflow: hidden; background: var(--navy); color: #E9EEF6; }
-.hero::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(120% 90% at 78% 12%, rgba(0,92,252,.30), transparent 62%),
-              radial-gradient(70% 60% at 92% 8%, rgba(253,96,1,.16), transparent 60%);
-  pointer-events: none;
-}
-.hero-mesh { position: absolute; inset: 0; opacity: .5; pointer-events: none; }
-.hero-in { position: relative; z-index: 2; max-width: 1280px; margin: 0 auto;
-  padding: 4.5rem 1.5rem 4rem; display: grid; grid-template-columns: 1.05fr 0.95fr;
-  gap: 3.5rem; align-items: center; }
-.hero img.lockup { width: min(430px, 92%); margin-bottom: 1.6rem; }
-.hero h1 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); margin: 0 0 0.9rem; color: #fff; }
-.hero h1 .odd { color: var(--orange); }
-.hero p { color: #A9BAD6; font-size: 1.08rem; margin: 0 0 1.8rem; max-width: 34rem; }
-.hero-cta { display: flex; flex-wrap: wrap; gap: 0.7rem; }
-.btn { display: inline-flex; align-items: center; gap: 0.45rem;
-  padding: 0.62rem 1.15rem; border-radius: 9px; font-size: 0.94rem; font-weight: 600;
-  border: 1px solid transparent; transition: transform .12s ease, background .12s ease; }
-.btn:hover { text-decoration: none; transform: translateY(-1px); }
-.btn-primary { background: var(--blue); color: #fff; }
-.btn-primary:hover { background: #1a6dff; color: #fff; }
-.btn-ghost { background: rgba(255,255,255,.06); color: #DDE6F5; border-color: rgba(255,255,255,.18); }
-.btn-ghost:hover { background: rgba(255,255,255,.12); color: #fff; }
-
-/* terminal */
-.term { background: #050D1D; border: 1px solid rgba(255,255,255,.09); border-radius: 12px;
-  overflow: hidden; box-shadow: 0 24px 60px -24px rgba(0,0,0,.7); }
-.term-bar { display: flex; align-items: center; gap: 0.4rem; padding: 0.6rem 0.85rem;
-  border-bottom: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03); }
-.term-bar i { width: 10px; height: 10px; border-radius: 50%; display: block; }
-.term-bar span { margin-left: 0.5rem; font-family: var(--mono); font-size: 0.7rem; color: #6C7C99; }
-.term pre { margin: 0; border-radius: 0; box-shadow: none; background: transparent; font-size: 0.745rem; padding: 1rem 1.1rem; }
-.t-flaky { color: #FF8A47; font-weight: 500; }
-.t-broken { color: #9FAEC6; }
-.t-head { color: #6C7C99; }
-.t-num { color: #7FB0FF; }
-.t-dim { color: #56637A; }
-
-/* ---------------- strip ---------------- */
-.strip { border-bottom: 1px solid var(--border); background: var(--surface); }
-.strip-in { max-width: 1280px; margin: 0 auto; padding: 1.6rem 1.5rem;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 1.4rem; }
-.strip b { display: block; font-size: 0.94rem; }
-.strip p { margin: 0.15rem 0 0; font-size: 0.87rem; color: var(--fg-muted); }
-
-/* ---------------- layout ---------------- */
-.shell { max-width: 1280px; margin: 0 auto; display: flex; gap: 3.5rem; padding: 0 1.5rem; }
-aside { width: 218px; flex: 0 0 218px; position: sticky; top: 3.6rem; align-self: flex-start;
-  max-height: calc(100vh - 4rem); overflow-y: auto; padding: 2.2rem 0 3rem; font-size: 0.875rem; }
-aside h5 { margin: 1.5rem 0 0.4rem; font-size: 0.68rem; text-transform: uppercase;
-  letter-spacing: 0.1em; color: var(--fg-faint); font-weight: 700; }
-aside h5:first-child { margin-top: 0; }
-aside a { display: block; padding: 0.24rem 0 0.24rem 0.7rem; color: var(--fg-muted);
-  border-left: 2px solid var(--border); font-weight: 500; }
-aside a:hover { color: var(--blue); border-left-color: var(--blue-ink); text-decoration: none; }
-aside a.active { color: var(--blue); border-left-color: var(--blue); font-weight: 600; }
-main { flex: 1 1 auto; min-width: 0; max-width: 790px; padding: 2.2rem 0 6rem; }
-
-section { scroll-margin-top: 5rem; }
-h2 { font-size: 1.72rem; margin: 3.6rem 0 0.4rem; padding-top: 2.2rem;
-  border-top: 1px solid var(--border); position: relative; }
-h2::before { content: ""; position: absolute; top: -1px; left: 0; width: 46px; height: 3px;
-  background: var(--blue); border-radius: 2px; }
-section:first-of-type h2 { margin-top: 0.5rem; padding-top: 0; border-top: none; }
-section:first-of-type h2::before { display: none; }
-h3 { font-size: 1.16rem; margin: 2.1rem 0 0.35rem; }
-h4 { font-size: 0.99rem; margin: 1.5rem 0 0.25rem; font-weight: 700; }
-.lede { font-size: 1.04rem; color: var(--fg-muted); margin-top: 0.35rem; }
-
-table { border-collapse: collapse; width: 100%; margin: 1.1rem 0; font-size: 0.88rem;
-  display: block; overflow-x: auto; }
-th, td { text-align: left; padding: 0.55rem 0.85rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-th { font-weight: 700; color: var(--fg-faint); font-size: 0.72rem; text-transform: uppercase;
-  letter-spacing: 0.07em; white-space: nowrap; }
-tbody tr:hover { background: var(--surface); }
-td code { white-space: nowrap; }
-
-.note { border-left: 3px solid var(--blue); background: var(--blue-wash);
-  padding: 0.85rem 1.1rem; margin: 1.3rem 0; border-radius: 0 8px 8px 0; font-size: 0.93rem; }
-.note b { display: block; margin-bottom: 0.15rem; color: var(--blue-ink); }
-.note.flag { border-left-color: var(--orange); background: var(--orange-wash); }
-.note.flag b { color: var(--orange-ink); }
-
-.verdict { display: grid; grid-template-columns: 12.5rem 1fr; gap: 1rem; align-items: baseline;
-  padding: 0.62rem 0.9rem; border-radius: 8px; font-size: 0.91rem; margin-bottom: 0.4rem;
-  background: var(--surface); border-left: 3px solid var(--border-2); }
-.verdict b { font-family: var(--mono); font-size: 0.83rem; font-weight: 500; }
-.v-flaky   { border-left-color: var(--orange); } .v-flaky b   { color: var(--orange-ink); }
-.v-suspect { border-left-color: #E0A100; }       .v-suspect b { color: #A87400; }
-.v-stable  { border-left-color: var(--green); }  .v-stable b  { color: var(--green); }
-.v-other b { color: var(--fg-muted); }
-
-.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px,1fr)); gap: 0.9rem; margin: 1.2rem 0; }
-.tile { border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem 1.1rem; background: var(--surface); }
-.tile h4 { margin: 0 0 0.2rem; }
-.tile p { margin: 0; font-size: 0.88rem; color: var(--fg-muted); }
-.tile.pick { border-color: var(--blue); background: var(--blue-wash); }
-.tile .tag { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
-  color: var(--blue); display: block; margin-bottom: 0.15rem; }
-
-.pill { display: inline-block; padding: 0.16rem 0.6rem; border-radius: 20px; font-size: 0.78rem;
-  font-weight: 600; background: var(--surface-2); color: var(--fg-muted); margin: 0.15rem 0.15rem 0.15rem 0; }
-
-footer { border-top: 1px solid var(--border); background: var(--surface); }
-.footer-in { max-width: 1280px; margin: 0 auto; padding: 2.5rem 1.5rem 3.5rem;
-  display: flex; flex-wrap: wrap; gap: 1.5rem; align-items: center; justify-content: space-between;
-  color: var(--fg-muted); font-size: 0.88rem; }
-.footer-in img { width: 130px; opacity: .9; }
-.footer-links { display: flex; gap: 1.1rem; flex-wrap: wrap; }
-
-@media (max-width: 980px) {
-  .hero-in { grid-template-columns: 1fr; gap: 2.2rem; padding: 3rem 1.25rem; }
-  .shell { flex-direction: column; gap: 0; padding: 0 1.25rem; }
-  aside { position: static; width: auto; flex: none; max-height: none; padding: 1.5rem 0 0;
-    border-bottom: 1px solid var(--border); }
-  aside .sidenav { display: none; }
-  main { padding-top: 1.5rem; }
-  .topbar nav a.hide-sm { display: none; }
-  .verdict { grid-template-columns: 1fr; gap: 0.1rem; }
-}
-</style>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/flakestat/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://rowhitswami.github.io/flakestat/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://rowhitswami.github.io/flakestat/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://rowhitswami.github.io/flakestat/#website","url":"https://rowhitswami.github.io/flakestat/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://rowhitswami.github.io/flakestat/#person"}},{"@type":"Person","@id":"https://rowhitswami.github.io/flakestat/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"}]}</script>
 </head>
 <body>
+<div class="progress" id="progress"></div>
 
-<div class="topbar">
-  <div class="topbar-in">
-    <a class="logo" href="#top"><img src="assets/logo-mark.png" alt="">flakestat</a>
-    <nav>
-      <a href="#install" class="hide-sm">Install</a>
-      <a href="#quickstart" class="hide-sm">Quickstart</a>
-      <a href="#commands" class="hide-sm">Commands</a>
-      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
-      <button class="iconbtn" id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
-    </nav>
-  </div>
-</div>
-
-<header class="hero" id="top">
-  <svg class="hero-mesh" aria-hidden="true" width="100%" height="100%">
-    <defs>
-      <pattern id="nodes" width="54" height="54" patternUnits="userSpaceOnUse">
-        <circle cx="27" cy="27" r="2.4" fill="#4D8DFF" opacity=".30"/>
-      </pattern>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#nodes)"/>
-    <!-- one node that disagrees with its neighbours: the whole idea, drawn -->
-    <circle cx="81" cy="135" r="4.6" fill="#FD6001" opacity=".85"/>
-    <circle cx="513" cy="297" r="4.6" fill="#FD6001" opacity=".55"/>
-  </svg>
-
-  <div class="hero-in">
-    <div>
-      <img class="lockup" src="assets/logo-lockup-dark.png" alt="flakestat">
-      <h1>Some tests disagree<br>with <span class="odd">themselves</span>.</h1>
-      <p>
-        flakestat reads the JUnit XML your test runner already writes and tells
-        you which tests are actually flaky — ranked, with a confidence level,
-        and with the evidence behind every verdict.
-      </p>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="#quickstart">Get started</a>
-        <a class="btn btn-ghost" href="https://github.com/rowhitswami/flakestat">View on GitHub</a>
-      </div>
-    </div>
-
-    <div class="term">
-      <div class="term-bar">
-        <i style="background:#FD6001"></i><i style="background:#E0A100"></i><i style="background:#00A163"></i>
-        <span>flakestat report</span>
-      </div>
-<pre><code><span class="t-head">VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST</span>
-<span class="t-flaky">flaky                  0.62  high    20       14/6  test_demo::test_flaky_race</span>
-<span class="t-broken">consistently-failing   0.00  high    20       0/20  test_demo::test_broken</span>
-
-<span class="t-dim">1 flaky, 0 suspect, 1 consistently failing, 1 stable,
-1 unscored (of 4 tests)</span></code></pre>
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/flakestat/" aria-label="flakestat home">
+      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
+           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/quickstart/">Docs</a><a href="/flakestat/docs/commands/">Commands</a><a href="/flakestat/compare/trunk/">Compare</a><a href="/flakestat/docs/faq/">FAQ</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="theme" aria-label="Toggle dark mode">◐</button>
     </div>
   </div>
 </header>
 
-<div class="strip">
-  <div class="strip-in">
-    <div><b>Local first</b><p>One static binary. No account, no server, no test data leaving your machine.</p></div>
-    <div><b>Any language</b><p>If your runner writes JUnit XML — and they all do — flakestat reads it.</p></div>
-    <div><b>Free at any volume</b><p>Recording CI runs costs no extra compute. No per-seat or per-run pricing.</p></div>
-    <div><b>Zero dependencies</b><p>The Go module has no <code>require</code> block. Nothing to audit but the tool.</p></div>
+
+<section class="hero">
+  <svg class="mesh" aria-hidden="true" width="100%" height="100%">
+    <defs><pattern id="n" width="54" height="54" patternUnits="userSpaceOnUse">
+      <circle cx="27" cy="27" r="2.4" fill="#4D8DFF" opacity=".30"/></pattern></defs>
+    <rect width="100%" height="100%" fill="url(#n)"/>
+    <circle cx="81" cy="135" r="4.6" fill="#FD6001" opacity=".85"/>
+    <circle cx="513" cy="297" r="4.6" fill="#FD6001" opacity=".5"/>
+  </svg>
+  <div class="hero-in">
+    <div>
+      <img class="hero-lockup" src="/flakestat/assets/logo-lockup-dark.png" alt="flakestat" width="400" height="126">
+      <h1>Some tests disagree<br>with <span class="odd">themselves</span>.</h1>
+      <p class="sub">flakestat reads the JUnit XML your test runner already writes and tells you
+      which tests are actually flaky — ranked, with a confidence level, and with the evidence
+      behind every verdict.</p>
+      <div class="hero-cta">
+        <a class="btn btn-pri" href="/flakestat/docs/quickstart/">Get started</a>
+        <a class="btn btn-ghost" href="https://github.com/rowhitswami/flakestat">View on GitHub</a>
+      </div>
+    </div>
+    <div class="cblock">
+      <div class="cblock-head"><span class="cblock-title">flakestat report</span>
+      <button class="copy" type="button">Copy</button></div>
+<pre><code><span class="t-dim">VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST</span>
+<span class="t-flaky">flaky                  0.62  high    20       14/6  test_demo::test_flaky_race</span>
+<span class="t-ok">consistently-failing   0.00  high    20       0/20  test_demo::test_broken</span>
+
+<span class="t-dim">1 flaky, 0 suspect, 1 consistently failing,
+1 stable, 1 unscored (of 4 tests)</span></code></pre>
+    </div>
+  </div>
+</section>
+
+<div class="band"><div class="band-in">
+  <div><b>Local first</b><p>One static binary. No account, no server, no test data leaving your machine.</p></div>
+  <div><b>Any language</b><p>If your runner writes JUnit XML — and they all do — flakestat reads it.</p></div>
+  <div><b>Free at any volume</b><p>Recording CI runs costs no extra compute. No per-seat or per-run pricing.</p></div>
+  <div><b>Zero dependencies</b><p>The Go module has no <code>require</code> block. Nothing to audit but the tool.</p></div>
+</div></div>
+
+<div class="wide narrow">
+  <h2 id="install-and-run-in-two-commands">Install and run in two commands<a class="anchor" href="#install-and-run-in-two-commands" aria-label="Link to this section">#</a></h2>
+  <div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">install</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="brew">Homebrew</button><button class="tab" role="tab" aria-selected="false" data-lang="npm">npm</button><button class="tab" role="tab" aria-selected="false" data-lang="pip">pip</button><button class="tab" role="tab" aria-selected="false" data-lang="go">Go</button><button class="tab" role="tab" aria-selected="false" data-lang="sh">Script</button><button class="tab" role="tab" aria-selected="false" data-lang="docker">Docker</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>brew install rowhitswami/tap/flakestat</code></pre></div><div class="cpane" hidden><pre><code>npm install --save-dev flakestat
+# or, without installing:
+npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip install flakestat</code></pre></div><div class="cpane" hidden><pre><code>go install github.com/rowhitswami/flakestat/cmd/flakestat@latest</code></pre></div><div class="cpane" hidden><pre><code>curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh \
+  | sh -s -- -b /usr/local/bin</code></pre></div><div class="cpane" hidden><pre><code>docker run --rm -v &quot;$PWD:/workspace&quot; ghcr.io/rowhitswami/flakestat report</code></pre></div></div>
+  <div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">hunt for flaky tests</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="pytest">pytest</button><button class="tab" role="tab" aria-selected="false" data-lang="jest">Jest</button><button class="tab" role="tab" aria-selected="false" data-lang="go">go test</button><button class="tab" role="tab" aria-selected="false" data-lang="maven">Maven</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- pytest --junitxml=&#x27;{junit}&#x27;</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- npx jest --reporters=jest-junit</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;reports/junit-{run}.xml&#x27; \
+  -- gotestsum --junitfile=&#x27;{junit}&#x27; -- ./...</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;target/surefire-reports/*.xml&#x27; \
+  -- mvn -q test</code></pre></div></div>
+  <p>That runs your suite 20 times on unchanged code and reports what disagreed.
+  Already have CI? <a href="/flakestat/docs/history/">Record the runs you already pay for</a> instead —
+  it catches environment-dependent flakes a local burst never will, at no extra compute.</p>
+
+  <h2 id="why-the-verdicts-can-be-trusted">Why the verdicts can be trusted<a class="anchor" href="#why-the-verdicts-can-be-trusted" aria-label="Link to this section">#</a></h2>
+  <div class="cards">
+    <div class="card"><h4>Inconsistency, not failure</h4>
+      <p>A test failing 100% of the time isn't flaky, it's broken. flakestat scores
+      pass→fail→pass transitions, so a broken test scores zero and is reported separately.</p></div>
+    <div class="card"><h4>Evidence is weighed</h4>
+      <p>Disagreement on the same commit is proof; across commits it may be a regression
+      someone already fixed, so it counts for less.</p></div>
+    <div class="card"><h4>Confidence, not just a number</h4>
+      <p>A score of 0.62 from three runs and from three hundred are different claims. A small
+      sample can never reach <code>high</code>.</p></div>
+    <div class="card"><h4>Only comparable things compared</h4>
+      <p>Two outcomes are evidence of nondeterminism only if branch, platform and runtime were
+      held constant.</p></div>
+  </div>
+  <p><a href="/flakestat/docs/scoring/">See exactly how scoring works</a>, including a live demo you
+  can poke at.</p>
+
+  <h2 id="start-where-you-are">Start where you are<a class="anchor" href="#start-where-you-are" aria-label="Link to this section">#</a></h2>
+  <div class="cards">
+    <a class="card" href="/flakestat/flaky-tests/pytest/"><h4>pytest →</h4><p>Find flaky tests in a Python suite.</p></a>
+    <a class="card" href="/flakestat/flaky-tests/jest/"><h4>Jest →</h4><p>Find flaky tests in a JS or TS suite.</p></a>
+    <a class="card" href="/flakestat/flaky-tests/go/"><h4>go test →</h4><p>Find flaky tests in a Go suite.</p></a>
+    <a class="card" href="/flakestat/docs/ci/github-actions/"><h4>GitHub Actions →</h4><p>Record every CI run and gate on regressions.</p></a>
   </div>
 </div>
 
-<div class="shell">
-<aside>
-  <div class="sidenav">
-    <h5>Start</h5>
-    <a href="#install">Install</a>
-    <a href="#quickstart">Quickstart</a>
-    <a href="#reading">Reading a report</a>
-    <h5>Guides</h5>
-    <a href="#hunt-guide">Hunting locally</a>
-    <a href="#history">History over time</a>
-    <a href="#where-history">Where to keep history</a>
-    <a href="#dimensions">Recording context</a>
-    <a href="#gate">Gating CI</a>
-    <a href="#quarantine-guide">Unblocking the pipeline</a>
-    <a href="#explain-guide">Why is this flaky?</a>
-    <h5>CI</h5>
-    <a href="#github-actions">GitHub Actions</a>
-    <a href="#gitlab">GitLab and others</a>
-    <h5>Reference</h5>
-    <a href="#commands">Commands</a>
-    <a href="#config">Config file</a>
-    <a href="#scoring">How scoring works</a>
-    <a href="#runners">Supported runners</a>
-    <h5>More</h5>
-    <a href="#compare">How it compares</a>
-    <a href="#faq">FAQ</a>
-  </div>
-</aside>
-
-<main>
-
-<section id="install">
-  <h2>Install</h2>
-  <p class="lede">Same binary whichever route you pick.</p>
-
-<pre><code># Homebrew
-brew install rowhitswami/tap/flakestat
-
-# npm — JS/TS projects
-npm install --save-dev flakestat        # or: npx flakestat
-
-# pip — Python projects
-pip install flakestat
-
-# Go
-go install github.com/rowhitswami/flakestat/cmd/flakestat@latest
-
-# Script — CI, or no package manager
-curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh \
-  | sh -s -- -b /usr/local/bin
-
-# Docker
-docker run --rm -v "$PWD:/workspace" ghcr.io/rowhitswami/flakestat report</code></pre>
-
-  <p>
-    Or download a binary from
-    <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a> —
-    macOS, Linux and Windows, on x86_64 and arm64.
-  </p>
-</section>
-
-<section id="quickstart">
-  <h2>Quickstart</h2>
-  <p class="lede">Two ways to use flakestat. They answer different questions.</p>
-
-  <h3>1. Hunt — is this suite flaky right now?</h3>
-  <p>
-    Runs your test command N times on unchanged code and reports what disagreed.
-    Good for a suite you already suspect, or before opening a pull request.
-  </p>
-
-<pre><code>flakestat hunt --runs 20 --junit 'reports/junit-{run}.xml' \
-  -- pytest --junitxml='{junit}'</code></pre>
-
-  <p>
-    <code>{run}</code> becomes the run number so each run writes its own report,
-    and <code>{junit}</code> becomes that path inside your command. Anything
-    after <code>--</code> is your command, untouched.
-  </p>
-
-  <p>Run <code>flakestat init</code> first and it detects your setup, so this becomes:</p>
-
-<pre><code>flakestat init      # writes .flakestat.json
-flakestat hunt</code></pre>
-
-  <h3>2. Ingest — which tests are flaky over time?</h3>
-  <p>
-    Records the CI runs you already pay for. This is the one that catches
-    environment-dependent flakes a local burst never will, and it costs no extra
-    compute.
-  </p>
-
-<pre><code># in CI, after your tests run
-flakestat ingest 'reports/**/*.xml'
-
-# any time
-flakestat report --top 20</code></pre>
-
-  <div class="note">
-    <b>Which should I use?</b>
-    Hunt when you need an answer in the next ten minutes. Ingest when you want a
-    reliable picture of the whole suite. Most projects end up doing both.
-  </div>
-</section>
-
-<section id="reading">
-  <h2>Reading a report</h2>
-
-<pre><code>VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST
-flaky                  0.62  high    20       14/6  test_demo::test_flaky_race
-suspect                0.08   low     6        5/1  test_api::test_timeout
-consistently-failing   0.00  high    20       0/20  test_demo::test_broken</code></pre>
-
-  <h3>Verdicts</h3>
-  <div class="verdict v-flaky"><b>flaky</b><span>Disagrees with itself often enough, with enough evidence, to act on.</span></div>
-  <div class="verdict v-suspect"><b>suspect</b><span>Some disagreement, below the flaky threshold. Worth watching, not worth a ticket yet.</span></div>
-  <div class="verdict v-stable"><b>stable</b><span>No meaningful disagreement.</span></div>
-  <div class="verdict v-other"><b>consistently-failing</b><span>Fails every time. Broken, not flaky — a different problem with a different fix.</span></div>
-  <div class="verdict v-other"><b>insufficient-data</b><span>Fewer runs than needed for a verdict. More runs would help.</span></div>
-  <div class="verdict v-other"><b>always-skipped</b><span>Never actually ran. More runs would <em>not</em> help, so this is not the same as insufficient data.</span></div>
-
-  <h3>Score and confidence</h3>
-  <p>
-    <strong>Score</strong> is how often the test disagrees with itself: 0.62 means
-    roughly six of ten consecutive runs changed their answer. It is not a failure
-    rate — a test failing 100% of the time scores <code>0.00</code>.
-  </p>
-  <p>
-    <strong>Confidence</strong> is <code>low</code>, <code>medium</code> or
-    <code>high</code> depending on how much evidence sits behind the score. A
-    score of 0.62 from three runs and the same score from three hundred are very
-    different claims, and a small sample can never reach <code>high</code> no
-    matter how flaky the test looks. Classification uses a lower bound on the
-    score, not the score itself, so a verdict needs evidence rather than a lucky
-    flip.
-  </p>
-</section>
-
-<section id="hunt-guide">
-  <h2>Hunting locally</h2>
-
-<pre><code>flakestat hunt --runs 30 --junit 'reports/junit-{run}.xml' \
-  -- go test ./... -count=1</code></pre>
-
-  <h4>If it finds nothing</h4>
-  <p>
-    That is a real result, not a failure. It means nothing disagreed in that many
-    runs. A test that fails 2% of the time will usually survive 20 runs untouched —
-    raise <code>--runs</code>, or record CI history instead, where the sample
-    grows for free.
-  </p>
-
-  <h4>Chasing one test</h4>
-<pre><code>flakestat hunt --runs 50 --junit 'reports/junit-{run}.xml' \
-  -- pytest tests/test_checkout.py::test_race --junitxml='{junit}'</code></pre>
-
-  <div class="note flag">
-    <b>A warning about --parallel</b>
-    <code>--parallel N</code> runs N copies of your command <em>in the same
-    working directory</em>. A suite that writes fixed paths, binds a fixed port or
-    shares a database collides with itself and looks flaky when it isn't. This is
-    real, not theoretical: running against <code>spf13/cobra</code> with
-    <code>--parallel 4</code> reported a test as flaky at 0.60 because concurrent
-    copies deleted each other's build. Sequentially, cobra is clean.
-    <br><br>
-    So flakestat verifies its own findings. Candidates found under
-    <code>--parallel</code> are re-run sequentially and demoted to
-    <code>suspect</code> if they don't reproduce. Sequential is always
-    trustworthy; use <code>--parallel</code> to hunt faster and let verification
-    sort out the difference, or <code>--verify 0</code> to opt out.
-  </div>
-</section>
-
-<section id="history">
-  <h2>Tracking flakiness over time</h2>
-  <p class="lede">
-    A burst proves flakiness exists. History measures it, and catches flakes that
-    only appear on one platform, one runtime, or under CI load.
-  </p>
-
-<pre><code>flakestat ingest 'reports/**/*.xml' \
-  --commit "$GIT_SHA" --branch "$BRANCH"</code></pre>
-
-  <p>
-    Commit and branch default to the current git checkout. Recording the commit
-    is what lets flakestat tell genuine flakiness — same code, different result —
-    from a regression someone later fixed.
-  </p>
-  <p>
-    History lives in <code>.flakestat/runs.ndjson</code>, one JSON object per
-    line. Because it is append-only NDJSON, results from parallel CI shards
-    concatenate with <code>cat</code> and no merge step.
-  </p>
-
-  <h3>Re-ingesting is safe</h3>
-  <p>
-    Every observation carries the identity of the execution it describes, so an
-    artifact uploaded twice, a re-run aggregation step, or a shard collected by
-    two jobs is counted once — while a genuine retry, which really did run the
-    tests again, still counts.
-  </p>
-  <p>
-    This matters more than it sounds. A duplicate carries its original's
-    timestamp, sorts next to it, and always agrees with itself, so uncounted
-    duplicates make a flaky test look <em>stable</em>. Measured on a test failing
-    4 of 12 runs, ingesting the same reports twice moved the score from 0.64 to
-    0.30.
-  </p>
-  <p>
-    Copies are ignored on read, so nothing is required of you.
-    <code>flakestat compact</code> removes them from the file as well, which is
-    worth doing when the file is the record you keep.
-  </p>
-</section>
-
-<section id="where-history">
-  <h2>Where to keep the history</h2>
-  <p class="lede">Three arrangements, in increasing order of usefulness.</p>
-
-  <div class="grid2">
-    <div class="tile">
-      <h4>Commit it</h4>
-      <p>Simplest — the file goes in the repo and everyone shares one history. Downside: every CI run wants to write to it, so telemetry lands in your development history.</p>
-    </div>
-    <div class="tile">
-      <h4>A CI artifact</h4>
-      <p>Zero setup, but nothing accumulates. Each run sees only itself, so you never build the long history that makes the tool accurate.</p>
-    </div>
-    <div class="tile pick">
-      <span class="tag">Recommended</span>
-      <h4>A dedicated branch</h4>
-      <p>What flakestat uses for itself. Keeps telemetry out of your development history, avoids a bot commit retriggering your workflow, and gives one place to serialize writers.</p>
-    </div>
-  </div>
-
-<pre><code>matrix jobs → per-job NDJSON artifacts → aggregate job
-  → fetch history branch → merge + compact → analyze
-  → commit back to the history branch</code></pre>
-
-<pre><code>concurrency:
-  group: flakestat-history-writer
-  cancel-in-progress: false</code></pre>
-
-  <div class="note flag">
-    <b>Not a CI cache</b>
-    Cache eviction should cost you time, not statistical history. Use durable
-    storage for the record and let the cache stay an optimization.
-  </div>
-
-  <p>
-    flakestat's own
-    <a href="https://github.com/rowhitswami/flakestat/blob/main/.github/workflows/ci.yml">CI workflow</a>
-    implements this end to end, including re-merging a push that lost a race.
-  </p>
-</section>
-
-<section id="dimensions">
-  <h2>Recording where tests ran</h2>
-  <p class="lede">
-    Pass <code>--dimension key=value</code>, repeatable, and flakestat reports
-    where failures concentrate.
-  </p>
-
-<pre><code>flakestat ingest 'reports/**/*.xml' \
-  --dimension os=windows \
-  --dimension runtime.version=3.13 \
-  --dimension database=postgres-17</code></pre>
-
-<pre><code>Where the failures concentrate
-
-  os=windows
-    failures here:  12 / 12 (100.0%)
-    elsewhere:      0 / 24 (0.0%)
-    difference:     +100.0 pp</code></pre>
-
-  <p>
-    Inside a recognized CI provider, <code>os</code>, <code>arch</code> and the
-    run/job identity are detected automatically. Two rules keep that honest:
-  </p>
-  <ul>
-    <li>
-      Only a whitelist of known CI variables is read, and only JUnit
-      <code>&lt;property&gt;</code> names flakestat recognizes. The process
-      environment is never scraped, so secrets and build ids cannot end up in
-      your history.
-    </li>
-    <li>
-      Host details are recorded only when flakestat ran the tests. If one job
-      downloads other jobs' artifacts and ingests them centrally, pass
-      <code>--no-host</code> — otherwise the aggregator's platform gets stamped
-      onto results from everywhere else.
-    </li>
-  </ul>
-
-  <h3>Canonical keys</h3>
-  <table>
-    <tr><th>Key</th><th>Meaning</th></tr>
-    <tr><td><code>os</code>, <code>arch</code></td><td>Platform the tests ran on</td></tr>
-    <tr><td><code>runtime.name</code>, <code>runtime.version</code></td><td>Language runtime under test</td></tr>
-    <tr><td><code>ci.provider</code></td><td>github, gitlab, circleci, buildkite, jenkins, azure</td></tr>
-    <tr><td><code>ci.run_id</code>, <code>ci.job_id</code></td><td>Provenance. Recorded, never analysed — every failure happened during <em>some</em> run</td></tr>
-    <tr><td><code>ci.attempt</code></td><td>Separates a retry from a duplicate. Never analysed: retries happen <em>because</em> of failures</td></tr>
-    <tr><td><code>ci.shard</code>, <code>ci.worker</code></td><td>Which shard or worker executed the run</td></tr>
-  </table>
-  <p>Anything else you pass is a user dimension and is analysed normally.</p>
-
-  <div class="note">
-    <b>Correlation, never causation</b>
-    flakestat says failures <em>cluster</em> on Windows. It will not claim Windows
-    is why. Observational data cannot distinguish a cause from anything perfectly
-    correlated with it, and when several dimensions vary together it says so
-    rather than picking one.
-  </div>
-</section>
-
-<section id="gate">
-  <h2>Gating CI without a permanently red build</h2>
-  <p class="lede">
-    Most repos already have flaky tests when they adopt a tool like this. Failing
-    on all of them means a red build on day one and a deleted gate by day three.
-  </p>
-  <p>
-    So <code>check</code> is a ratchet: accept today's flakiness, then fail only
-    on what is new or measurably worse.
-  </p>
-
-<pre><code>flakestat check --update-baseline    # once; commit .flakestat/baseline.json
-flakestat check --fail-on-new        # in CI from then on</code></pre>
-
-  <table>
-    <tr><th>Exit code</th><th>Meaning</th></tr>
-    <tr><td><code>0</code></td><td>Nothing new</td></tr>
-    <tr><td><code>1</code></td><td>A test became flaky that wasn't in the baseline</td></tr>
-    <tr><td><code>2</code></td><td>An accepted test got measurably worse (<code>--fail-on-regression</code>)</td></tr>
-  </table>
-
-  <p>
-    <code>--regression-delta</code> keeps ordinary scoring jitter from failing
-    builds. Tests that stop being flaky are reported as <code>FIXED</code>, which
-    is your cue to tighten the baseline.
-  </p>
-</section>
-
-<section id="quarantine-guide">
-  <h2>Unblocking the pipeline</h2>
-  <p class="lede">While you work the list down, emit a skip list your runner already understands.</p>
-
-<pre><code>flakestat quarantine --format pytest -o quarantine.txt
-flakestat quarantine --format go
-flakestat quarantine --format jest
-flakestat quarantine --format yaml     # default</code></pre>
-
-  <p>
-    <code>--include-broken</code> also lists consistently failing tests.
-    Quarantine is a tourniquet, not a cure — everything in the file is something
-    to fix.
-  </p>
-</section>
-
-<section id="explain-guide">
-  <h2>Working out why a test is flaky</h2>
-
-<pre><code>flakestat explain test_checkout_flow</code></pre>
-
-<pre><code>tests/test_checkout.py::test_checkout_flow
-  id 4c1f9a2e77b3d810
-
-  Classification: flaky
-  Score:          0.55
-  Confidence:     high  (lower bound 0.402 over 41 transition(s))
-
-  Observations:   42
-  Passed:         27
-  Failed:         15
-  Failure rate:   35.7%
-
-  Transitions:               41
-  Same-commit disagreements: 9
-  Seen across:               6 commit(s), 2 branch(es)
-
-  History  (last 20 of 42, oldest first)
-
-  P F P P F P F F P P P F P P F P P F P P
-    ^ ^   ^ ^ ^   ^     ^ ^   ^ ^ ^   ^
-
-  P pass   F fail   -  skip   ^ flip   ! flip on identical code</code></pre>
-
-  <p>
-    <code>!</code> marks a disagreement on identical code, which is the strongest
-    single piece of evidence a test is flaky. <code>--json</code> emits the same
-    evidence for tooling and <code>--history N</code> widens the strip.
-  </p>
-</section>
-
-<section id="github-actions">
-  <h2>GitHub Actions</h2>
-  <p class="lede">The action installs the binary and runs whatever you pass it.</p>
-
-<pre><code>- name: Run tests
-  run: pytest --junitxml=reports/junit.xml
-  continue-on-error: true
-
-- uses: rowhitswami/flakestat@v1
-  with:
-    args: ingest 'reports/**/*.xml'
-    comment: true          # post/update a PR comment
-    annotations: true      # annotate new flakes in the diff</code></pre>
-
-  <p>
-    That records the run, writes a report to the job summary, and posts it as a
-    pull request comment. A re-run <strong>updates the same comment</strong>
-    rather than adding another.
-  </p>
-
-  <h3>Inputs</h3>
-  <table>
-    <tr><th>Input</th><th>Default</th><th>Description</th></tr>
-    <tr><td><code>args</code></td><td>—</td><td>Arguments passed to flakestat</td></tr>
-    <tr><td><code>version</code></td><td>latest</td><td>Release tag to install, e.g. <code>v0.1.1</code></td></tr>
-    <tr><td><code>install-only</code></td><td><code>false</code></td><td>Put the binary on PATH without running it</td></tr>
-    <tr><td><code>summary</code></td><td><code>true</code></td><td>Append the report to the job summary</td></tr>
-    <tr><td><code>comment</code></td><td><code>false</code></td><td>Post/update a PR comment (needs <code>pull-requests: write</code>)</td></tr>
-    <tr><td><code>annotations</code></td><td><code>false</code></td><td>Annotate new and regressed tests in the diff</td></tr>
-    <tr><td><code>max-rows</code></td><td><code>20</code></td><td>Cap the highlight table on large suites</td></tr>
-    <tr><td><code>working-directory</code></td><td><code>.</code></td><td>Directory to run in</td></tr>
-  </table>
-  <p>Outputs: <code>flaky-count</code>, <code>new-flaky-count</code>, <code>report-file</code>.</p>
-
-  <h3>The intended sequence</h3>
-<pre><code>- run: pytest --junitxml=reports/junit.xml
-  continue-on-error: true          # record the run even when it fails
-
-- uses: rowhitswami/flakestat@v1
-  with: { args: "ingest 'reports/**/*.xml'" }
-
-- uses: rowhitswami/flakestat@v1
-  with: { args: "check --fail-on-new", comment: true }</code></pre>
-
-  <p>
-    Ingest first so the run is recorded, then gate.
-    <code>continue-on-error</code> matters: a failed suite is exactly the run you
-    most want in the history.
-  </p>
-</section>
-
-<section id="gitlab">
-  <h2>GitLab, CircleCI and others</h2>
-  <p class="lede">
-    Nothing is GitHub-specific. Provider context is detected for GitLab,
-    CircleCI, Buildkite, Jenkins and Azure Pipelines.
-  </p>
-
-<pre><code>test:
-  script:
-    - pytest --junitxml=reports/junit.xml || true
-    - curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh
-        | sh -s -- -b /usr/local/bin
-    - flakestat ingest 'reports/**/*.xml'
-    - flakestat check --fail-on-new
-  artifacts:
-    paths: [.flakestat/runs.ndjson]</code></pre>
-
-  <p>
-    For sharded pipelines, let each shard ingest its own results and concatenate
-    the NDJSON afterwards. Each shard then records the context it actually ran
-    in, rather than the aggregator's.
-  </p>
-</section>
-
-<section id="commands">
-  <h2>Commands</h2>
-
-  <table>
-    <tr><th>Command</th><th>What it does</th></tr>
-    <tr><td><code>init</code></td><td>Detect the project and write <code>.flakestat.json</code></td></tr>
-    <tr><td><code>hunt</code></td><td>Run a test command N times and detect disagreement</td></tr>
-    <tr><td><code>ingest</code></td><td>Load JUnit XML from CI into the history</td></tr>
-    <tr><td><code>report</code></td><td>Score recorded history and print a report</td></tr>
-    <tr><td><code>explain</code></td><td>Show why one test received its verdict</td></tr>
-    <tr><td><code>check</code></td><td>Fail CI when flakiness gets worse, not when it exists</td></tr>
-    <tr><td><code>quarantine</code></td><td>Emit a skip list your test runner accepts</td></tr>
-    <tr><td><code>ci-report</code></td><td>Render a report for job summaries and PR comments</td></tr>
-    <tr><td><code>compact</code></td><td>Drop observations duplicating an already-recorded execution</td></tr>
-  </table>
-
-  <p><code>flakestat &lt;command&gt; -h</code> prints the full flag list for any of them.</p>
-
-  <h3>Flags worth knowing</h3>
-  <table>
-    <tr><th>Flag</th><th>Default</th><th>Effect</th></tr>
-    <tr><td><code>--threshold</code></td><td><code>0.10</code></td><td>Score at or above which a test is called flaky</td></tr>
-    <tr><td><code>--suspect-threshold</code></td><td><code>0.05</code></td><td>Score at or above which a test is called suspect</td></tr>
-    <tr><td><code>--min-runs</code></td><td><code>5</code></td><td>Scored runs required before any verdict</td></tr>
-    <tr><td><code>--same-commit-weight</code></td><td><code>3</code></td><td>How much more a same-commit disagreement counts</td></tr>
-    <tr><td><code>--branch-weight</code></td><td><code>0.5</code></td><td>Weight for disagreement off the default branch</td></tr>
-    <tr><td><code>--alpha</code></td><td><code>0.3</code></td><td>Recency decay; higher weights recent runs more</td></tr>
-    <tr><td><code>--format</code></td><td><code>table</code></td><td><code>table</code>, <code>json</code> or <code>markdown</code></td></tr>
-    <tr><td><code>--all</code></td><td><code>false</code></td><td>Include stable and unscored tests in the report</td></tr>
-    <tr><td><code>--dir</code></td><td><code>.flakestat</code></td><td>State directory</td></tr>
-  </table>
-</section>
-
-<section id="config">
-  <h2>Config file</h2>
-  <p class="lede"><code>flakestat init</code> detects your setup and writes <code>.flakestat.json</code>.</p>
-
-<pre><code>{
-  "command": ["pytest", "--junitxml={junit}"],
-  "junit": "reports/junit-{run}.xml",
-  "runs": 20,
-  "threshold": 0.10
-}</code></pre>
-
-  <p>
-    Flags always win over the file, so a one-off
-    <code>flakestat hunt --runs 50</code> works without editing anything.
-  </p>
-</section>
-
-<section id="scoring">
-  <h2>How scoring works</h2>
-  <p class="lede">For a test's observations, ordered oldest first:</p>
-
-  <ol>
-    <li>
-      <strong>Group by execution context.</strong> Two outcomes are only
-      comparable if branch, os, arch and runtime were the same. Interleaving
-      platforms would otherwise make a test that always fails on Windows and
-      always passes elsewhere read as constant disagreement.
-    </li>
-    <li>
-      <strong>Count transitions.</strong> Every adjacent pair within a context
-      that disagreed is a flip. Failure rate is deliberately not used, which is
-      why an always-failing test scores zero.
-    </li>
-    <li>
-      <strong>Weight them.</strong> A flip on the same commit counts three times
-      a cross-commit one, because the latter may be a regression someone fixed.
-      Disagreement off the default branch counts for half.
-    </li>
-    <li>
-      <strong>Decay by age.</strong> Age is measured in commits, not
-      observations, so a 200-run burst on one commit uses all of its evidence
-      instead of only the tail.
-    </li>
-    <li>
-      <strong>Take a lower bound.</strong> Classification uses a Wilson score
-      lower bound with an effective sample size, so a verdict requires evidence
-      rather than a lucky flip in a short run.
-    </li>
-  </ol>
-
-  <p>
-    Association analysis is separate and never touches the score. A test is flaky
-    because its outcomes demonstrate flakiness; associations only say where that
-    flakiness concentrates. Findings must clear an evidence floor, an effect-size
-    floor, and a Benjamini–Hochberg correction for the number of dimensions
-    tested — because testing os, arch, runtime, browser and database will
-    eventually turn up something that looks significant by chance.
-  </p>
-  <p>
-    <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">DESIGN.md</a>
-    covers the reasoning in full, including the mistakes that shaped it.
-  </p>
-</section>
-
-<section id="runners">
-  <h2>Supported runners</h2>
-  <p class="lede">
-    Anything that writes JUnit XML. The parser is deliberately tolerant of
-    dialect differences, since JUnit XML has no official schema.
-  </p>
-
-  <p>
-    <span class="pill">pytest</span><span class="pill">Jest</span><span class="pill">Vitest</span>
-    <span class="pill">go test</span><span class="pill">JUnit 5</span><span class="pill">TestNG</span>
-    <span class="pill">Surefire</span><span class="pill">RSpec</span><span class="pill">PHPUnit</span>
-    <span class="pill">Mocha</span><span class="pill">Playwright</span><span class="pill">Cypress</span>
-    <span class="pill">xUnit</span><span class="pill">NUnit</span><span class="pill">cargo test</span>
-  </p>
-
-  <table>
-    <tr><th>Language</th><th>Runner</th><th>How to emit JUnit XML</th></tr>
-    <tr><td>Python</td><td>pytest</td><td><code>pytest --junitxml=reports/junit.xml</code></td></tr>
-    <tr><td>Python</td><td>unittest</td><td><code>unittest-xml-reporting</code></td></tr>
-    <tr><td>JS / TS</td><td>Jest</td><td><code>jest-junit</code> reporter</td></tr>
-    <tr><td>JS / TS</td><td>Vitest</td><td><code>--reporter=junit</code></td></tr>
-    <tr><td>JS / TS</td><td>Mocha</td><td><code>mocha-junit-reporter</code></td></tr>
-    <tr><td>JS / TS</td><td>Playwright</td><td><code>--reporter=junit</code></td></tr>
-    <tr><td>JS / TS</td><td>Cypress</td><td><code>cypress-multi-reporters</code></td></tr>
-    <tr><td>Go</td><td>go test</td><td><code>gotestsum --junitfile reports/junit.xml</code></td></tr>
-    <tr><td>Java</td><td>Maven Surefire</td><td>Written by default</td></tr>
-    <tr><td>Java</td><td>Gradle / JUnit 5</td><td>Written by default</td></tr>
-    <tr><td>Ruby</td><td>RSpec</td><td><code>rspec_junit_formatter</code></td></tr>
-    <tr><td>PHP</td><td>PHPUnit</td><td><code>--log-junit reports/junit.xml</code></td></tr>
-    <tr><td>.NET</td><td>xUnit / NUnit</td><td><code>dotnet test --logger junit</code></td></tr>
-    <tr><td>Rust</td><td>cargo test</td><td><code>cargo2junit</code> or <code>cargo-nextest</code></td></tr>
-  </table>
-
-  <p>
-    No JUnit XML at all? flakestat falls back to exit codes and reports
-    suite-level flakiness — less precise, but it still works.
-  </p>
-</section>
-
-<section id="compare">
-  <h2>How it compares</h2>
-  <table>
-    <tr><th></th><th>flakestat</th><th>Hosted services</th><th>Per-language plugins</th></tr>
-    <tr><td>Cost</td><td>Free at any volume</td><td>Per seat or per run</td><td>Free</td></tr>
-    <tr><td>Test data leaves your machine</td><td>No</td><td>Yes</td><td>No</td></tr>
-    <tr><td>Works before you push</td><td>Yes</td><td>No</td><td>Sometimes</td></tr>
-    <tr><td>Languages</td><td>Any with JUnit XML</td><td>Many</td><td>One</td></tr>
-    <tr><td>Dashboards, alerting</td><td>No</td><td>Yes</td><td>No</td></tr>
-    <tr><td>Setup</td><td>One binary</td><td>Account and integration</td><td>Per project</td></tr>
-  </table>
-  <p>
-    If you want a hosted dashboard, org-wide rollups and alerting, the commercial
-    tools do that well and flakestat does not try to. It is for the case where
-    you want the detection to be local, free, and yours.
-  </p>
-</section>
-
-<section id="faq">
-  <h2>FAQ</h2>
-
-  <h4>Does my test data leave my machine?</h4>
-  <p>No. flakestat is a binary that reads local files and writes a local file. There is no network call and no account.</p>
-
-  <h4>My test failed 100% of the time. Why is the score zero?</h4>
-  <p>Because it isn't flaky, it's broken. It appears as <code>consistently-failing</code>, which is a different problem with a different fix.</p>
-
-  <h4>How many runs do I need?</h4>
-  <p>
-    Depends on how rare the flake is. A test failing ~25% of the time is reliably
-    caught within 20 runs; one failing 10% of the time usually needs 50 or more;
-    below about 5% a local burst is not the right instrument and CI history is.
-    <code>insufficient-data</code> means exactly that — not enough evidence yet.
-  </p>
-
-  <h4>Can I use it with a monorepo or sharded CI?</h4>
-  <p>
-    Yes. Let each shard ingest its own results and concatenate the NDJSON. It is
-    append-only and one observation per line specifically so that works with
-    <code>cat</code> and no merge step.
-  </p>
-
-  <h4>Does re-running a job double-count?</h4>
-  <p>
-    No. Each observation carries the identity of the execution it describes, so
-    the same artifact ingested twice counts once — while a genuine retry, which
-    really did run the tests again, counts as the second execution it is.
-  </p>
-
-  <h4>Will it slow down my CI?</h4>
-  <p>
-    <code>ingest</code> parses XML files you already produce; it is milliseconds.
-    <code>hunt</code> runs your suite N times and costs exactly that.
-  </p>
-
-  <h4>What if my runner doesn't write JUnit XML?</h4>
-  <p>Almost all of them can with one flag or one reporter package — see the table above. Failing that, exit-code mode still gives suite-level results.</p>
-</section>
-
-</main>
-</div>
 
 <footer>
-  <div class="footer-in">
+  <div class="foot-in">
     <div>
-      <img src="assets/logo-text.png" alt="flakestat" class="foot-logo">
-      <p style="margin:.4rem 0 0">MIT licensed. Built by <a href="https://github.com/rowhitswami">Rohit Swami</a>.</p>
+      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
+           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="footer-links">
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/flakestat/docs/install/">Install</a>
+      <a href="/flakestat/docs/quickstart/">Quickstart</a>
+      <a href="/flakestat/docs/commands/">Commands</a>
+      <a href="/flakestat/docs/scoring/">How scoring works</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/flakestat/docs/ci/github-actions/">GitHub Actions</a>
+      <a href="/flakestat/docs/history/">Tracking over time</a>
+      <a href="/flakestat/docs/ci-gate/">Gating CI</a>
+      <a href="/flakestat/docs/runners/">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
       <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
     </div>
   </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a> · <a href="https://rowhitswami.github.io/flakestat/llms.txt">llms.txt</a></div></div>
 </footer>
 
-<script>
-(function () {
-  var KEY = 'flakestat-theme';
-  var root = document.documentElement;
-  try { var saved = localStorage.getItem(KEY); if (saved) root.setAttribute('data-theme', saved); } catch (e) {}
+<div class="scrim" id="scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
 
-  function swapLogos() {
-    var dark = root.getAttribute('data-theme') === 'dark' ||
-      (!root.getAttribute('data-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    var f = document.querySelector('.foot-logo');
-    if (f) f.src = dark ? 'assets/logo-text-dark.png' : 'assets/logo-text.png';
-  }
-  swapLogos();
-
-  document.getElementById('theme').addEventListener('click', function () {
-    var cur = root.getAttribute('data-theme');
-    if (!cur) cur = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    var next = cur === 'dark' ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
-    try { localStorage.setItem(KEY, next); } catch (e) {}
-    swapLogos();
-  });
-
-  // Highlight the section currently in view.
-  var links = {};
-  document.querySelectorAll('aside a[href^="#"]').forEach(function (a) {
-    links[a.getAttribute('href').slice(1)] = a;
-  });
-  var seen = new Set();
-  var obs = new IntersectionObserver(function (entries) {
-    entries.forEach(function (e) {
-      if (e.isIntersecting) seen.add(e.target.id); else seen.delete(e.target.id);
-    });
-    var first = null;
-    document.querySelectorAll('main section').forEach(function (s) {
-      if (!first && seen.has(s.id)) first = s.id;
-    });
-    Object.keys(links).forEach(function (id) { links[id].classList.toggle('active', id === first); });
-  }, { rootMargin: '-80px 0px -65% 0px' });
-  document.querySelectorAll('main section').forEach(function (s) { obs.observe(s); });
-})();
-</script>
+<script src="/flakestat/app.js" defer></script>
 </body>
 </html>
