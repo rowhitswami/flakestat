@@ -225,8 +225,11 @@ mid-experiment, affected results are invalidated, the build gets a new SHA
 recorded here, and every affected subject is re-scored from its retained XML.
 Nothing is quietly patched and continued.
 
-    flakestat commit   465faaec
+    flakestat commit   a4672ece  (code identical to 465faaec; later commits
+                                  in the range are documentation only)
     flakestat version  dev (built from source)
+    binary sha256      e5db674fe97f6de323f24f88a30f27282c4ccd4fb332ff710d07
+                       cf1b332af760
     go                 go1.25.4
     host               Darwin arm64
 
