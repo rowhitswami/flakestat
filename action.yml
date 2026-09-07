@@ -3,8 +3,11 @@ description: Find flaky tests in any language. No SaaS, no account, no data leav
 author: flakestat contributors
 
 branding:
-  icon: alert-triangle
-  color: red
+  # Matches the logo: a blue mark with a pass/fail trend line through it.
+  # alert-triangle/red read as "something is broken", which is the wrong
+  # message for a tool whose main job is telling you what is not.
+  icon: activity
+  color: blue
 
 inputs:
   version:
