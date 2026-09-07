@@ -10,7 +10,17 @@ permissions:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  # Superseded pull request runs are worth cancelling; superseded main runs are
+  # not. Their matrix jobs have already produced observations, and cancelling
+  # the job that files them away would leave a silent hole in the history.
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  # Observations accumulate on a dedicated branch, never on main.
+  HISTORY_BRANCH: flakestat-history
+  # Must stay "runs.ndjson": flakestat resolves a state directory to that name,
+  # which is what lets `compact --dir hist` work on the checkout directly.
+  HISTORY_FILE: runs.ndjson
 
 jobs:
   test:
@@ -194,6 +204,16 @@ jobs:
     needs: test
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    # Two runs must never extend the same append-only history at once.
+    # Queued, not cancelled: cancelling a writer discards that run's evidence,
+    # and the whole point of the branch is that evidence accumulates.
+    concurrency:
+      group: flakestat-history-writer
+      cancel-in-progress: false
+
     steps:
       - uses: actions/checkout@v4
 
@@ -211,20 +231,49 @@ jobs:
       # NDJSON is append-only and one observation per line specifically so
       # shards can be concatenated with no merge step and no re-ingestion.
       # Merging preserves the context each job recorded about itself.
-      - name: Merge observations
+      - name: Merge this run's observations
+        shell: bash
+        run: |
+          set -euo pipefail
+          find incoming -name runs.ndjson -exec cat {} + > run.ndjson
+          echo "merged $(wc -l < run.ndjson) observations from $(find incoming -name runs.ndjson | wc -l) jobs"
+
+      # History lives on its own branch rather than in the working tree.
+      # Analysis is unaffected -- every observation already carries the commit
+      # and branch it came from -- and development history stays free of
+      # telemetry commits that would otherwise trigger this workflow in a loop.
+      - name: Fetch accumulated history
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p .flakestat
-          find incoming -name runs.ndjson -exec cat {} + > .flakestat/runs.ndjson
-          echo "merged $(wc -l < .flakestat/runs.ndjson) observations from $(find incoming -name runs.ndjson | wc -l) jobs"
+          : > history.ndjson
+          if git fetch --depth=1 origin "$HISTORY_BRANCH" 2>/dev/null; then
+            git show "FETCH_HEAD:$HISTORY_FILE" > history.ndjson 2>/dev/null \
+              || echo "history branch exists but holds no observations yet"
+            echo "fetched $(wc -l < history.ndjson) observations recorded by earlier runs"
+          else
+            echo "no history branch yet; this run starts it"
+          fi
+          cat history.ndjson run.ndjson > .flakestat/runs.ndjson
+
+      - name: Build flakestat
+        run: go build -o /tmp/flakestat ./cmd/flakestat
+
+      # An execution recorded twice is not two executions. Reading already
+      # ignores copies, but the file is the durable record here, so they are
+      # removed from it rather than skipped on every later read.
+      - name: Compact the accumulated history
+        shell: bash
+        run: |
+          set -euo pipefail
+          /tmp/flakestat compact
+          echo "history now holds $(wc -l < .flakestat/runs.ndjson) observations"
 
       - name: Verify the pipeline preserved execution context
         shell: bash
         run: |
           set -euo pipefail
-          go build -o /tmp/flakestat ./cmd/flakestat
-
           # Every platform that ran must be present, and the aggregation host
           # must not have overwritten any of them.
           for want in linux darwin windows; do
@@ -309,10 +358,76 @@ jobs:
         shell: bash
         run: /tmp/flakestat ci-report --step-summary --max-rows 20 || true
 
-      - name: Publish merged history
+      # A copy for inspection. The branch is the source of truth; losing this
+      # artifact to retention must cost nothing but convenience.
+      - name: Publish a snapshot for inspection
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: flakestat-history
           path: .flakestat/runs.ndjson
           retention-days: 30
+
+      # Pull requests read the history but never write it. A fork's token
+      # cannot push here anyway, and a PR's observations are not yet part of
+      # what main has established.
+      - name: Extend the history branch
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          git config --global user.name  "flakestat"
+          git config --global user.email "flakestat@users.noreply.github.com"
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # The concurrency group serializes writers within this workflow, but
+          # it cannot speak for anything else that might extend the branch. A
+          # rejected push is re-merged against whatever landed first rather
+          # than retried blindly, so no run's observations are lost to a race.
+          for attempt in 1 2 3 4 5; do
+            rm -rf hist && mkdir hist
+
+            if git clone --quiet --branch "$HISTORY_BRANCH" --single-branch --depth 1 "$remote" hist 2>/dev/null; then
+              :
+            else
+              git clone --quiet --depth 1 "$remote" hist
+              git -C hist checkout --quiet --orphan "$HISTORY_BRANCH"
+              git -C hist rm -rq --cached . 2>/dev/null || true
+              find hist -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+              printf '%s\n' \
+                "# flakestat observation history" \
+                "" \
+                "Written by CI. One JSON object per line, append-only." \
+                "Analysis lives in the repository; this branch only stores evidence." \
+                > hist/README.md
+            fi
+
+            touch "hist/$HISTORY_FILE"
+            cat "hist/$HISTORY_FILE" run.ndjson > hist/merged.ndjson
+            mv hist/merged.ndjson "hist/$HISTORY_FILE"
+            /tmp/flakestat compact --dir hist
+
+            # --porcelain rather than `git diff`, which reports nothing for a
+            # file that is not tracked yet -- exactly the case on the first
+            # write to a new orphan branch.
+            if [ -z "$(git -C hist status --porcelain)" ]; then
+              echo "this run added nothing new to the history"
+              exit 0
+            fi
+
+            git -C hist add -A
+            git -C hist commit --quiet -m "observations from ${GITHUB_SHA:0:7} (run ${GITHUB_RUN_ID})"
+
+            if git -C hist push --quiet origin "$HISTORY_BRANCH" 2>/dev/null; then
+              echo "history branch now holds $(wc -l < "hist/$HISTORY_FILE") observations"
+              exit 0
+            fi
+
+            echo "push rejected; another run extended the branch first, re-merging (attempt $attempt)"
+            sleep $(( attempt * 3 ))
+          done
+
+          echo "::error::could not extend $HISTORY_BRANCH after 5 attempts"
+          exit 1

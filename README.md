@@ -230,6 +230,35 @@ which really did run the tests again, still counts. Duplication is not
 harmless: a copy always agrees with itself, so uncounted duplicates make a
 flaky test look stable.
 
+Copies are ignored on read, so nothing is required of you. `flakestat compact`
+removes them from the file as well, which is worth doing when the file itself
+is the record you keep.
+
+### Where to keep the history
+
+For a durable, shared history, a **dedicated branch** works well and is what
+flakestat uses for itself:
+
+```text
+matrix jobs → per-job NDJSON artifacts → aggregate job
+  → fetch history branch → merge + compact → analyze
+  → commit back to the history branch
+```
+
+It keeps telemetry commits out of your development history, avoids a bot commit
+retriggering the same workflow, and gives one place to serialize concurrent
+writers:
+
+```yaml
+concurrency:
+  group: flakestat-history-writer
+  cancel-in-progress: false
+```
+
+A CI cache is the wrong home for it. Cache eviction should cost you time, not
+statistical history. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+for the full arrangement, including re-merging a push that lost a race.
+
 ### Recording where tests ran
 
 Pass `--dimension key=value` (repeatable) to record the context a run happened
@@ -485,6 +514,7 @@ Tuning: `--min-runs`, `--alpha`, `--same-commit-weight`, `--threshold`,
 | `init` | Detect this project's test setup and write `.flakestat.json` |
 | `hunt` | Run a test command N times and detect disagreement |
 | `ingest` | Load JUnit XML from CI into the history |
+| `compact` | Drop observations that duplicate an execution already recorded |
 | `report` | Score recorded history and print a report |
 | `explain` | Show why one test received its verdict |
 | `check` | Fail CI when flakiness gets worse, not when it exists |
