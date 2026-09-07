@@ -247,7 +247,7 @@ func Score(obs []store.Observation, cfg Config) Result {
 			passed:  passed,
 			commit:  o.Commit,
 			branch:  o.Branch,
-			context: executionContext(o),
+			context: ExecutionContext(o),
 			gen:     gen,
 		})
 		if o.Commit != "" {
@@ -331,10 +331,14 @@ type point struct {
 // so whether two of its outcomes can meaningfully be compared.
 var contextDimensions = []string{"os", "arch", "runtime.name", "runtime.version"}
 
-// executionContext builds the comparability key for an observation. Absent
+// ExecutionContext builds the comparability key for an observation. Absent
 // dimensions yield an empty key, so histories recorded before dimensions
 // existed keep scoring exactly as they did.
-func executionContext(o store.Observation) string {
+//
+// Exported because it is not a scoring detail: anything that presents
+// evidence about transitions has to draw the same boundaries, or it will
+// describe disagreements the verdict does not believe in.
+func ExecutionContext(o store.Observation) string {
 	var b strings.Builder
 	b.WriteString(o.Branch)
 	for _, k := range contextDimensions {
