@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-base="/flakestat/">
+<html lang="en" data-base="/">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>flakestat — find flaky tests in any language</title>
 <meta name="description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
-<link rel="canonical" href="https://rowhitswami.github.io/flakestat/">
+<link rel="canonical" href="https://flakestat.com/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Rohit Swami">
 <meta name="keywords" content="flaky test detector, find flaky tests, flaky test detection, open source flaky tests, pytest flaky tests, jest flaky tests, go test flaky, junit xml flaky tests, ci flaky tests">
@@ -13,26 +13,26 @@
 <meta property="og:site_name" content="flakestat">
 <meta property="og:title" content="flakestat — find flaky tests in any language">
 <meta property="og:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
-<meta property="og:url" content="https://rowhitswami.github.io/flakestat/">
-<meta property="og:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta property="og:url" content="https://flakestat.com/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="flakestat — find flaky tests in any language">
 <meta name="twitter:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
-<meta name="twitter:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
 <meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/flakestat/assets/favicon.png">
-<link rel="apple-touch-icon" href="/flakestat/assets/logo-mark.png">
-<link rel="alternate" type="text/plain" href="https://rowhitswami.github.io/flakestat/llms.txt" title="llms.txt">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/flakestat/theme.css">
+<link rel="stylesheet" href="/theme.css">
 <script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://rowhitswami.github.io/flakestat/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://rowhitswami.github.io/flakestat/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://rowhitswami.github.io/flakestat/#website","url":"https://rowhitswami.github.io/flakestat/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://rowhitswami.github.io/flakestat/#person"}},{"@type":"Person","@id":"https://rowhitswami.github.io/flakestat/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"}]}</script>
 </head>
 <body>
 <div class="progress" id="progress"></div>
@@ -42,11 +42,11 @@
     <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
-    <a class="brand" href="/flakestat/" aria-label="flakestat home">
-      <img src="/flakestat/assets/logo-text.png" alt="flakestat" width="186" height="30"
-           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/">Docs</a><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -69,13 +69,13 @@
   </svg>
   <div class="hero-in">
     <div>
-      <img class="hero-lockup" src="/flakestat/assets/logo-lockup-dark.png" alt="flakestat" width="400" height="126">
+      <img class="hero-lockup" src="/assets/logo-lockup-dark.png" alt="flakestat" width="400" height="126">
       <h1>Some tests disagree<br>with <span class="odd">themselves</span>.</h1>
       <p class="sub">flakestat reads the JUnit XML your test runner already writes and tells you
       which tests are actually flaky — ranked, with a confidence level, and with the evidence
       behind every verdict.</p>
       <div class="hero-cta">
-        <a class="btn btn-pri" href="/flakestat/docs/#quickstart">Get started</a>
+        <a class="btn btn-pri" href="/docs/#quickstart">Get started</a>
         <a class="btn btn-ghost" href="https://github.com/rowhitswami/flakestat">View on GitHub</a>
       </div>
     </div>
@@ -111,7 +111,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
   -- gotestsum --junitfile=&#x27;{junit}&#x27; -- ./...</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;target/surefire-reports/*.xml&#x27; \
   -- mvn -q test</code></pre></div></div>
   <p>That runs your suite 20 times on unchanged code and reports what disagreed.
-  Already have CI? <a href="/flakestat/docs/#history">Record the runs you already pay for</a> instead —
+  Already have CI? <a href="/docs/#history">Record the runs you already pay for</a> instead —
   it catches environment-dependent flakes a local burst never will, at no extra compute.</p>
 
   <h2 id="why-the-verdicts-can-be-trusted">Why the verdicts can be trusted<a class="anchor" href="#why-the-verdicts-can-be-trusted" aria-label="Link to this section">#</a></h2>
@@ -129,15 +129,15 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <p>Two outcomes are evidence of nondeterminism only if branch, platform and runtime were
       held constant.</p></div>
   </div>
-  <p><a href="/flakestat/docs/#scoring">See exactly how scoring works</a>, including a live demo you
+  <p><a href="/docs/#scoring">See exactly how scoring works</a>, including a live demo you
   can poke at.</p>
 
   <h2 id="start-where-you-are">Start where you are<a class="anchor" href="#start-where-you-are" aria-label="Link to this section">#</a></h2>
   <div class="cards">
-    <a class="card" href="/flakestat/flaky-tests/pytest/"><h4>pytest →</h4><p>Find flaky tests in a Python suite.</p></a>
-    <a class="card" href="/flakestat/flaky-tests/jest/"><h4>Jest →</h4><p>Find flaky tests in a JS or TS suite.</p></a>
-    <a class="card" href="/flakestat/flaky-tests/go/"><h4>go test →</h4><p>Find flaky tests in a Go suite.</p></a>
-    <a class="card" href="/flakestat/docs/#github-actions"><h4>GitHub Actions →</h4><p>Record every CI run and gate on regressions.</p></a>
+    <a class="card" href="/flaky-tests/pytest/"><h4>pytest →</h4><p>Find flaky tests in a Python suite.</p></a>
+    <a class="card" href="/flaky-tests/jest/"><h4>Jest →</h4><p>Find flaky tests in a JS or TS suite.</p></a>
+    <a class="card" href="/flaky-tests/go/"><h4>go test →</h4><p>Find flaky tests in a Go suite.</p></a>
+    <a class="card" href="/docs/#github-actions"><h4>GitHub Actions →</h4><p>Record every CI run and gate on regressions.</p></a>
   </div>
 </div>
 
@@ -145,28 +145,28 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="/flakestat/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
-           data-light="/flakestat/assets/logo-lockup.png" data-dark="/flakestat/assets/logo-lockup-dark.png">
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
     <div class="foot-col"><h6>Docs</h6>
-      <a href="/flakestat/docs/#install">Install</a>
-      <a href="/flakestat/docs/#quickstart">Quickstart</a>
-      <a href="/flakestat/docs/#commands">Commands</a>
-      <a href="/flakestat/docs/#scoring">How scoring works</a>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
     </div>
     <div class="foot-col"><h6>Guides</h6>
-      <a href="/flakestat/docs/#github-actions">GitHub Actions</a>
-      <a href="/flakestat/docs/#history">Tracking over time</a>
-      <a href="/flakestat/docs/#ci-gate">Gating CI</a>
-      <a href="/flakestat/docs/#runners">Supported runners</a>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/docs/#runners">Supported runners</a>
     </div>
     <div class="foot-col"><h6>Project</h6>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
       <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
-      <a href="https://rowhitswami.github.io/flakestat/llms.txt">llms.txt</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>
   <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
@@ -180,6 +180,6 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
   </div>
 </div>
 
-<script src="/flakestat/app.js" defer></script>
+<script src="/app.js" defer></script>
 </body>
 </html>

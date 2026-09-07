@@ -24,4 +24,4 @@ Allow: /
 User-agent: CCBot
 Allow: /
 
-Sitemap: https://rowhitswami.github.io/flakestat/sitemap.xml
+Sitemap: https://flakestat.com/sitemap.xml

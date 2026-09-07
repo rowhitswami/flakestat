@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en" data-base="/flakestat/">
+<html lang="en" data-base="/">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>flakestat documentation — find flaky tests in any language</title>
 <meta name="description" content="Complete flakestat documentation: install, quickstart, CI recipes, every command and flag, how scoring works, and supported test runners.">
-<link rel="canonical" href="https://rowhitswami.github.io/flakestat/docs/">
+<link rel="canonical" href="https://flakestat.com/docs/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Rohit Swami">
 <meta name="keywords" content="flakestat documentation, flaky test detection, flaky test cli">
@@ -13,26 +13,26 @@
 <meta property="og:site_name" content="flakestat">
 <meta property="og:title" content="Documentation">
 <meta property="og:description" content="Complete flakestat documentation: install, quickstart, CI recipes, every command and flag, how scoring works, and supported test runners.">
-<meta property="og:url" content="https://rowhitswami.github.io/flakestat/docs/">
-<meta property="og:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta property="og:url" content="https://flakestat.com/docs/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Documentation">
 <meta name="twitter:description" content="Complete flakestat documentation: install, quickstart, CI recipes, every command and flag, how scoring works, and supported test runners.">
-<meta name="twitter:image" content="https://rowhitswami.github.io/flakestat/assets/social-card.png">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
 <meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/flakestat/assets/favicon.png">
-<link rel="apple-touch-icon" href="/flakestat/assets/logo-mark.png">
-<link rel="alternate" type="text/plain" href="https://rowhitswami.github.io/flakestat/llms.txt" title="llms.txt">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="/flakestat/theme.css">
+<link rel="stylesheet" href="/theme.css">
 <script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://rowhitswami.github.io/flakestat/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://rowhitswami.github.io/flakestat/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://rowhitswami.github.io/flakestat/#website","url":"https://rowhitswami.github.io/flakestat/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://rowhitswami.github.io/flakestat/#person"}},{"@type":"Person","@id":"https://rowhitswami.github.io/flakestat/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://rowhitswami.github.io/flakestat/docs/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://rowhitswami.github.io/flakestat/"},{"@type":"ListItem","position":2,"name":"Documentation","item":"https://rowhitswami.github.io/flakestat/docs/"}]},{"@type":"TechArticle","@id":"https://rowhitswami.github.io/flakestat/docs/#article","headline":"Documentation","description":"Complete flakestat documentation: install, quickstart, CI recipes, every command and flag, how scoring works, and supported test runners.","url":"https://rowhitswami.github.io/flakestat/docs/","datePublished":"2026-09-06","dateModified":"2026-09-07","author":{"@id":"https://rowhitswami.github.io/flakestat/#person"},"about":{"@id":"https://rowhitswami.github.io/flakestat/#software"},"inLanguage":"en"},{"@type":"FAQPage","@id":"https://rowhitswami.github.io/flakestat/docs/#faq","mainEntity":[{"@type":"Question","name":"Does my test data leave my machine?","acceptedAnswer":{"@type":"Answer","text":"No. flakestat is a binary that reads local files and writes a local file. There is no network call, no account and no telemetry."}},{"@type":"Question","name":"My test failed 100% of the time. Why is the score zero?","acceptedAnswer":{"@type":"Answer","text":"Because it is not flaky, it is broken. flakestat scores how often a test disagrees with itself, not how often it fails, so a consistently failing test scores zero and is reported as consistently-failing \u2014 a different problem with a different fix."}},{"@type":"Question","name":"How many runs do I need to detect a flaky test?","acceptedAnswer":{"@type":"Answer","text":"It depends on the flake rate. A test failing about 25% of the time is reliably caught within 20 runs. One failing 10% of the time usually needs 50 or more. Below about 5%, a local burst is the wrong instrument and recording CI history is better."}},{"@type":"Question","name":"Can I use flakestat with a monorepo or sharded CI?","acceptedAnswer":{"@type":"Answer","text":"Yes. Let each shard ingest its own results and concatenate the NDJSON. The history is append-only with one observation per line specifically so shards merge with cat and no merge step."}},{"@type":"Question","name":"Does re-running a CI job double-count results?","acceptedAnswer":{"@type":"Answer","text":"No. Each observation carries the identity of the execution it describes, so the same artifact ingested twice counts once, while a genuine retry that really did run the tests again counts as the second execution it is."}},{"@type":"Question","name":"Will flakestat slow down my CI?","acceptedAnswer":{"@type":"Answer","text":"Ingest parses XML files you already produce and takes milliseconds. Hunt runs your suite N times and costs exactly that, which is why it is a local tool rather than something you run on every build."}},{"@type":"Question","name":"What if my test runner does not write JUnit XML?","acceptedAnswer":{"@type":"Answer","text":"Almost all of them can with one flag or one reporter package. Failing that, flakestat falls back to exit codes and reports suite-level flakiness."}},{"@type":"Question","name":"Is flakestat free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is MIT licensed and free at any volume, with no per-seat or per-run pricing, because it runs on your own machines."}},{"@type":"Question","name":"How is this different from just retrying failed tests?","acceptedAnswer":{"@type":"Answer","text":"Retries hide flakiness; flakestat measures it. A retried test still costs you time and still fails sometimes in ways that matter. Retry to keep the pipeline moving, measure so the list actually shrinks."}}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/docs/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Documentation","item":"https://flakestat.com/docs/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/docs/#article","headline":"Documentation","description":"Complete flakestat documentation: install, quickstart, CI recipes, every command and flag, how scoring works, and supported test runners.","url":"https://flakestat.com/docs/","datePublished":"2026-09-06","dateModified":"2026-09-07","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"},{"@type":"FAQPage","@id":"https://flakestat.com/docs/#faq","mainEntity":[{"@type":"Question","name":"Does my test data leave my machine?","acceptedAnswer":{"@type":"Answer","text":"No. flakestat is a binary that reads local files and writes a local file. There is no network call, no account and no telemetry."}},{"@type":"Question","name":"My test failed 100% of the time. Why is the score zero?","acceptedAnswer":{"@type":"Answer","text":"Because it is not flaky, it is broken. flakestat scores how often a test disagrees with itself, not how often it fails, so a consistently failing test scores zero and is reported as consistently-failing \u2014 a different problem with a different fix."}},{"@type":"Question","name":"How many runs do I need to detect a flaky test?","acceptedAnswer":{"@type":"Answer","text":"It depends on the flake rate. A test failing about 25% of the time is reliably caught within 20 runs. One failing 10% of the time usually needs 50 or more. Below about 5%, a local burst is the wrong instrument and recording CI history is better."}},{"@type":"Question","name":"Can I use flakestat with a monorepo or sharded CI?","acceptedAnswer":{"@type":"Answer","text":"Yes. Let each shard ingest its own results and concatenate the NDJSON. The history is append-only with one observation per line specifically so shards merge with cat and no merge step."}},{"@type":"Question","name":"Does re-running a CI job double-count results?","acceptedAnswer":{"@type":"Answer","text":"No. Each observation carries the identity of the execution it describes, so the same artifact ingested twice counts once, while a genuine retry that really did run the tests again counts as the second execution it is."}},{"@type":"Question","name":"Will flakestat slow down my CI?","acceptedAnswer":{"@type":"Answer","text":"Ingest parses XML files you already produce and takes milliseconds. Hunt runs your suite N times and costs exactly that, which is why it is a local tool rather than something you run on every build."}},{"@type":"Question","name":"What if my test runner does not write JUnit XML?","acceptedAnswer":{"@type":"Answer","text":"Almost all of them can with one flag or one reporter package. Failing that, flakestat falls back to exit codes and reports suite-level flakiness."}},{"@type":"Question","name":"Is flakestat free?","acceptedAnswer":{"@type":"Answer","text":"Yes. It is MIT licensed and free at any volume, with no per-seat or per-run pricing, because it runs on your own machines."}},{"@type":"Question","name":"How is this different from just retrying failed tests?","acceptedAnswer":{"@type":"Answer","text":"Retries hide flakiness; flakestat measures it. A retried test still costs you time and still fails sometimes in ways that matter. Retry to keep the pipeline moving, measure so the list actually shrinks."}}]}]}</script>
 </head>
 <body>
 <div class="progress" id="progress"></div>
@@ -42,11 +42,11 @@
     <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
-    <a class="brand" href="/flakestat/" aria-label="flakestat home">
-      <img src="/flakestat/assets/logo-text.png" alt="flakestat" width="186" height="30"
-           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/">Docs</a><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -60,7 +60,7 @@
   </div>
 </header>
 
-<div class="shell shell-2col"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="#install" data-anchor="install">Install</a><a href="#quickstart" data-anchor="quickstart">Quickstart</a><a href="#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="#hunting" data-anchor="hunting">Hunting locally</a><a href="#history" data-anchor="history">History over time</a><a href="#dimensions" data-anchor="dimensions">Recording context</a><a href="#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="#commands" data-anchor="commands">Commands</a><a href="#config" data-anchor="config">Configuration</a><a href="#scoring" data-anchor="scoring">How scoring works</a><a href="#runners" data-anchor="runners">Supported runners</a><a href="#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/flakestat/compare/trunk/">vs Trunk</a><a href="/flakestat/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content content-wide"><nav class="crumbs" aria-label="Breadcrumb"><a href="/flakestat/">Home</a><span>/</span><span>Documentation</span></nav><h1>Documentation</h1><p class="lede">Everything on one page. Use <kbd>⌘K</kbd> to search, or the contents on the left.</p><section id="install"><h2 id="install-flakestat">Install flakestat<a class="anchor" href="#install-flakestat" aria-label="Link to this section">#</a></h2><p class="lede">Same binary whichever route you pick. No runtime to install alongside it.</p>
+<div class="shell shell-2col"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="#install" data-anchor="install">Install</a><a href="#quickstart" data-anchor="quickstart">Quickstart</a><a href="#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="#hunting" data-anchor="hunting">Hunting locally</a><a href="#history" data-anchor="history">History over time</a><a href="#dimensions" data-anchor="dimensions">Recording context</a><a href="#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="#commands" data-anchor="commands">Commands</a><a href="#config" data-anchor="config">Configuration</a><a href="#scoring" data-anchor="scoring">How scoring works</a><a href="#runners" data-anchor="runners">Supported runners</a><a href="#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/compare/trunk/">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content content-wide"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Documentation</span></nav><h1>Documentation</h1><p class="lede">Everything on one page. Use <kbd>⌘K</kbd> to search, or the contents on the left.</p><section id="install"><h2 id="install-flakestat">Install flakestat<a class="anchor" href="#install-flakestat" aria-label="Link to this section">#</a></h2><p class="lede">Same binary whichever route you pick. No runtime to install alongside it.</p>
 <div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">install</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="brew">Homebrew</button><button class="tab" role="tab" aria-selected="false" data-lang="npm">npm</button><button class="tab" role="tab" aria-selected="false" data-lang="pip">pip</button><button class="tab" role="tab" aria-selected="false" data-lang="go">Go</button><button class="tab" role="tab" aria-selected="false" data-lang="sh">Script</button><button class="tab" role="tab" aria-selected="false" data-lang="docker">Docker</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>brew install rowhitswami/tap/flakestat</code></pre></div><div class="cpane" hidden><pre><code>npm install --save-dev flakestat
 # or, without installing:
 npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip install flakestat</code></pre></div><div class="cpane" hidden><pre><code>go install github.com/rowhitswami/flakestat/cmd/flakestat@latest</code></pre></div><div class="cpane" hidden><pre><code>curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh \
@@ -77,11 +77,11 @@ flakestat --help</code></pre></div>
 
 <div class="callout"><b>Pin the version in CI</b>
 A floating <code>latest</code> means a scoring change can move your verdicts between builds.
-The <a href="/flakestat/docs/#github-actions">GitHub Action</a> takes a <code>version</code> input,
+The <a href="/docs/#github-actions">GitHub Action</a> takes a <code>version</code> input,
 and the install script takes a tag.</div>
 
 <h2 id="next">Next<a class="anchor" href="#next" aria-label="Link to this section">#</a></h2>
-<p>Head to the <a href="/flakestat/docs/#quickstart">quickstart</a> — two commands, and you'll know
+<p>Head to the <a href="/docs/#quickstart">quickstart</a> — two commands, and you'll know
 whether your suite is flaky.</p>
 </section><section id="quickstart"><h2 id="quickstart-2">Quickstart<a class="anchor" href="#quickstart-2" aria-label="Link to this section">#</a></h2><p class="lede">Two ways to use flakestat. They answer different questions, and most projects end up doing both.</p>
 <h2 id="1-hunt-is-this-suite-flaky-right-now">1. Hunt — is this suite flaky right now?<a class="anchor" href="#1-hunt-is-this-suite-flaky-right-now" aria-label="Link to this section">#</a></h2>
@@ -100,7 +100,7 @@ your command, passed through untouched.</p>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat init      # writes .flakestat.json
 flakestat hunt      # no flags needed</code></pre></div>
 <p><code>init</code> looks at your project and writes the command and report path once, so the
-day-to-day invocation is a single word. See <a href="/flakestat/docs/#config">configuration</a>.</p>
+day-to-day invocation is a single word. See <a href="/docs/#config">configuration</a>.</p>
 
 <h2 id="2-ingest-which-tests-are-flaky-over-time">2. Ingest — which tests are flaky over time?<a class="anchor" href="#2-ingest-which-tests-are-flaky-over-time" aria-label="Link to this section">#</a></h2>
 <p>Records the CI runs you already pay for. This is the one that catches flakes that only appear
@@ -110,8 +110,8 @@ flakestat ingest &#x27;reports/**/*.xml&#x27;
 
 # any time
 flakestat report --top 20</code></pre></div>
-<p>See <a href="/flakestat/docs/#history">tracking flakiness over time</a> for where to keep the
-history, and <a href="/flakestat/docs/#github-actions">GitHub Actions</a> for a complete workflow.</p>
+<p>See <a href="/docs/#history">tracking flakiness over time</a> for where to keep the
+history, and <a href="/docs/#github-actions">GitHub Actions</a> for a complete workflow.</p>
 
 <div class="callout"><b>Which should I use?</b>
 Hunt when you need an answer in the next ten minutes. Ingest when you want a reliable picture of
@@ -122,8 +122,8 @@ the whole suite. They write to the same history, so using both just gives you mo
 flaky                  0.62  high    20       14/6  test_demo::test_flaky_race
 suspect                0.08   low     6        5/1  test_api::test_timeout
 consistently-failing   0.00  high    20       0/20  test_demo::test_broken</code></pre></div>
-<p>Read the columns in <a href="/flakestat/docs/#reading-a-report">reading a report</a>, or ask about
-one test with <a href="/flakestat/docs/#explain"><code>flakestat explain</code></a>.</p>
+<p>Read the columns in <a href="/docs/#reading-a-report">reading a report</a>, or ask about
+one test with <a href="/docs/#explain"><code>flakestat explain</code></a>.</p>
 
 <h2 id="if-it-finds-nothing">If it finds nothing<a class="anchor" href="#if-it-finds-nothing" aria-label="Link to this section">#</a></h2>
 <p>That is a real result, not a failure. It means nothing disagreed in that many runs. A test that
@@ -161,7 +161,7 @@ score from three hundred are very different claims, and a small sample can never
 <code>high</code> no matter how flaky the test looks.</p>
 <p>Classification uses a <em>lower bound</em> on the score rather than the score itself, so a
 verdict requires evidence rather than a lucky flip in a short run. The mechanics are in
-<a href="/flakestat/docs/#scoring">how scoring works</a>.</p>
+<a href="/docs/#scoring">how scoring works</a>.</p>
 
 <div class="tablewrap"><table><thead><tr><th>Column</th><th>Meaning</th></tr></thead><tbody><tr><td><code>SCORE</code></td><td>Weighted rate at which consecutive runs disagreed.</td></tr><tr><td><code>CONF</code></td><td>How much evidence supports that score.</td></tr><tr><td><code>RUNS</code></td><td>Scored observations. Skips are excluded — a skip is not evidence either way.</td></tr><tr><td><code>PASS/FAIL</code></td><td>Counts among scored runs.</td></tr><tr><td><code>TEST</code></td><td>Stable identity, from suite, class and name.</td></tr></tbody></table></div>
 
@@ -180,7 +180,7 @@ flakestat report --top 20           # worst 20 only</code></pre></div>
 <h2 id="how-many-runs-do-i-need">How many runs do I need?<a class="anchor" href="#how-many-runs-do-i-need" aria-label="Link to this section">#</a></h2>
 <p>It depends entirely on how rare the flake is. These are measured against synthetic tests with
 known failure probabilities:</p>
-<div class="tablewrap"><table><thead><tr><th>Flake rate</th><th>Runs for reliable detection</th></tr></thead><tbody><tr><td>25% or higher</td><td>20 runs is plenty</td></tr><tr><td>10%</td><td>50 or more</td></tr><tr><td>5%</td><td>100+, and a local burst is starting to be the wrong instrument</td></tr><tr><td>Below 5%</td><td>Record <a href='/flakestat/docs/history/'>CI history</a> instead</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Flake rate</th><th>Runs for reliable detection</th></tr></thead><tbody><tr><td>25% or higher</td><td>20 runs is plenty</td></tr><tr><td>10%</td><td>50 or more</td></tr><tr><td>5%</td><td>100+, and a local burst is starting to be the wrong instrument</td></tr><tr><td>Below 5%</td><td>Record <a href='/docs/history/'>CI history</a> instead</td></tr></tbody></table></div>
 
 <h2 id="chasing-one-test">Chasing one test<a class="anchor" href="#chasing-one-test" aria-label="Link to this section">#</a></h2>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat hunt --runs 50 --junit &#x27;reports/junit-{run}.xml&#x27; \
@@ -333,7 +333,7 @@ NEW     test_cart::test_checkout    0.42 (high)
 
 <div class="callout"><b>Order matters in CI</b>
 Ingest before you gate, and let the test step continue on error. A failed suite is exactly the run
-you most want recorded. See <a href="/flakestat/docs/#github-actions">GitHub Actions</a> for the
+you most want recorded. See <a href="/docs/#github-actions">GitHub Actions</a> for the
 full sequence.</div>
 </section><section id="quarantine"><h2 id="unblocking-the-pipeline">Unblocking the pipeline<a class="anchor" href="#unblocking-the-pipeline" aria-label="Link to this section">#</a></h2><p class="lede">Emit a skip list your runner already understands, so merges are unblocked while you fix things.</p>
 <div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">quarantine</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="pytest">pytest</button><button class="tab" role="tab" aria-selected="false" data-lang="jest">Jest</button><button class="tab" role="tab" aria-selected="false" data-lang="go">go test</button><button class="tab" role="tab" aria-selected="false" data-lang="yaml">YAML</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>flakestat quarantine --format pytest -o quarantine.txt
@@ -349,7 +349,7 @@ quietly.</div>
 <h2 id="a-workable-rhythm">A workable rhythm<a class="anchor" href="#a-workable-rhythm" aria-label="Link to this section">#</a></h2>
 <ol>
   <li>Quarantine what is blocking merges today.</li>
-  <li>Commit a <a href="/flakestat/docs/#ci-gate">baseline</a> so nothing <em>new</em> gets in.</li>
+  <li>Commit a <a href="/docs/#ci-gate">baseline</a> so nothing <em>new</em> gets in.</li>
   <li>Fix the worst-ranked test, remove it from quarantine, update the baseline.</li>
   <li>Repeat. The list only shrinks, because the gate stops it growing.</li>
 </ol>
@@ -398,7 +398,7 @@ guessing which you meant.</p>
   run: pytest --junitxml=reports/junit.xml
   continue-on-error: true
 
-- uses: rowhitswami/flakestat@v1
+- uses: rowhitswami/flakestat@v0.2.0
   with:
     args: ingest &#x27;reports/**/*.xml&#x27;
     comment: true          # post/update a PR comment
@@ -411,10 +411,10 @@ comment. A re-run <strong>updates the same comment</strong> rather than adding a
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>- run: pytest --junitxml=reports/junit.xml
   continue-on-error: true          # record the run even when it fails
 
-- uses: rowhitswami/flakestat@v1
+- uses: rowhitswami/flakestat@v0.2.0
   with: { args: &quot;ingest &#x27;reports/**/*.xml&#x27;&quot; }
 
-- uses: rowhitswami/flakestat@v1
+- uses: rowhitswami/flakestat@v0.2.0
   with: { args: &quot;check --fail-on-new&quot;, comment: true }</code></pre></div>
 
 <div class="callout"><b>continue-on-error matters</b>
@@ -434,7 +434,7 @@ flakiness.</div>
 <h2 id="matrix-builds">Matrix builds<a class="anchor" href="#matrix-builds" aria-label="Link to this section">#</a></h2>
 <p>Let each matrix job ingest its own results, then merge the NDJSON in an aggregate job. That way
 every observation records the platform it actually ran on, rather than the aggregator's.</p>
-<div class="cblock"><button class="copy" type="button">Copy</button><pre><code>- uses: rowhitswami/flakestat@v1
+<div class="cblock"><button class="copy" type="button">Copy</button><pre><code>- uses: rowhitswami/flakestat@v0.2.0
   with:
     args: &gt;-
       ingest &#x27;reports/**/*.xml&#x27;
@@ -444,8 +444,8 @@ every observation records the platform it actually ran on, rather than the aggre
   with:
     name: observations-${{ matrix.os }}
     path: .flakestat/runs.ndjson</code></pre></div>
-<p>See <a href="/flakestat/docs/#dimensions">recording where tests ran</a> for why this matters, and
-<a href="/flakestat/docs/#history">tracking over time</a> for where to keep the merged history.</p>
+<p>See <a href="/docs/#dimensions">recording where tests ran</a> for why this matters, and
+<a href="/docs/#history">tracking over time</a> for where to keep the merged history.</p>
 </section><section id="gitlab"><h2 id="gitlab-circleci-and-others">GitLab, CircleCI and others<a class="anchor" href="#gitlab-circleci-and-others" aria-label="Link to this section">#</a></h2><p class="lede">Nothing is GitHub-specific. Install the binary and call it.</p>
 <p>Provider context — run id, job id, attempt and shard — is detected automatically for GitLab CI,
 CircleCI, Buildkite, Jenkins and Azure Pipelines.</p>
@@ -504,12 +504,12 @@ from any source.</p>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat ingest &#x27;archive/2026-*/junit.xml&#x27;
 flakestat report</code></pre></div>
 </section><section id="commands"><h2 id="command-reference">Command reference<a class="anchor" href="#command-reference" aria-label="Link to this section">#</a></h2><p class="lede">Nine commands. Run <code>flakestat &lt;command&gt; -h</code> for the full flag list of any of them.</p>
-<div class="tablewrap"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><a href="/flakestat/docs/#config"><code>init</code></a></td><td>Detect the project and write <code>.flakestat.json</code></td></tr><tr><td><a href="/flakestat/docs/#hunting"><code>hunt</code></a></td><td>Run a test command N times and detect disagreement</td></tr><tr><td><a href="/flakestat/docs/#history"><code>ingest</code></a></td><td>Load JUnit XML from CI into the history</td></tr><tr><td><a href="/flakestat/docs/#reading-a-report"><code>report</code></a></td><td>Score recorded history and print a report</td></tr><tr><td><a href="/flakestat/docs/#explain"><code>explain</code></a></td><td>Show why one test received its verdict</td></tr><tr><td><a href="/flakestat/docs/#ci-gate"><code>check</code></a></td><td>Fail CI when flakiness gets worse, not when it exists</td></tr><tr><td><a href="/flakestat/docs/#quarantine"><code>quarantine</code></a></td><td>Emit a skip list your test runner accepts</td></tr><tr><td><code>ci-report</code></td><td>Render a report for job summaries and PR comments</td></tr><tr><td><a href="/flakestat/docs/#history"><code>compact</code></a></td><td>Drop observations duplicating an already-recorded execution</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><a href="/docs/#config"><code>init</code></a></td><td>Detect the project and write <code>.flakestat.json</code></td></tr><tr><td><a href="/docs/#hunting"><code>hunt</code></a></td><td>Run a test command N times and detect disagreement</td></tr><tr><td><a href="/docs/#history"><code>ingest</code></a></td><td>Load JUnit XML from CI into the history</td></tr><tr><td><a href="/docs/#reading-a-report"><code>report</code></a></td><td>Score recorded history and print a report</td></tr><tr><td><a href="/docs/#explain"><code>explain</code></a></td><td>Show why one test received its verdict</td></tr><tr><td><a href="/docs/#ci-gate"><code>check</code></a></td><td>Fail CI when flakiness gets worse, not when it exists</td></tr><tr><td><a href="/docs/#quarantine"><code>quarantine</code></a></td><td>Emit a skip list your test runner accepts</td></tr><tr><td><code>ci-report</code></td><td>Render a report for job summaries and PR comments</td></tr><tr><td><a href="/docs/#history"><code>compact</code></a></td><td>Drop observations duplicating an already-recorded execution</td></tr></tbody></table></div>
 
 <h2 id="scoring-flags">Scoring flags<a class="anchor" href="#scoring-flags" aria-label="Link to this section">#</a></h2>
 <p>Accepted by <code>hunt</code>, <code>report</code>, <code>explain</code>, <code>check</code> and
 <code>quarantine</code>. Defaults are calibrated against a ground-truth corpus, not chosen by
-intuition — see <a href="/flakestat/docs/#scoring">how scoring works</a> before changing them.</p>
+intuition — see <a href="/docs/#scoring">how scoring works</a> before changing them.</p>
 <div class="tablewrap"><table><thead><tr><th>Flag</th><th>Default</th><th>Effect</th></tr></thead><tbody><tr><td><code>--threshold</code></td><td><code>0.10</code></td><td>Score at or above which a test is called flaky</td></tr><tr><td><code>--suspect-threshold</code></td><td><code>0.05</code></td><td>Score at or above which a test is called suspect</td></tr><tr><td><code>--min-runs</code></td><td><code>5</code></td><td>Scored runs required before any verdict</td></tr><tr><td><code>--same-commit-weight</code></td><td><code>3</code></td><td>How much more a same-commit disagreement counts</td></tr><tr><td><code>--branch-weight</code></td><td><code>0.5</code></td><td>Weight for disagreement off the default branch</td></tr><tr><td><code>--default-branch</code></td><td><code>main</code></td><td>Branch whose results are trusted fully</td></tr><tr><td><code>--alpha</code></td><td><code>0.3</code></td><td>Recency decay; higher weights recent runs more</td></tr></tbody></table></div>
 
 <h2 id="output-flags">Output flags<a class="anchor" href="#output-flags" aria-label="Link to this section">#</a></h2>
@@ -517,7 +517,7 @@ intuition — see <a href="/flakestat/docs/#scoring">how scoring works</a> befor
 
 <h2 id="command-specific-flags">Command-specific flags<a class="anchor" href="#command-specific-flags" aria-label="Link to this section">#</a></h2>
 <h3 id="hunt">hunt<a class="anchor" href="#hunt" aria-label="Link to this section">#</a></h3>
-<div class="tablewrap"><table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>--runs N</code></td><td>How many times to run the command</td></tr><tr><td><code>--junit PATH</code></td><td>Where each run writes its report; supports <code>{run}</code></td></tr><tr><td><code>--parallel N</code></td><td>Run N copies concurrently — read the warning in <a href='/flakestat/docs/hunting/'>hunting</a></td></tr><tr><td><code>--history</code></td><td>Score all recorded history, not just this burst</td></tr><tr><td><code>--dimension k=v</code></td><td>Attach context; repeatable</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>--runs N</code></td><td>How many times to run the command</td></tr><tr><td><code>--junit PATH</code></td><td>Where each run writes its report; supports <code>{run}</code></td></tr><tr><td><code>--parallel N</code></td><td>Run N copies concurrently — read the warning in <a href='/docs/hunting/'>hunting</a></td></tr><tr><td><code>--history</code></td><td>Score all recorded history, not just this burst</td></tr><tr><td><code>--dimension k=v</code></td><td>Attach context; repeatable</td></tr></tbody></table></div>
 <h3 id="ingest">ingest<a class="anchor" href="#ingest" aria-label="Link to this section">#</a></h3>
 <div class="tablewrap"><table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody><tr><td><code>--commit SHA</code></td><td>Commit these results belong to (default: current git HEAD)</td></tr><tr><td><code>--branch NAME</code></td><td>Branch name (default: current git branch)</td></tr><tr><td><code>--dimension k=v</code></td><td>Attach context; repeatable</td></tr><tr><td><code>--no-host</code></td><td>Never record this machine's platform, even in CI</td></tr><tr><td><code>--run-id ID</code></td><td>Identifier for this run (default: generated)</td></tr></tbody></table></div>
 <h3 id="check">check<a class="anchor" href="#check" aria-label="Link to this section">#</a></h3>
@@ -547,7 +547,7 @@ without editing anything. Nothing in the file is required — every key has a de
 The config belongs in the repo. It is how everyone on the team — and CI — runs the same thing.</div>
 
 <h2 id="what-gets-written-where">What gets written where<a class="anchor" href="#what-gets-written-where" aria-label="Link to this section">#</a></h2>
-<div class="tablewrap"><table><thead><tr><th>Path</th><th>What it is</th><th>Commit it?</th></tr></thead><tbody><tr><td><code>.flakestat.json</code></td><td>Configuration</td><td>Yes</td></tr><tr><td><code>.flakestat/runs.ndjson</code></td><td>Observation history</td><td><a href="/flakestat/docs/#history">Depends</a></td></tr><tr><td><code>.flakestat/baseline.json</code></td><td>Accepted flakiness for <code>check</code></td><td>Yes</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th>Path</th><th>What it is</th><th>Commit it?</th></tr></thead><tbody><tr><td><code>.flakestat.json</code></td><td>Configuration</td><td>Yes</td></tr><tr><td><code>.flakestat/runs.ndjson</code></td><td>Observation history</td><td><a href="/docs/#history">Depends</a></td></tr><tr><td><code>.flakestat/baseline.json</code></td><td>Accepted flakiness for <code>check</code></td><td>Yes</td></tr></tbody></table></div>
 </section><section id="scoring"><h2 id="how-scoring-works">How scoring works<a class="anchor" href="#how-scoring-works" aria-label="Link to this section">#</a></h2><p class="lede">Five steps, and a live demo you can poke at to see each of them.</p>
 <h2 id="try-it">Try it<a class="anchor" href="#try-it" aria-label="Link to this section">#</a></h2>
 <p>Click any run to cycle it between pass, fail and skip. The verdict below is computed with the
@@ -612,7 +612,7 @@ passes, not two disagreements.</p>
 outcomes demonstrate flakiness; associations only say <em>where</em> that flakiness concentrates.
 Findings must clear an evidence floor, an effect-size floor, and a Benjamini–Hochberg correction
 for how many dimensions were tested. See
-<a href="/flakestat/docs/#dimensions">recording where tests ran</a>.</p>
+<a href="/docs/#dimensions">recording where tests ran</a>.</p>
 
 <h2 id="going-deeper">Going deeper<a class="anchor" href="#going-deeper" aria-label="Link to this section">#</a></h2>
 <p><a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">DESIGN.md</a> records the reasoning in full, including the
@@ -649,12 +649,12 @@ call, no account and no telemetry.</p>
 <p>Because it isn't flaky, it's broken. flakestat scores how often a test <em>disagrees with
 itself</em>, not how often it fails, so a consistently failing test scores zero and appears as
 <code>consistently-failing</code> — a different problem with a different fix. See
-<a href="/flakestat/docs/#reading-a-report">reading a report</a>.</p>
+<a href="/docs/#reading-a-report">reading a report</a>.</p>
 
 <h3 id="how-many-runs-do-i-need-2">How many runs do I need?<a class="anchor" href="#how-many-runs-do-i-need-2" aria-label="Link to this section">#</a></h3>
 <p>Depends on the flake rate. ~25% is reliably caught within 20 runs; 10% usually needs 50 or more;
 below about 5% a local burst is the wrong instrument and
-<a href="/flakestat/docs/#history">CI history</a> is right. <code>insufficient-data</code> means exactly
+<a href="/docs/#history">CI history</a> is right. <code>insufficient-data</code> means exactly
 that — not enough evidence yet.</p>
 
 <h3 id="can-i-use-it-with-a-monorepo-or-sharded-ci">Can I use it with a monorepo or sharded CI?<a class="anchor" href="#can-i-use-it-with-a-monorepo-or-sharded-ci" aria-label="Link to this section">#</a></h3>
@@ -673,7 +673,7 @@ something on every build.</p>
 
 <h3 id="what-if-my-runner-doesnt-write-junit-xml">What if my runner doesn't write JUnit XML?<a class="anchor" href="#what-if-my-runner-doesnt-write-junit-xml" aria-label="Link to this section">#</a></h3>
 <p>Almost all of them can with one flag or one reporter package — see
-<a href="/flakestat/docs/#runners">supported runners</a>. Failing that, exit-code mode still gives
+<a href="/docs/#runners">supported runners</a>. Failing that, exit-code mode still gives
 suite-level results.</p>
 
 <h3 id="is-it-free">Is it free?<a class="anchor" href="#is-it-free" aria-label="Link to this section">#</a></h3>
@@ -683,39 +683,39 @@ machines, so there is nothing to meter.</p>
 <h3 id="how-is-this-different-from-just-retrying-failed-tests">How is this different from just retrying failed tests?<a class="anchor" href="#how-is-this-different-from-just-retrying-failed-tests" aria-label="Link to this section">#</a></h3>
 <p>Retries hide flakiness; flakestat measures it. A retried test still costs time and still fails
 in ways that matter. Retry to keep the pipeline moving, and measure so the list actually shrinks.
-<a href="/flakestat/docs/#ci-gate">Gating on regressions</a> is how you stop it growing.</p>
+<a href="/docs/#ci-gate">Gating on regressions</a> is how you stop it growing.</p>
 
 <h3 id="why-not-just-use-a-hosted-service">Why not just use a hosted service?<a class="anchor" href="#why-not-just-use-a-hosted-service" aria-label="Link to this section">#</a></h3>
 <p>Use one if you want dashboards, org-wide rollups and alerting — they do that well.
 flakestat is for the case where you want detection to be local, free and yours. See
-<a href="/flakestat/compare/trunk/">how it compares</a>.</p>
+<a href="/compare/trunk/">how it compares</a>.</p>
 </section></article></div>
 
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="/flakestat/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
-           data-light="/flakestat/assets/logo-lockup.png" data-dark="/flakestat/assets/logo-lockup-dark.png">
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
     <div class="foot-col"><h6>Docs</h6>
-      <a href="/flakestat/docs/#install">Install</a>
-      <a href="/flakestat/docs/#quickstart">Quickstart</a>
-      <a href="/flakestat/docs/#commands">Commands</a>
-      <a href="/flakestat/docs/#scoring">How scoring works</a>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
     </div>
     <div class="foot-col"><h6>Guides</h6>
-      <a href="/flakestat/docs/#github-actions">GitHub Actions</a>
-      <a href="/flakestat/docs/#history">Tracking over time</a>
-      <a href="/flakestat/docs/#ci-gate">Gating CI</a>
-      <a href="/flakestat/docs/#runners">Supported runners</a>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/docs/#runners">Supported runners</a>
     </div>
     <div class="foot-col"><h6>Project</h6>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
       <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
-      <a href="https://rowhitswami.github.io/flakestat/llms.txt">llms.txt</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>
   <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
@@ -729,6 +729,6 @@ flakestat is for the case where you want detection to be local, free and yours. 
   </div>
 </div>
 
-<script src="/flakestat/app.js" defer></script>
+<script src="/app.js" defer></script>
 </body>
 </html>
