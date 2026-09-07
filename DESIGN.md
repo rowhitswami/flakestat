@@ -331,6 +331,38 @@ to increase nondeterminism. One combined class could not express both.
 If a vocabulary for that is ever added it should be a *secondary* descriptor
 ("context pattern"), not a sixth primary class.
 
+### Comparability: the transition invariant
+
+    A transition is meaningful only between observations from the same
+    execution context.
+
+Execution context is currently:
+
+    branch + os + arch + runtime.name + runtime.version
+
+and explicitly excludes provenance identifiers -- `ci.run_id`, `ci.job_id` and
+anything similarly high-cardinality. Including them would place every
+observation alone in its own context, leaving no transitions to measure
+anywhere.
+
+This invariant has now been violated twice, in the same way, at two different
+levels:
+
+  - Interleaved *branches* made a test that passed on main and failed on an
+    in-progress feature branch read as repeated disagreement.
+  - Interleaved *platforms* made a test that always fails on Windows and always
+    passes elsewhere read as constant disagreement, scoring 0.45 with an
+    explanation asserting "direct evidence of nondeterminism". The test is
+    perfectly deterministic on every platform.
+
+Both were found only with real data; no synthetic fixture written beforehand
+produced either. The second surfaced within minutes of pointing flakestat at
+its own CI matrix.
+
+The general shape is worth remembering when adding any new axis: two outcomes
+are evidence of nondeterminism only if everything that could legitimately
+change the outcome was held constant.
+
 ### Diagnosis is deliberately deferred
 
 Categorising causes -- timing, race condition, network, shared state -- is
