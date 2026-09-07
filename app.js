@@ -1,7 +1,19 @@
 /* flakestat docs — behaviour. No framework, no build step. */
 (function () {
   'use strict';
-  var BASE = document.documentElement.dataset.base || '/';
+  // Derived from this script's own URL rather than a baked-in base path.
+  // A hardcoded base breaks the moment the site moves host or subpath - and it
+  // fails silently, because a 404 on the index just means search returns
+  // nothing. The script always knows where it was loaded from.
+  var BASE = (function () {
+    var el = document.currentScript ||
+      (function () { var s = document.getElementsByTagName('script'); return s[s.length - 1]; })();
+    try {
+      return new URL('.', el.src).pathname;
+    } catch (e) {
+      return document.documentElement.dataset.base || '/';
+    }
+  })();
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
@@ -127,14 +139,20 @@
   function load() {
     if (index) return Promise.resolve(index);
     return fetch(BASE + 'search-index.json')
-      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r.ok) throw new Error('index ' + r.status);
+        return r.json();
+      })
       .then(function (j) { index = j; return j; });
   }
   function open() {
     if (!scrim) return;
     scrim.hidden = false; input.value = ''; results.innerHTML = '';
     document.body.style.overflow = 'hidden';
-    load().then(function () { input.focus(); render(''); });
+    load().then(function () { input.focus(); render(''); }, function (err) {
+      results.innerHTML = '<div class="empty">Search index unavailable (' +
+        esc(String(err.message || err)) + '). Reload, or browse using the contents.</div>';
+    });
   }
   function close() {
     if (!scrim) return;
