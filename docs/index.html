@@ -83,7 +83,7 @@ and the install script takes a tag.</div>
 <h2 id="next">Next<a class="anchor" href="#next" aria-label="Link to this section">#</a></h2>
 <p>Head to the <a href="/flakestat/docs/#quickstart">quickstart</a> — two commands, and you'll know
 whether your suite is flaky.</p>
-</section><section id="quickstart"><h2 id="quickstart">Quickstart<a class="anchor" href="#quickstart" aria-label="Link to this section">#</a></h2><p class="lede">Two ways to use flakestat. They answer different questions, and most projects end up doing both.</p>
+</section><section id="quickstart"><h2 id="quickstart-2">Quickstart<a class="anchor" href="#quickstart-2" aria-label="Link to this section">#</a></h2><p class="lede">Two ways to use flakestat. They answer different questions, and most projects end up doing both.</p>
 <h2 id="1-hunt-is-this-suite-flaky-right-now">1. Hunt — is this suite flaky right now?<a class="anchor" href="#1-hunt-is-this-suite-flaky-right-now" aria-label="Link to this section">#</a></h2>
 <p>Runs your test command N times on unchanged code and reports what disagreed. Use it when you
 already suspect a suite, or before opening a pull request.</p>
@@ -129,7 +129,7 @@ one test with <a href="/flakestat/docs/#explain"><code>flakestat explain</code><
 <p>That is a real result, not a failure. It means nothing disagreed in that many runs. A test that
 fails 2% of the time will usually survive 20 runs untouched — raise <code>--runs</code>, or record
 CI history where the sample grows for free.</p>
-</section><section id="reading-a-report"><h2 id="reading-a-report">Reading a report<a class="anchor" href="#reading-a-report" aria-label="Link to this section">#</a></h2><p class="lede">Six verdicts, one score and one confidence level. Here is what each of them is claiming.</p>
+</section><section id="reading-a-report"><h2 id="reading-a-report-2">Reading a report<a class="anchor" href="#reading-a-report-2" aria-label="Link to this section">#</a></h2><p class="lede">Six verdicts, one score and one confidence level. Here is what each of them is claiming.</p>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST
 flaky                  0.62  high    20       14/6  test_demo::test_flaky_race
 suspect                0.08   low     6        5/1  test_api::test_timeout
@@ -188,7 +188,7 @@ known failure probabilities:</p>
 <p>Narrowing to one test is usually much faster per run, so you can afford far more runs — which
 is exactly what a rare flake needs.</p>
 
-<h2 id="if-it-finds-nothing">If it finds nothing<a class="anchor" href="#if-it-finds-nothing" aria-label="Link to this section">#</a></h2>
+<h2 id="if-it-finds-nothing-2">If it finds nothing<a class="anchor" href="#if-it-finds-nothing-2" aria-label="Link to this section">#</a></h2>
 <p>That is a real result. It means nothing disagreed in that many runs, which is evidence the test
 is not flaky <em>at a rate this sample could detect</em>. It is not evidence the test is clean.
 Raise <code>--runs</code>, or let CI history accumulate.</p>
@@ -393,7 +393,7 @@ flakestat explain 4c1f9a2e77b3d810        # by id, when names are ambiguous</cod
 
 <p>If a name matches several tests, flakestat lists the candidates with their ids rather than
 guessing which you meant.</p>
-</section><section id="github-actions"><h2 id="github-actions">GitHub Actions<a class="anchor" href="#github-actions" aria-label="Link to this section">#</a></h2><p class="lede">Record every run, comment on the pull request, and gate on regressions rather than on flakiness itself.</p>
+</section><section id="github-actions"><h2 id="github-actions-2">GitHub Actions<a class="anchor" href="#github-actions-2" aria-label="Link to this section">#</a></h2><p class="lede">Record every run, comment on the pull request, and gate on regressions rather than on flakiness itself.</p>
 <div class="cblock"><div class="cblock-head"><span class="cblock-title">.github/workflows/ci.yml</span><button class="copy" type="button">Copy</button></div><pre><code>- name: Run tests
   run: pytest --junitxml=reports/junit.xml
   continue-on-error: true
@@ -651,7 +651,7 @@ itself</em>, not how often it fails, so a consistently failing test scores zero 
 <code>consistently-failing</code> — a different problem with a different fix. See
 <a href="/flakestat/docs/#reading-a-report">reading a report</a>.</p>
 
-<h3 id="how-many-runs-do-i-need">How many runs do I need?<a class="anchor" href="#how-many-runs-do-i-need" aria-label="Link to this section">#</a></h3>
+<h3 id="how-many-runs-do-i-need-2">How many runs do I need?<a class="anchor" href="#how-many-runs-do-i-need-2" aria-label="Link to this section">#</a></h3>
 <p>Depends on the flake rate. ~25% is reliably caught within 20 runs; 10% usually needs 50 or more;
 below about 5% a local burst is the wrong instrument and
 <a href="/flakestat/docs/#history">CI history</a> is right. <code>insufficient-data</code> means exactly
