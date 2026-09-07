@@ -321,6 +321,67 @@ That is the right reading of the evidence in hand — and **inconclusive for
 sensitivity**, not a miss. The shared `math/rand` dependency it exercises is
 order-sensitive in a way that a hundred shuffles happened to trip only twice.
 
+
+## Subject B — results
+
+`DataDog/techstories-demo-app @ 1ca082de`, 100 independent executions, Jest with
+no retries against PostgreSQL 16, the repository's own `broken-tests/` swapped
+in over their working counterparts.
+
+67 tests, 100 executions each:
+
+| Verdict | Count |
+| --- | --- |
+| `stable` | 57 |
+| `flaky` | 5 |
+| `consistently-failing` | 5 |
+| `suspect` | 0 |
+
+**No stable test failed even once, and nothing landed in `suspect`.** The
+separation was total: every test either fired repeatedly or never.
+
+| Test | Observed | flakestat | Score |
+| --- | --- | --- | --- |
+| `PostList` expects PostListItem to be called | 49/100 | `flaky` | 0.58 |
+| Post and Comment — can create a post | 54/100 | `flaky` | 0.56 |
+| Database — email uniqueness race | 39/100 | `flaky` | 0.54 |
+| User Registration — concurrent registration | 55/100 | `flaky` | 0.47 |
+| SignUp — registration (flaky variant) | 13/100 | `flaky` | 0.22 |
+| Header — renders the user's name | 100/100 | `consistently-failing` | 0.00 |
+| Quotes API — four cases | 100/100 each | `consistently-failing` | 0.00 |
+
+`PostList` is the one fixture with a mechanism visible in the source:
+`Math.random() > 0.5`. It fired 49 times in 100. That is the closest thing to a
+known-rate positive control in this subject, and the observation matches it.
+
+Detection latency: four of the five reached `flaky` at run 5, the earliest
+`min_runs` permits. The 13% case took until run 11.
+
+### A contaminated first run, and what it showed
+
+The first attempt at this subject is void. Backups of the working test files
+were left in `.originals/` **inside the project**, and Jest collected them, so
+five working files ran alongside the broken versions that replaced them.
+Thirteen test identities therefore had two different implementations
+contributing outcomes under one name.
+
+That run is discarded, not reported, and 100 executions were re-run against a
+tree where `jest --listTests` returns 18 files and a single run yields 67
+testcases with no repeated identity.
+
+The comparison is worth keeping, because flakestat was right both times:
+
+    Header renders the user's name when signed in
+      contaminated:  flaky 0.99          (working + broken version alternating)
+      clean:         consistently-failing 0.00   (only the broken version runs)
+
+Under contamination, one identity really did alternate between passing and
+failing on identical code — which is flakiness, and reporting it as such was
+correct analysis of a corrupt input. The fault was in the fixture, not the
+tool. It is a fair reminder that a detector can only be as good as the identity
+its inputs give it, and that `-count`-style repetition and accidental
+duplication look alike from the outside.
+
 ## Protocol amendments
 
 Recorded as additions with their reasoning. Earlier entries are left standing,
@@ -393,6 +454,17 @@ is recorded here rather than corrected away: three of a hundred executions ran
 under load, which is noted beside subject A's rates so a reader can judge it.
 Nothing was re-run, because selectively discarding executions that ran under
 conditions one dislikes is how a measured rate becomes a chosen one.
+
+## flakestat against its own suite
+
+Accumulated on the `flakestat-history` branch across every CI run of this
+project: **10,305 observations of 293 distinct tests over 33 runs, on three
+platforms. All 293 stable, no false positives.**
+
+Not a sensitivity result — nothing in that suite is known to be flaky — but it
+is specificity measured on real, unsynthetic data, from a matrix where branch,
+platform and runtime all vary and where earlier versions of the scorer produced
+phantom transitions.
 
 ## Frozen implementation
 
@@ -490,7 +562,7 @@ states an expectation as though it were an observation:
 | Subject | State |
 | --- | --- |
 | A. playwright-flaky-tests | **complete** — see results below |
-| B. techstories-demo-app | not started |
+| B. techstories-demo-app | **complete** |
 | C1. conduit @ 612f5bfb (pre-fix) | **complete** |
 | C2. conduit @ 9e00e594 (the repair) | **complete** |
 
