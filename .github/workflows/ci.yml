@@ -4,6 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Lets the history branch be exercised without inventing a commit, which
+  # matters for checking that persistence does not depend on the cache.
+  workflow_dispatch:
 
 permissions:
   contents: read
