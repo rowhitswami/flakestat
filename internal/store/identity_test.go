@@ -9,9 +9,23 @@ import (
 
 func scope() ExecutionScope {
 	return ExecutionScope{
-		Provider: "github", Run: "9381732", Job: "test", Attempt: "1",
+		Context: map[string]string{
+			"ci.provider": "github", "ci.run_id": "9381732",
+			"ci.job_id": "test", "ci.attempt": "1", "os": "linux",
+		},
 		Report: "reports/junit.xml", Digest: Digest([]byte("<testsuite/>")),
 	}
+}
+
+// with returns the scope with one context value changed.
+func with(s ExecutionScope, k, v string) ExecutionScope {
+	ctx := make(map[string]string, len(s.Context)+1)
+	for key, val := range s.Context {
+		ctx[key] = val
+	}
+	ctx[k] = v
+	s.Context = ctx
+	return s
 }
 
 func cases(n int) []junit.Case {
@@ -84,8 +98,7 @@ func TestIngestingTheSameReportTwiceAddsNothing(t *testing.T) {
 // execute the tests a second time and that result is evidence.
 func TestARetryIsNotADuplicate(t *testing.T) {
 	first := scope()
-	retry := scope()
-	retry.Attempt = "2"
+	retry := with(first, "ci.attempt", "2")
 
 	both := append(FromCases(cases(5), Meta{Scope: first}), FromCases(cases(5), Meta{Scope: retry})...)
 	if got := len(Dedup(both)); got != 10 {
@@ -97,8 +110,8 @@ func TestARetryIsNotADuplicate(t *testing.T) {
 // empty suite, or a framework that writes a fixed header. The job identity is
 // what separates them, so the digest alone must never be the whole key.
 func TestIdenticalReportsFromDifferentJobsStayDistinct(t *testing.T) {
-	a, b := scope(), scope()
-	b.Job = "test-2"
+	a := scope()
+	b := with(a, "ci.job_id", "test-2")
 
 	both := append(FromCases(cases(4), Meta{Scope: a}), FromCases(cases(4), Meta{Scope: b})...)
 	if got := len(Dedup(both)); got != 8 {
@@ -109,7 +122,8 @@ func TestIdenticalReportsFromDifferentJobsStayDistinct(t *testing.T) {
 // Conversely, one job that emits two different reports must keep both, which
 // the job identity alone cannot express.
 func TestDifferentReportsFromOneJobStayDistinct(t *testing.T) {
-	a, b := scope(), scope()
+	a := scope()
+	b := a
 	b.Report, b.Digest = "reports/platform.xml", Digest([]byte("<testsuite name='other'/>"))
 
 	both := append(FromCases(cases(4), Meta{Scope: a}), FromCases(cases(4), Meta{Scope: b})...)
@@ -135,11 +149,43 @@ func TestObservationsWithoutAKeyAreAlwaysKept(t *testing.T) {
 
 // Field values must not be able to slide between fields.
 func TestKeyFieldsCannotBeRearranged(t *testing.T) {
-	a := ExecutionScope{Run: "1", Job: "23"}
-	b := ExecutionScope{Run: "12", Job: "3"}
+	a := ExecutionScope{Report: "a", Digest: "bc"}
+	b := ExecutionScope{Report: "ab", Digest: "c"}
 
 	if ExecutionKey(a, "t", 0) == ExecutionKey(b, "t", 0) {
-		t.Error("run/job boundaries are not encoded; keys collided")
+		t.Error("field boundaries are not encoded; keys collided")
+	}
+}
+
+// The collision this design exists to avoid. GitHub reports the same
+// GITHUB_JOB for every leg of a matrix, so three platforms ingesting under one
+// run and one job differ only in what they recorded about themselves. If the
+// recorded context were left out of the key, merging their artifacts would
+// discard two platforms' evidence outright -- and silently, since dedup has no
+// way to know it dropped something real.
+func TestMatrixLegsUnderOneJobIDStayDistinct(t *testing.T) {
+	base := ExecutionScope{
+		Context: map[string]string{"ci.provider": "github", "ci.run_id": "9381732", "ci.job_id": "test"},
+		Report:  "reports/junit.xml",
+		Digest:  Digest([]byte("<testsuite/>")), // identical XML from every leg
+	}
+
+	var merged []Observation
+	for _, os := range []string{"linux", "darwin", "windows"} {
+		merged = append(merged, FromCases(cases(4), Meta{Scope: with(base, "os", os)})...)
+	}
+	if got := len(Dedup(merged)); got != 12 {
+		t.Errorf("three matrix legs survived as %d of 12 observations", got)
+	}
+}
+
+// Context order must not matter; Go randomizes map iteration.
+func TestKeyIsStableAcrossMapIterationOrder(t *testing.T) {
+	want := ExecutionKey(scope(), "t", 0)
+	for i := 0; i < 200; i++ {
+		if got := ExecutionKey(scope(), "t", 0); got != want {
+			t.Fatalf("key varied with map order: %s vs %s", got, want)
+		}
 	}
 }
 

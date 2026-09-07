@@ -375,15 +375,30 @@ execution that happened to agree.
 
 Identity is derived from the evidence, never from ingestion:
 
-    provider + run + job + shard + attempt + report path + report digest
-      + test id + repetition index
+    recorded context + report path + report digest + test id
+      + repetition index
 
-Each part earns its place. `attempt` is what separates a legitimate retry --
-which really did run the tests again -- from a duplicate. The report digest
-separates a file from the file that later replaced it; the report path
-separates two shards that emitted byte-identical XML. The repetition index is
-not defensive: `-count=12` puts twelve executions of one test in one document,
-and without it eleven results would vanish.
+Each part earns its place. The report digest separates a file from the file
+that later replaced it; the report path separates two documents from one job.
+The repetition index is not defensive: `-count=12` puts twelve executions of
+one test in one document, and without it eleven results would vanish. The
+`ci.attempt` inside the context is what separates a legitimate retry -- which
+really did run the tests again -- from a duplicate.
+
+**The recorded context is the whole dimension set, not a chosen few**, because
+a provider's idea of a job can be coarser than an execution. GitHub reports the
+same `GITHUB_JOB` for every leg of a matrix, so flakestat's own three platforms
+ingest under one provider, one run, one job and one attempt; the only thing
+telling them apart is what each recorded about itself. An earlier version keyed
+on the CI fields alone and survived only because gotestsum happens to write the
+platform into a `go.version` property, making the digests differ. Measured with
+that luck removed, three legs of four observations each dedup to four -- two
+thirds of the matrix silently destroyed, with no way for dedup to know it had
+dropped anything real.
+
+That sets the bias for the whole mechanism: **when in doubt, do not dedup.**
+Missing a duplicate restores the old behaviour; a false dedup destroys evidence
+and says nothing.
 
 Nothing about *when* ingestion happened may enter the key, or re-ingesting
 would mint a fresh one and restore the problem.

@@ -158,13 +158,9 @@ func runIngest(args []string, stdout, stderr io.Writer) error {
 			Source:     store.SourceCI,
 			Dimensions: dimensions,
 			Scope: store.ExecutionScope{
-				Provider: dimensions[dimension.CIProvider],
-				Run:      dimensions[dimension.CIRunID],
-				Job:      dimensions[dimension.CIJobID],
-				Shard:    dimensions[dimension.CIShard],
-				Attempt:  dimensions[dimension.CIAttempt],
-				Report:   r.path,
-				Digest:   r.digest,
+				Context: dimensions,
+				Report:  r.path,
+				Digest:  r.digest,
 			},
 		})
 		for _, o := range batch {

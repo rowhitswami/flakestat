@@ -3,6 +3,7 @@ package store
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -27,20 +28,20 @@ import (
 // would produce a different key and defeat the whole point.
 
 // ExecutionScope is where an execution happened, as far as anything can tell.
-//
-// The CI fields are qualifiers, not requirements: every provider names its
-// pipelines and jobs differently and some name nothing at all, so a missing
-// field weakens the key rather than invalidating it. The report fields carry
-// the weight when no provider is present.
 type ExecutionScope struct {
-	// Provider, Run, Job, Shard and Attempt come from the recognized CI
-	// dimensions. Attempt is what keeps a legitimate retry distinguishable
-	// from a duplicate: a re-run is a real second execution and must count.
-	Provider string
-	Run      string
-	Job      string
-	Shard    string
-	Attempt  string
+	// Context is the recorded dimensions of the execution: platform, runtime,
+	// CI provider, run, job, attempt, shard and any user-supplied axis.
+	//
+	// The whole set is used rather than a chosen few, because a provider's
+	// idea of a job may be coarser than an execution. GitHub reports the same
+	// GITHUB_JOB for every leg of a matrix, so three platforms ingesting under
+	// one run and one job are distinguishable only by what they recorded about
+	// themselves. Anything that changes the recorded context makes this a
+	// different execution.
+	//
+	// The attempt inside it is what keeps a legitimate retry distinguishable
+	// from a duplicate: a re-run really did execute the tests again.
+	Context map[string]string
 
 	// Report is the cleaned path the results were read from and Digest a hash
 	// of its bytes.
@@ -53,6 +54,27 @@ type ExecutionScope struct {
 	Digest string
 }
 
+// canonical renders the context in a fixed order so that map iteration cannot
+// change a key.
+func (s ExecutionScope) canonical() string {
+	keys := make([]string, 0, len(s.Context))
+	for k, v := range s.Context {
+		if v != "" {
+			keys = append(keys, k)
+		}
+	}
+	sort.Strings(keys)
+
+	var b strings.Builder
+	for _, k := range keys {
+		b.WriteString(k)
+		b.WriteByte('=')
+		b.WriteString(s.Context[k])
+		b.WriteByte('\n')
+	}
+	return b.String()
+}
+
 // Digest hashes report bytes for use as part of an execution scope.
 func Digest(data []byte) string {
 	sum := sha256.Sum256(data)
@@ -62,8 +84,7 @@ func Digest(data []byte) string {
 // Empty reports whether the scope identifies nothing, in which case no key can
 // be formed and the observation must be kept unconditionally.
 func (s ExecutionScope) Empty() bool {
-	return s.Provider == "" && s.Run == "" && s.Job == "" &&
-		s.Shard == "" && s.Attempt == "" && s.Report == "" && s.Digest == ""
+	return s.Report == "" && s.Digest == "" && s.canonical() == ""
 }
 
 // ExecutionKey identifies the ordinal-th execution of testID within scope.
@@ -78,12 +99,11 @@ func ExecutionKey(scope ExecutionScope, testID string, ordinal int) string {
 	}
 
 	// Length-prefixed so that no combination of field values can be rearranged
-	// into another valid key. Without it, run "1" job "23" and run "12" job "3"
-	// would hash identically.
+	// into another valid key. Without it a report path ending in one character
+	// and a digest beginning with another would be interchangeable.
 	var b strings.Builder
 	for _, part := range []string{
-		scope.Provider, scope.Run, scope.Job, scope.Shard, scope.Attempt,
-		scope.Report, scope.Digest, testID, strconv.Itoa(ordinal),
+		scope.canonical(), scope.Report, scope.Digest, testID, strconv.Itoa(ordinal),
 	} {
 		b.WriteString(strconv.Itoa(len(part)))
 		b.WriteByte(':')
