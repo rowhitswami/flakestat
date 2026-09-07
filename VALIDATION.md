@@ -6,6 +6,69 @@ configuration, and what each outcome is allowed to mean — is fixed in advance.
 Deciding what counts as success after seeing results is how a detector gets
 graded on noise.
 
+## Results at a glance
+
+Three external subjects and this project's own suite, all scored with one
+frozen build. Written after every experiment finished; the contract that
+grades them was committed before any of them ran.
+
+| Subject | Ground truth established by | Outcome |
+| --- | --- | --- |
+| **A** `playwright-flaky-tests` | fixture author, purpose-built | 10 intentional flakes detected at high confidence; 5 controls clean at 0/100 |
+| **B** `techstories-demo-app` | fixture author, app-shaped, real PostgreSQL | 5 flaky, 5 consistently-failing, 57 stable, **0 suspect** |
+| **C** `ConduitIO/conduit` | the project's own contributors | `flaky` 0.67 before their fix, `stable` 0.00 after |
+| **self** flakestat's own CI | none known | 293 tests, 10,305 observations, all stable |
+
+**No bug row in the contract ever fired.** Nine always-failing tests across A and
+B were called `consistently-failing`, not flaky. No healthy test was flagged
+anywhere. No association was reported from evidence below the thresholds.
+
+### What each subject is worth
+
+**C is the load-bearing result.** The defect was documented by Conduit's
+contributors, the tests were named by them, and the repair was written by them —
+all before this tool was pointed at the repository. flakestat was handed
+observations from both sides of a commit it had no part in and separated them:
+three of the four in-scope tests `flaky` at 0.67 with high confidence at
+`612f5bfb`, and `stable` at 0.00 at `9e00e594`, under a protocol identical on
+both sides and fixed in advance.
+
+**A and B establish that the classifier separates cleanly** when ground truth is
+known — including the distinction that motivates the whole design. Nine tests
+failed 100 out of 100 times. A detector ranking by failure rate would put all
+nine at the top of a flaky list; flakestat scored them 0.00 and filed them
+separately as broken.
+
+**The self-measurement is specificity on real data.** 293 tests over 33 runs
+across three platforms, with branch, os, arch and runtime all varying — the exact
+conditions under which earlier versions of the scorer manufactured phantom
+transitions. Zero false positives.
+
+### What this does not establish
+
+**Sensitivity below roughly 5%.** Three tests across the subjects fired once or
+twice in a hundred runs and were correctly left `stable`; that is the right
+reading of the evidence, and it is also the boundary at which this sampling
+approach stops being the right instrument.
+
+**Discovery of unknown flakiness.** Every flake found here was already known to
+someone. flakestat has not yet surfaced a flake nobody had filed, and nothing in
+this report should be read as evidence that it can.
+
+### Two results that are worth more than the pass rate
+
+**A null arm was published.** The pre-registered `-count=1` protocol found zero
+failures in a hundred executions of a suite its own maintainers had documented as
+flaky. Reporting only the `-count=3` arm — which found everything — would have
+been exactly the adjustment this contract exists to police. Both are above.
+
+**A contaminated run was discarded rather than reported.** Subject B was first
+run with backup copies of the working tests left inside the project, which Jest
+collected; thirteen identities ended up with two implementations feeding one
+name. That run is void and was re-run clean. flakestat had been right about the
+corrupt input too — one identity genuinely alternated on identical code, which is
+flakiness — but a result obtained from a broken fixture is not a result.
+
 ## The failure mode this guards against
 
 The tempting protocol is "run flakestat against real repositories until it
