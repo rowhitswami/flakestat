@@ -1,4 +1,10 @@
-# flakestat
+<p align="center">
+  <img src="https://rowhitswami.github.io/flakestat/assets/logo-wordmark.png" alt="flakestat" width="440">
+</p>
+
+<p align="center"><a href="https://rowhitswami.github.io/flakestat/"><b>Documentation</b></a></p>
+
+---
 
 Find flaky tests in any language. No SaaS, no account, no data leaving your machine.
 

@@ -36,7 +36,8 @@ classifiers = [
 dependencies = []
 
 [project.urls]
-Homepage = "https://github.com/rowhitswami/flakestat"
+Homepage = "https://rowhitswami.github.io/flakestat/"
+Documentation = "https://rowhitswami.github.io/flakestat/"
 Issues = "https://github.com/rowhitswami/flakestat/issues"
 Source = "https://github.com/rowhitswami/flakestat"
 

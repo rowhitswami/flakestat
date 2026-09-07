@@ -17,7 +17,7 @@
     "test-retry",
     "quarantine"
   ],
-  "homepage": "https://github.com/rowhitswami/flakestat#readme",
+  "homepage": "https://rowhitswami.github.io/flakestat/",
   "bugs": {
     "url": "https://github.com/rowhitswami/flakestat/issues"
   },
