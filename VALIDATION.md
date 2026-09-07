@@ -159,6 +159,113 @@ both commits, so C2 has every opportunity to flake that C1 does.
 This is the only subject where catching a real flake is genuinely attempted. It
 is a bonus result, not a requirement.
 
+## Protocol amendments
+
+Recorded as additions with their reasoning. Earlier entries are left standing,
+because a preregistration that gets edited is not one.
+
+### 2026-09-07 — C2 tightened to the exact repair commit
+
+Originally C2 was `HEAD`. That answers a weaker question than intended: if C1
+flakes and HEAD does not, the honest conclusion is only *something between
+these commits removed the behaviour*, not *the documented repair removed it*.
+Hundreds of unrelated commits sit in between.
+
+The comparison is now against the repair itself, with `HEAD` retained
+separately as a durability check rather than as the contrast:
+
+    C1  612f5bfb  parent of the repair          documented flaky
+    C2  9e00e594  the repair, #2537             documented fixed
+    C3  104f91a9  HEAD, optional                is the repair still holding?
+
+C1 -> C2 differ only by that commit, so a difference in behaviour is
+attributable to it. C1 -> C3 answers a separate and also useful question.
+
+No Conduit execution had been run when this was written.
+
+### 2026-09-07 — Conduit invocation stated explicitly
+
+    go test -count=1 -shuffle=on <packages>
+
+`-shuffle=on` alone already defeats the test cache in this invocation, but
+`-count=1` states the experimental requirement rather than relying on that:
+**execute the tests, never reuse a cached result.**
+
+`go test` prints the shuffle seed it used. That seed is recorded per execution,
+so any failure carries
+
+    commit + runtime + test + shuffle seed + failure message
+
+and is reproducible by a third party, rather than being "run 47 failed".
+
+### 2026-09-07 — a defect found before the freeze, and how it was handled
+
+Checking the skip invariant surfaced an unrelated bug: the history strip in
+`explain` grouped transitions by branch while scoring grouped them by execution
+context, so the rendered evidence printed "flip on identical code" at every
+platform boundary. Verdicts were correct; the evidence displayed beneath them
+was not.
+
+It cannot affect any external subject, all of which run on a single machine
+with one platform, one runtime and one branch — branch grouping and execution
+context coincide there, so the strip and the verdict agree by construction. It
+was fixed before the freeze rather than during the experiments.
+
+Subject A was already executing against the pre-fix build when this was found.
+Rather than restart it, note that execution and measurement are separable here:
+the raw evidence is the JUnit XML on disk, and scoring happens afterwards. Every
+subject's XML is **re-ingested and re-scored with the frozen build** before any
+result is reported, so all three subjects are measured by one implementation
+regardless of which build produced the XML.
+
+## Frozen implementation
+
+Fixed for the duration of A, B and C. If a genuine correctness bug is found
+mid-experiment, affected results are invalidated, the build gets a new SHA
+recorded here, and every affected subject is re-scored from its retained XML.
+Nothing is quietly patched and continued.
+
+    flakestat commit   465faaec
+    flakestat version  dev (built from source)
+    go                 go1.25.4
+    host               Darwin arm64
+
+    subject A          uppadhyayraj/playwright-flaky-tests @ dd4738a4
+                       npx playwright test --workers=1 --retries=0 --reporter=junit
+                       CI unset, so the repo's own config yields retries=0
+
+    subject B          DataDog/techstories-demo-app @ (recorded when run)
+
+    subject C          ConduitIO/conduit @ 612f5bfb / 9e00e594 / 104f91a9
+                       go test -count=1 -shuffle=on <in-scope packages>
+                       repo targets go 1.25.8
+
+## Descriptive metrics
+
+Captured for every subject and reported alongside the verdict. These describe
+behaviour; they are **not** success criteria and must not be used to move the
+bar set above.
+
+    observations until first contradictory outcome
+    observations until suspect
+    observations until flaky
+    final pass/fail counts
+    final classification, score and confidence
+
+Detection latency is the interesting one, and is a far more meaningful property
+of a detector than whether a flake score resembles an advertised failure
+probability. Reported per test:
+
+    test_random_failure
+      first failure             run 7
+      first contradictory pair  run 7
+      reached suspect           run 11
+      reached flaky             run 24
+      final                     74 pass / 26 fail, flaky, high confidence
+
+A verdict snapshot is written after every execution, so these are recovered
+from the record rather than estimated afterwards.
+
 ## Stopping rule
 
 For each subject, stop at whichever comes first:
