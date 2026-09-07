@@ -88,9 +88,27 @@ func TestHostReportsThisMachine(t *testing.T) {
 	}
 }
 
+// isolateCI clears every variable this package knows how to read, so that a
+// test describes exactly one CI environment and nothing else.
+//
+// Without it these tests only pass on a laptop. Inside GitHub Actions
+// GITHUB_ACTIONS=true is already set, so "detect gitlab" silently becomes
+// "detect whichever provider happens to be listed first".
+func isolateCI(t *testing.T) {
+	t.Helper()
+	for _, p := range providers {
+		for _, name := range []string{p.detect, p.runID, p.jobID, p.worker, p.shard} {
+			if name != "" {
+				t.Setenv(name, "")
+			}
+		}
+	}
+}
+
 // Only whitelisted variables are read. Scraping the process environment would
 // eventually capture credentials.
 func TestDetectCIReadsOnlyKnownVariables(t *testing.T) {
+	isolateCI(t)
 	t.Setenv("GITHUB_ACTIONS", "true")
 	t.Setenv("GITHUB_RUN_ID", "21948210")
 	t.Setenv("GITHUB_JOB", "test")
@@ -113,6 +131,7 @@ func TestDetectCIReadsOnlyKnownVariables(t *testing.T) {
 }
 
 func TestDetectCIRecognizesShardedProviders(t *testing.T) {
+	isolateCI(t)
 	t.Setenv("GITLAB_CI", "true")
 	t.Setenv("CI_PIPELINE_ID", "999")
 	t.Setenv("CI_NODE_INDEX", "3")
@@ -126,7 +145,20 @@ func TestDetectCIRecognizesShardedProviders(t *testing.T) {
 	}
 }
 
+// Nested or emulated environments can expose two providers at once. The first
+// match wins, which is arbitrary but must at least be deliberate and stable.
+func TestDetectCIPrefersTheFirstMatchingProvider(t *testing.T) {
+	isolateCI(t)
+	t.Setenv("GITHUB_ACTIONS", "true")
+	t.Setenv("GITLAB_CI", "true")
+
+	if got := DetectCI(); got[CIProvider] != "github" {
+		t.Errorf("provider = %q, want the first listed provider to win", got[CIProvider])
+	}
+}
+
 func TestDetectCIRequiresTheExpectedValue(t *testing.T) {
+	isolateCI(t)
 	// GitHub sets GITHUB_ACTIONS=true; a stray empty or false value must not
 	// be read as "running in GitHub Actions".
 	t.Setenv("GITHUB_ACTIONS", "false")
@@ -136,9 +168,7 @@ func TestDetectCIRequiresTheExpectedValue(t *testing.T) {
 }
 
 func TestInCIIsFalseOutsideCI(t *testing.T) {
-	for _, v := range []string{"GITHUB_ACTIONS", "GITLAB_CI", "CIRCLECI", "BUILDKITE", "JENKINS_URL", "TF_BUILD"} {
-		t.Setenv(v, "")
-	}
+	isolateCI(t)
 	if InCI() {
 		t.Error("InCI should be false when no provider is detected")
 	}
