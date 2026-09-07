@@ -280,6 +280,31 @@ jobs:
           echo "--- full report ---"
           /tmp/flakestat report --no-color --top 20 || true
 
+      # An execution recorded twice must not become two executions. This is
+      # the merge path specifically, which never passes through ingest, so
+      # nothing but reading enforces it.
+      #
+      # The direction of the harm is worth stating: a duplicate carries its
+      # original's timestamp, sorts beside it and always agrees with itself,
+      # so duplication makes a flaky test look stable rather than the reverse.
+      - name: Re-collecting the same artifacts must not change the evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          before=$(/tmp/flakestat report --format json)
+
+          # Exactly what collecting one job's artifact twice would produce.
+          cat .flakestat/runs.ndjson .flakestat/runs.ndjson > doubled.ndjson
+          mv doubled.ndjson .flakestat/runs.ndjson
+
+          after=$(/tmp/flakestat report --format json)
+          if [ "$before" != "$after" ]; then
+            echo "::error::a duplicated observation log changed the conclusions"
+            diff <(echo "$before") <(echo "$after") | head -40 || true
+            exit 1
+          fi
+          echo "duplicated log ($(wc -l < .flakestat/runs.ndjson) lines) produced identical conclusions"
+
       - name: Report
         shell: bash
         run: /tmp/flakestat ci-report --step-summary --max-rows 20 || true
