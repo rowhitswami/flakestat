@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://rowhitswami.github.io/flakestat/assets/logo-lockup.png" alt="flakestat" width="460">
+  <img src="https://flakestat.com/assets/logo-lockup.png" alt="flakestat" width="460">
 </p>
 
 <p align="center">
@@ -8,9 +8,9 @@
 </p>
 
 <p align="center">
-  <a href="https://rowhitswami.github.io/flakestat/"><b>Documentation</b></a> ·
-  <a href="https://rowhitswami.github.io/flakestat/docs/quickstart/">Quickstart</a> ·
-  <a href="https://rowhitswami.github.io/flakestat/docs/commands/">Commands</a> ·
+  <a href="https://flakestat.com/"><b>Documentation</b></a> ·
+  <a href="https://flakestat.com/docs/quickstart/">Quickstart</a> ·
+  <a href="https://flakestat.com/docs/commands/">Commands</a> ·
   <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
 </p>
 
@@ -38,7 +38,7 @@ go install github.com/rowhitswami/flakestat/cmd/flakestat@latest
 ```
 
 Also available as a [container](https://github.com/rowhitswami/flakestat/pkgs/container/flakestat),
-a [GitHub Action](https://rowhitswami.github.io/flakestat/docs/ci/github-actions/), and
+a [GitHub Action](https://flakestat.com/docs/ci/github-actions/), and
 [prebuilt binaries](https://github.com/rowhitswami/flakestat/releases) for macOS,
 Linux and Windows.
 
@@ -90,7 +90,7 @@ report, flakestat can read it.
 
 ## Documentation
 
-The [documentation site](https://rowhitswami.github.io/flakestat/) covers
+The [documentation site](https://flakestat.com/) covers
 everything: every command and flag, CI recipes, how scoring works, how to keep
 a shared history, and how flakestat avoids claiming more than the evidence
 supports.

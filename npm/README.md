@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://rowhitswami.github.io/flakestat/assets/logo-lockup.png" alt="flakestat" width="420">
+  <img src="https://flakestat.com/assets/logo-lockup.png" alt="flakestat" width="420">
 </p>
 
-<p align="center"><a href="https://rowhitswami.github.io/flakestat/"><b>Documentation</b></a></p>
+<p align="center"><a href="https://flakestat.com/"><b>Documentation</b></a></p>
 
 ---
 
