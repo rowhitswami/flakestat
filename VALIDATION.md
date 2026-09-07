@@ -110,8 +110,54 @@ shared `math/rand` state.
 Being Go, `gotestsum --junitfile` produces JUnit XML with no modification to
 the repository.
 
-This is the only subject where catching a wild flake is genuinely attempted.
-It is a bonus result, not a requirement.
+#### Amended before running: a before/after design
+
+Inspecting the repository first — as the contract intends, since the protocol
+must be fixed before results exist — turned up something better than the
+original plan.
+
+The issue is still open, but the named tests have since been repaired by the
+maintainers in an identifiable series of commits, and the project added its own
+`flake-hunt.yml` job that repeats the suite nightly. At `HEAD` those tests are
+expected to be clean, so pointing flakestat there would produce silence that
+means nothing.
+
+So subject C is run at two commits instead of one:
+
+    C1  612f5bfb  the parent of "test: deflake known-flaky tests from #2534"
+                  (#2537, 2026-07-05). Ground truth: documented flaky.
+    C2  104f91a9  current HEAD, after that fix and the follow-up backlog
+                  commit (#2542). Ground truth: documented fixed.
+
+Both use the identical protocol. That converts a one-sided test into a
+controlled comparison whose ground truth — both the defect and the repair —
+was established by the project's own contributors, with no involvement from
+this tool:
+
+    detected at C1, silent at C2   -> strong positive validation
+    silent at both                 -> inconclusive for sensitivity
+    flagged at C2                  -> false positive, a bug
+    silent at C1 but flagged at C2 -> a bug, and a serious one
+
+Scope is limited to the packages that commit touched, which hold four of the
+seven named tests:
+
+    pkg/plugin/processor/builtin/internal/diff/lcs   TestRandOld
+    pkg/schemaregistry                               TestClient_NotFound
+                                                     TestClient_CacheMiss
+                                                     TestClient_CacheHit
+
+**Executions use `-shuffle=on`, one fresh process each.** These are
+order-dependent failures rooted in process-global state — shared `math/rand`,
+a shared in-memory registry — so Go's default declaration order would produce
+the same outcome every run and no run-to-run variation to observe. Shuffling
+samples the orderings real CI and real developers actually encounter, and it is
+what the project's own flake-hunt job does. This is sampling the subject's
+behaviour, not provoking it: no test is modified, and the same protocol runs at
+both commits, so C2 has every opportunity to flake that C1 does.
+
+This is the only subject where catching a real flake is genuinely attempted. It
+is a bonus result, not a requirement.
 
 ## Stopping rule
 
@@ -157,6 +203,12 @@ states an expectation as though it were an observation:
 
 | Subject | State |
 | --- | --- |
-| A. playwright-flaky-tests | not started |
+| A. playwright-flaky-tests | running — 100 executions, retries=0, workers=1 |
 | B. techstories-demo-app | not started |
-| C. ConduitIO/conduit | not started |
+| C1. conduit @ 612f5bfb (pre-fix) | not started |
+| C2. conduit @ 104f91a9 (post-fix) | not started |
+
+Subject A is pinned at `dd4738a4`. Its "stable" control navigates to the live
+`playwright.dev`, so a control failure there is ambiguous between a tool error
+and a genuine network event; raw failure messages are kept so the two can be
+told apart rather than assumed.
