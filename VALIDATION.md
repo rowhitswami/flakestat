@@ -247,6 +247,80 @@ against an advertised probability.
 The honest reading: these two are **inconclusive for sensitivity**. A detector
 cannot be graded on an event that occurred twice in its input.
 
+
+## Subject C — results
+
+Identical protocol at both commits: 100 independent executions, fresh process
+each, `-shuffle=<seed>` with a distinct recorded seed per execution.
+
+| | `-count=1` | `-count=3` |
+| --- | --- | --- |
+| **C1** `612f5bfb` — documented flaky | 0/100 runs had failures | **100/100 runs had failures** |
+| **C2** `9e00e594` — the repair | 0/100 | **0/100** |
+
+### What flakestat said
+
+At `-count=3`, scored with the frozen build:
+
+| Test | External evidence | C1 observed | C1 verdict | C2 observed | C2 verdict |
+| --- | --- | --- | --- | --- | --- |
+| `TestClient_NotFound` | documented flaky, #2534 | 200/300 | `flaky` 0.67 high | 0/300 | `stable` 0.00 |
+| `TestClient_CacheMiss` | documented flaky, #2534 | 200/300 | `flaky` 0.67 high | 0/300 | `stable` 0.00 |
+| `TestClient_CacheHit` | documented flaky, #2534 | 200/300 | `flaky` 0.67 high | 0/300 | `stable` 0.00 |
+| `TestRandOld` | documented flaky, #2534 | 2/300 | `stable` 0.01 \* | 0/300 | `stable` 0.00 |
+| `TestAlgosOld` (and subtests) | not implicated | 0/300 | `stable` 0.00 | 0/300 | `stable` 0.00 |
+
+\* two contradictory outcomes in three hundred; see below.
+
+**This is the contract's strongest row: detected at C1, silent at C2.** Three of
+the four in-scope tests were called flaky at high confidence before the repair
+and stable after it, under a protocol that was identical on both sides and fixed
+before either ran.
+
+The value is in who established what. Conduit's contributors documented the
+defect, named the tests, and wrote the fix — all before this tool was pointed at
+their repository. flakestat was handed observations from both sides of a commit
+it had no part in, and separated them.
+
+### Detection latency
+
+`flaky` by **run 2** for all three. With `-count=3` each execution contributes
+three observations, so run 2 is the first point at which six scored runs exist —
+one above the `min_runs` floor of five. Nothing was classified earlier than the
+evidence allowed.
+
+### `-count=1` found nothing, and that is the finding
+
+The pre-registered protocol said `-count=1`. Under it, C1 produced **zero**
+failures in a hundred executions of a suite its own maintainers had documented
+as flaky.
+
+The reason is in the defect: these are process-global-state bugs — a shared
+in-memory registry, shared `math/rand` state — so the pollution has to happen
+*within* one process before a later test can trip over it. One repetition per
+process never gets there, however many processes you start. Conduit's own
+`flake-hunt.yml` uses `-count=3 -shuffle=on` for exactly this reason, and the
+original protocol under-specified by not matching it.
+
+Both were run and both are reported. The `-count=1` result is not a flakestat
+failure and not a success: it is a **detector correctly staying silent on an
+input that contained no contradictory outcome**, and a reminder that a sampling
+protocol can be too weak to see a defect that is definitely there.
+
+Changing the repetition count after seeing a null result is the kind of
+adjustment this contract exists to police, so the honest handling is to publish
+both arms rather than the flattering one, and to note that `-count=3` was
+adopted from the project's own reproduction recipe rather than tuned until
+something appeared.
+
+### `TestRandOld`: two failures in three hundred
+
+Named in the issue and repaired by the same commit, but it fired twice in three
+hundred observations here and flakestat scored it 0.01 and left it `stable`.
+That is the right reading of the evidence in hand — and **inconclusive for
+sensitivity**, not a miss. The shared `math/rand` dependency it exercises is
+order-sensitive in a way that a hundred shuffles happened to trip only twice.
+
 ## Protocol amendments
 
 Recorded as additions with their reasoning. Earlier entries are left standing,
@@ -417,8 +491,8 @@ states an expectation as though it were an observation:
 | --- | --- |
 | A. playwright-flaky-tests | **complete** — see results below |
 | B. techstories-demo-app | not started |
-| C1. conduit @ 612f5bfb (pre-fix) | not started |
-| C2. conduit @ 104f91a9 (post-fix) | not started |
+| C1. conduit @ 612f5bfb (pre-fix) | **complete** |
+| C2. conduit @ 9e00e594 (the repair) | **complete** |
 
 Subject A is pinned at `dd4738a4`. Its "stable" control navigates to the live
 `playwright.dev`, so a control failure there is ambiguous between a tool error
