@@ -252,9 +252,16 @@ jobs:
           echo "$out" | grep -q "os=windows" \
             || { echo "::error::expected an association with os=windows"; exit 1; }
 
-          # Correlation, never causation.
-          echo "$out" | grep -q "not an established cause" \
-            || { echo "::error::association wording must not imply causation"; exit 1; }
+          # Correlation, never causation. Which caveat appears depends on how
+          # many dimensions happen to be associated, so accept either and then
+          # assert the thing that actually matters: no causal claim anywhere.
+          echo "$out" | grep -qE "not an established cause|cannot tell which one matters" \
+            || { echo "::error::association is missing its correlation caveat"; exit 1; }
+
+          if echo "$out" | grep -qiE "caused by|because of|is responsible for"; then
+            echo "::error::association wording implied causation"
+            exit 1
+          fi
 
       - name: The healthy suite should stay silent
         shell: bash
