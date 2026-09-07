@@ -77,9 +77,20 @@ jobs:
           # The controlled differential lives behind a build tag so it never
           # runs in the normal suite. Its whole job is to prove the pipeline
           # carries platform context end to end.
-          gotestsum --junitfile reports/platform.xml --format none --             -tags ciplatform ./internal/platformcheck/ || true
+          #
+          # It is repeated because one execution per platform proves nothing:
+          # dimension analysis requires MinGroup observations inside a value and
+          # MinOthers outside it, both 10. Twelve per job clears that with room
+          # to spare, and gotestsum writes each repetition as its own testcase.
+          gotestsum --junitfile reports/platform.xml --format none -- \
+            -tags ciplatform -count=12 ./internal/platformcheck/ || true
 
-          "${RUNNER_TEMP}/flakestat" ingest 'reports/*.xml'             --dimension "os=${OS}"             --dimension "runtime.name=go"             --dimension "runtime.version=$(go env GOVERSION)"             --commit "${GITHUB_SHA}"             --branch "${GITHUB_REF_NAME}"
+          "${RUNNER_TEMP}/flakestat" ingest 'reports/*.xml' \
+            --dimension "os=${OS}" \
+            --dimension "runtime.name=go" \
+            --dimension "runtime.version=$(go env GOVERSION)" \
+            --commit "${GITHUB_SHA}" \
+            --branch "${GITHUB_REF_NAME}"
 
       - name: Upload observations
         if: always()
