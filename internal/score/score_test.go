@@ -1,6 +1,7 @@
 package score
 
 import (
+	"fmt"
 	"math"
 	"strings"
 	"testing"
@@ -579,5 +580,103 @@ func TestSkipsAreCountedSeparately(t *testing.T) {
 	}
 	if r.Runs != 4 {
 		t.Errorf("Runs = %d, want 4 (skips excluded from scoring)", r.Runs)
+	}
+}
+
+// dimSeries builds a history where observations alternate between execution
+// contexts, as a merged CI matrix does.
+func dimSeries(pattern string, dims []map[string]string, commit string) []store.Observation {
+	base := time.Date(2026, 9, 7, 10, 0, 0, 0, time.UTC)
+	out := make([]store.Observation, 0, len(pattern))
+
+	for i, ch := range pattern {
+		var st junit.Status
+		switch ch {
+		case 'p':
+			st = junit.StatusPass
+		case 'f':
+			st = junit.StatusFail
+		}
+		out = append(out, store.Observation{
+			TS:     base.Add(time.Duration(i) * time.Minute),
+			TestID: "t1", Name: "test_example", Suite: "s", Class: "C",
+			Status: st, Commit: commit, Branch: "main",
+			Dimensions: dims[i%len(dims)],
+		})
+	}
+	return out
+}
+
+// A test that always fails on one platform and always passes on another is
+// deterministic, not flaky. Merging matrix jobs into one series interleaves
+// the platforms and would otherwise read as constant disagreement -- the same
+// phantom-transition bug as interleaved branches, one level up.
+func TestPlatformDifferenceIsNotFlakiness(t *testing.T) {
+	dims := []map[string]string{
+		{"os": "linux"}, {"os": "darwin"}, {"os": "windows"},
+	}
+	// linux pass, darwin pass, windows fail, repeating.
+	r := Score(dimSeries(strings.Repeat("ppf", 10), dims, "onecommit"), Defaults())
+
+	if r.Score != 0 {
+		t.Errorf("Score = %.3f, want 0: each platform agreed with itself", r.Score)
+	}
+	if r.Verdict != ClassStable {
+		t.Errorf("Verdict = %q, want %q for a deterministic platform difference", r.Verdict, ClassStable)
+	}
+	if r.SameCommitFlips != 0 {
+		t.Errorf("SameCommitFlips = %d, want 0: differing platforms are not "+
+			"the test disagreeing with itself", r.SameCommitFlips)
+	}
+}
+
+// Genuine nondeterminism within one platform must still be caught.
+func TestFlakinessWithinAPlatformIsStillDetected(t *testing.T) {
+	dims := []map[string]string{{"os": "windows"}}
+	r := Score(dimSeries("pfpfpfpfpfpf", dims, "onecommit"), Defaults())
+
+	if r.Verdict != ClassFlaky {
+		t.Errorf("Verdict = %q, want %q: the outcome really did oscillate", r.Verdict, ClassFlaky)
+	}
+}
+
+// Runtime version is part of the execution context too.
+func TestRuntimeVersionSeparatesContexts(t *testing.T) {
+	dims := []map[string]string{
+		{"os": "linux", "runtime.version": "3.12"},
+		{"os": "linux", "runtime.version": "3.13"},
+	}
+	r := Score(dimSeries(strings.Repeat("pf", 12), dims, "onecommit"), Defaults())
+
+	if r.Score != 0 {
+		t.Errorf("Score = %.3f, want 0: each runtime agreed with itself", r.Score)
+	}
+}
+
+// Identifiers must not fragment the history: grouping by a CI run id would
+// leave every observation alone in its own context and no transitions anywhere.
+func TestIdentifierDimensionsDoNotFragmentHistory(t *testing.T) {
+	dims := make([]map[string]string, 12)
+	for i := range dims {
+		dims[i] = map[string]string{"os": "linux", "ci.run_id": fmt.Sprintf("run-%d", i)}
+	}
+	r := Score(dimSeries("pfpfpfpfpfpf", dims, "onecommit"), Defaults())
+
+	if r.Transitions == 0 {
+		t.Fatal("history was fragmented by a provenance identifier")
+	}
+	if r.Verdict != ClassFlaky {
+		t.Errorf("Verdict = %q, want %q", r.Verdict, ClassFlaky)
+	}
+}
+
+// Histories recorded before dimensions existed must score exactly as before.
+func TestHistoriesWithoutDimensionsAreUnchanged(t *testing.T) {
+	withDims := Score(dimSeries("pfpfpfpf", []map[string]string{nil}, "c"), Defaults())
+	plain := Score(series("pfpfpfpf", "c"), Defaults())
+
+	if withDims.Score != plain.Score || withDims.Verdict != plain.Verdict {
+		t.Errorf("absent dimensions changed scoring: %.4f/%s vs %.4f/%s",
+			withDims.Score, withDims.Verdict, plain.Score, plain.Verdict)
 	}
 }

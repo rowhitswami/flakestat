@@ -28,6 +28,7 @@ package score
 import (
 	"math"
 	"sort"
+	"strings"
 
 	"github.com/rowhitswami/flakestat/internal/junit"
 	"github.com/rowhitswami/flakestat/internal/store"
@@ -243,10 +244,11 @@ func Score(obs []store.Observation, cfg Config) Result {
 		}
 
 		points = append(points, point{
-			passed: passed,
-			commit: o.Commit,
-			branch: o.Branch,
-			gen:    gen,
+			passed:  passed,
+			commit:  o.Commit,
+			branch:  o.Branch,
+			context: executionContext(o),
+			gen:     gen,
 		})
 		if o.Commit != "" {
 			seenCommits[o.Commit] = struct{}{}
@@ -314,7 +316,32 @@ type point struct {
 	passed bool
 	commit string
 	branch string
-	gen    int // generation: how many distinct commits precede this one
+	// context identifies the execution environment. Two observations are only
+	// comparable when it matches: a Linux pass and a Windows failure are not
+	// the test disagreeing with itself.
+	context string
+	gen     int // generation: how many distinct commits precede this one
+}
+
+// contextDimensions are the axes that make two observations incomparable.
+//
+// Deliberately narrow. Grouping by every dimension would put each observation
+// in its own bucket -- a CI run id alone would do it -- leaving no transitions
+// to measure anywhere. These are the ones that describe where a test ran, and
+// so whether two of its outcomes can meaningfully be compared.
+var contextDimensions = []string{"os", "arch", "runtime.name", "runtime.version"}
+
+// executionContext builds the comparability key for an observation. Absent
+// dimensions yield an empty key, so histories recorded before dimensions
+// existed keep scoring exactly as they did.
+func executionContext(o store.Observation) string {
+	var b strings.Builder
+	b.WriteString(o.Branch)
+	for _, k := range contextDimensions {
+		b.WriteByte(0)
+		b.WriteString(o.Dimensions[k])
+	}
+	return b.String()
 }
 
 // flipRates returns the unweighted and weighted transition rates.
@@ -329,14 +356,14 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64, transi
 		return 0, 0, 0, 0, 0
 	}
 
-	// Preserve first-seen branch order so results are deterministic.
+	// Preserve first-seen order so results are deterministic.
 	groups := map[string][]point{}
 	var order []string
 	for _, p := range points {
-		if _, seen := groups[p.branch]; !seen {
-			order = append(order, p.branch)
+		if _, seen := groups[p.context]; !seen {
+			order = append(order, p.context)
 		}
-		groups[p.branch] = append(groups[p.branch], p)
+		groups[p.context] = append(groups[p.context], p)
 	}
 
 	// Age is counted in generations, so a 100-run burst on one commit keeps
@@ -346,11 +373,12 @@ func flipRates(points []point, cfg Config) (flat, weighted, effN float64, transi
 	var flips int
 	var num, den, sumSqW float64
 
-	for _, branch := range order {
-		g := groups[branch]
+	for _, ctx := range order {
+		g := groups[ctx]
 		if len(g) < 2 {
-			continue // a single observation on a branch proves nothing
+			continue // a single observation in one context proves nothing
 		}
+		branch := g[0].branch
 
 		// Work on the default branch is expected to be sound, so disagreement
 		// there is the trustworthy signal. Failures on a feature branch are
