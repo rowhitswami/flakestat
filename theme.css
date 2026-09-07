@@ -141,7 +141,10 @@ pre code { background: none; padding: 0; font-size: inherit; font-weight: 400; c
 .nav-in { max-width: 1380px; margin: 0 auto; height: 100%; padding: 0 1.4rem;
   display: flex; align-items: center; gap: 1.1rem; }
 .brand { display: flex; align-items: center; flex-shrink: 0; }
-.brand img { height: 34px; width: auto; display: block; }
+/* Assets are trimmed to their ink, so box-centring is optically correct
+   and needs no nudge. 30px of pure glyph reads larger than the 34px the
+   untrimmed file gave, which was 38% empty. */
+.brand img { height: 30px; width: auto; display: block; }
 .brand:hover { text-decoration: none; }
 .nav-links { display: flex; gap: 1.15rem; margin-left: .6rem; font-size: .905rem; }
 .nav-links a { color: var(--fg-2); font-weight: 500; }
