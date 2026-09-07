@@ -86,6 +86,12 @@
   var bar = $('#progress');
   var tocLinks = $$('.toc a');
   var heads = tocLinks.length ? $$('.content h2[id], .content h3[id]') : [];
+
+  // On the single docs page the sidebar is the table of contents, so it gets
+  // the same treatment: highlight whichever section the reader is inside.
+  var sideLinks = $$('.sidebar a[data-anchor]');
+  var sections = sideLinks.length ? $$('.content section[id]') : [];
+
   function onScroll() {
     if (bar) {
       var h = document.documentElement.scrollHeight - innerHeight;
@@ -96,6 +102,15 @@
       heads.forEach(function (el) { if (el.offsetTop <= y) cur = el; });
       tocLinks.forEach(function (a) {
         a.classList.toggle('on', a.getAttribute('href') === '#' + cur.id);
+      });
+    }
+    if (sections.length) {
+      var s0 = sections[0], sy = scrollY + 140;
+      sections.forEach(function (el) { if (el.offsetTop <= sy) s0 = el; });
+      sideLinks.forEach(function (a) {
+        var on = a.dataset.anchor === s0.id;
+        a.classList.toggle('on', on);
+        if (on) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
       });
     }
   }
@@ -207,13 +222,15 @@
     var seqEl = $('.seq', demo), MIN_RUNS = 5, FLAKY = 0.10, SUSPECT = 0.05;
     var state = 'PPFPPFPPFPPF'.split('');
 
+    // Ported from internal/score/score.go. z is the one-sided 80% bound the
+    // binary uses -- not 1.96 -- and the shape of the expression matches it
+    // term for term, so the numbers shown here are the numbers you get.
     function wilson(p, n) {
       if (n <= 0) return 0;
-      var z = 1.96, z2 = z * z;
-      var d = 1 + z2 / n;
-      var c = p + z2 / (2 * n);
-      var m = z * Math.sqrt((p * (1 - p) + z2 / (4 * n)) / n);
-      return Math.max(0, (c - m) / d);
+      var z = 0.8416, z2 = z * z;
+      var centre = (p + z2 / (2 * n)) / (1 + z2 / n);
+      var margin = (z / (1 + z2 / n)) * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n));
+      return Math.max(0, centre - margin);
     }
     function evaluate(seq) {
       var scored = seq.filter(function (c) { return c !== 'S'; });
@@ -228,7 +245,9 @@
       if (scored.length < MIN_RUNS) verdict = 'insufficient-data';
       else if (fails === scored.length) verdict = 'consistently-failing';
       else if (lower >= FLAKY) verdict = 'flaky';
-      else if (lower >= SUSPECT) verdict = 'suspect';
+      // Suspect deliberately uses the point estimate rather than the bound:
+      // it is the "worth a look" bucket, where being early beats being sure.
+      else if (score >= SUSPECT) verdict = 'suspect';
       else verdict = 'stable';
       return { verdict: verdict, score: score, lower: lower, trans: trans, flips: flips,
                passes: passes, fails: fails, runs: scored.length };
@@ -238,7 +257,7 @@
       if (r.verdict === 'insufficient-data') return 'Only ' + r.runs + ' scored run(s), below the ' + MIN_RUNS + ' needed before any verdict is claimed.';
       if (r.verdict === 'consistently-failing') return 'Fails every time. That is broken, not flaky — the score is zero because the outcome never disagrees with itself.';
       if (r.verdict === 'flaky') return 'Changed answer ' + r.flips + ' time(s) across ' + r.trans + ' comparison(s). Even the lower bound, ' + r.lower.toFixed(2) + ', clears the ' + FLAKY + ' threshold.';
-      if (r.verdict === 'suspect') return 'Some disagreement, but the lower bound (' + r.lower.toFixed(2) + ') sits below the ' + FLAKY + ' flaky threshold. Worth watching.';
+      if (r.verdict === 'suspect') return 'Disagreed ' + r.flips + ' time(s) in ' + r.trans + ' comparison(s). The point estimate clears ' + SUSPECT + ', but the lower bound (' + r.lower.toFixed(2) + ') does not reach ' + FLAKY + ' — worth watching, not worth a ticket.';
       return 'Changed answer ' + r.flips + ' time(s) across ' + r.trans + ' comparison(s) — below the ' + SUSPECT + ' threshold once sample size is accounted for.';
     }
     function draw() {

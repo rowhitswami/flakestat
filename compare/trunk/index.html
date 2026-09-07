@@ -43,10 +43,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <a class="brand" href="/flakestat/" aria-label="flakestat home">
-      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
+      <img src="/flakestat/assets/logo-text.png" alt="flakestat" width="150" height="38"
            data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/quickstart/">Docs</a><a href="/flakestat/docs/commands/">Commands</a><a href="/flakestat/compare/trunk/">Compare</a><a href="/flakestat/docs/faq/">FAQ</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/flakestat/docs/">Docs</a><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -60,7 +60,7 @@
   </div>
 </header>
 
-<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/flakestat/docs/install/">Install</a><a href="/flakestat/docs/quickstart/">Quickstart</a><a href="/flakestat/docs/reading-a-report/">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/flakestat/docs/hunting/">Hunting locally</a><a href="/flakestat/docs/history/">History over time</a><a href="/flakestat/docs/dimensions/">Recording context</a><a href="/flakestat/docs/ci-gate/">Gating CI</a><a href="/flakestat/docs/quarantine/">Unblocking the pipeline</a><a href="/flakestat/docs/explain/">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/flakestat/docs/ci/github-actions/">GitHub Actions</a><a href="/flakestat/docs/ci/gitlab/">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/flakestat/docs/commands/">Commands</a><a href="/flakestat/docs/config/">Configuration</a><a href="/flakestat/docs/scoring/">How scoring works</a><a href="/flakestat/docs/runners/">Supported runners</a><a href="/flakestat/docs/faq/">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/flakestat/compare/trunk/" aria-current="page">vs Trunk</a><a href="/flakestat/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/flakestat/">Home</a><span>/</span><span>Compare</span><span>/</span><span>flakestat vs Trunk Flaky Tests</span></nav><h1>flakestat vs Trunk Flaky Tests</h1><p class="lede">An honest comparison, including the cases where Trunk Flaky Tests is the better choice.</p>
+<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/flakestat/docs/#install" data-anchor="install">Install</a><a href="/flakestat/docs/#quickstart" data-anchor="quickstart">Quickstart</a><a href="/flakestat/docs/#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/flakestat/docs/#hunting" data-anchor="hunting">Hunting locally</a><a href="/flakestat/docs/#history" data-anchor="history">History over time</a><a href="/flakestat/docs/#dimensions" data-anchor="dimensions">Recording context</a><a href="/flakestat/docs/#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="/flakestat/docs/#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="/flakestat/docs/#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/flakestat/docs/#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="/flakestat/docs/#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/flakestat/docs/#commands" data-anchor="commands">Commands</a><a href="/flakestat/docs/#config" data-anchor="config">Configuration</a><a href="/flakestat/docs/#scoring" data-anchor="scoring">How scoring works</a><a href="/flakestat/docs/#runners" data-anchor="runners">Supported runners</a><a href="/flakestat/docs/#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flakestat/flaky-tests/pytest/">pytest</a><a href="/flakestat/flaky-tests/jest/">Jest</a><a href="/flakestat/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/flakestat/compare/trunk/" aria-current="page">vs Trunk</a><a href="/flakestat/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/flakestat/">Home</a><span>/</span><span>Compare</span><span>/</span><span>flakestat vs Trunk Flaky Tests</span></nav><h1>flakestat vs Trunk Flaky Tests</h1><p class="lede">An honest comparison, including the cases where Trunk Flaky Tests is the better choice.</p>
 <p>Trunk is a hosted service with dashboards, org-wide rollups and alerting. It does same-commit detection too, and does the hosted part well. flakestat is a local binary that does the detection part, for free, without your test
 data leaving your machines.</p>
 
@@ -91,7 +91,7 @@ the top of the flaky list wasting the time of whoever is hunting nondeterminism.
 score from three hundred are different claims, and small samples can never reach high confidence.</p>
 <p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
 cluster on Windows — and when <code>os</code> and <code>arch</code> vary together, it says the
-observations cannot tell which one matters. <a href="/flakestat/docs/dimensions/">More on that</a>.</p>
+observations cannot tell which one matters. <a href="/flakestat/docs/#dimensions">More on that</a>.</p>
 
 <h2 id="can-i-use-both">Can I use both?<a class="anchor" href="#can-i-use-both" aria-label="Link to this section">#</a></h2>
 <p>Yes, and it is a reasonable setup: the hosted service for org-wide visibility, flakestat locally
@@ -100,27 +100,27 @@ JUnit XML and neither interferes with the other.</p>
 
 <div class="callout"><b>Try it in two minutes</b>
 <code>brew install rowhitswami/tap/flakestat</code>, then
-<a href="/flakestat/docs/quickstart/">the quickstart</a>. Nothing to sign up for.</div>
-<nav class="pager"><a href="/flakestat/flaky-tests/go/"><span>Previous</span><b>go test</b></a><a class="next" href="/flakestat/compare/buildpulse/"><span>Next</span><b>vs BuildPulse</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice</a><a class="lvl2" href="#when-flakestat-is-the-better-choice">When flakestat is the better choice</a><a class="lvl2" href="#what-flakestat-does-differently">What flakestat does differently</a><a class="lvl2" href="#can-i-use-both">Can I use both?</a></div></div>
+<a href="/flakestat/docs/#quickstart">the quickstart</a>. Nothing to sign up for.</div>
+<nav class="pager"><a href="/flakestat/docs/"><span>Reference</span><b>Full documentation</b></a><a class="next" href="/flakestat/docs/#quickstart"><span>Get going</span><b>Quickstart</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice</a><a class="lvl2" href="#when-flakestat-is-the-better-choice">When flakestat is the better choice</a><a class="lvl2" href="#what-flakestat-does-differently">What flakestat does differently</a><a class="lvl2" href="#can-i-use-both">Can I use both?</a></div></div>
 
 <footer>
   <div class="foot-in">
     <div>
-      <img src="/flakestat/assets/logo-text.png" alt="flakestat"
-           data-light="/flakestat/assets/logo-text.png" data-dark="/flakestat/assets/logo-text-dark.png">
+      <img class="foot-lockup" src="/flakestat/assets/logo-lockup.png" alt="flakestat — find flaky tests in any language"
+           data-light="/flakestat/assets/logo-lockup.png" data-dark="/flakestat/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
     <div class="foot-col"><h6>Docs</h6>
-      <a href="/flakestat/docs/install/">Install</a>
-      <a href="/flakestat/docs/quickstart/">Quickstart</a>
-      <a href="/flakestat/docs/commands/">Commands</a>
-      <a href="/flakestat/docs/scoring/">How scoring works</a>
+      <a href="/flakestat/docs/#install">Install</a>
+      <a href="/flakestat/docs/#quickstart">Quickstart</a>
+      <a href="/flakestat/docs/#commands">Commands</a>
+      <a href="/flakestat/docs/#scoring">How scoring works</a>
     </div>
     <div class="foot-col"><h6>Guides</h6>
-      <a href="/flakestat/docs/ci/github-actions/">GitHub Actions</a>
-      <a href="/flakestat/docs/history/">Tracking over time</a>
-      <a href="/flakestat/docs/ci-gate/">Gating CI</a>
-      <a href="/flakestat/docs/runners/">Supported runners</a>
+      <a href="/flakestat/docs/#github-actions">GitHub Actions</a>
+      <a href="/flakestat/docs/#history">Tracking over time</a>
+      <a href="/flakestat/docs/#ci-gate">Gating CI</a>
+      <a href="/flakestat/docs/#runners">Supported runners</a>
     </div>
     <div class="foot-col"><h6>Project</h6>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>

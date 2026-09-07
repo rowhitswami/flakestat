@@ -8,30 +8,34 @@ Install: `brew install rowhitswami/tap/flakestat`, `npm install --save-dev flake
 
 ## Documentation
 
-- [Install](https://rowhitswami.github.io/flakestat/docs/install/): Install flakestat via Homebrew, npm, pip, Go, a shell script or Docker. Same static binary on macOS, Linux and Windows, x86_64 and arm64.
-- [Quickstart](https://rowhitswami.github.io/flakestat/docs/quickstart/): Two ways to detect flaky tests: run your suite N times locally with hunt, or record CI runs over time with ingest. Working examples for pytest, Jest and go test.
-- [Reading a report](https://rowhitswami.github.io/flakestat/docs/reading-a-report/): What each flakestat verdict means, why score is not a failure rate, and how confidence is derived from the amount of evidence behind a verdict.
-- [Hunting locally](https://rowhitswami.github.io/flakestat/docs/hunting/): Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.
-- [History over time](https://rowhitswami.github.io/flakestat/docs/history/): Record every CI run with flakestat ingest to measure flakiness over time, and choose where to keep the history: committed, an artifact, or a dedicated branch.
-- [Recording context](https://rowhitswami.github.io/flakestat/docs/dimensions/): Attach platform, runtime and CI context to observations with --dimension, and see where failures concentrate, without flakestat ever claiming causation.
-- [Gating CI](https://rowhitswami.github.io/flakestat/docs/ci-gate/): flakestat check is a ratchet: accept today's flakiness in a committed baseline, then fail the build only when a test becomes newly flaky or measurably worse.
-- [Unblocking the pipeline](https://rowhitswami.github.io/flakestat/docs/quarantine/): Generate a skip list your test runner already understands, so flaky tests stop blocking merges while you work the list down.
-- [Explaining a verdict](https://rowhitswami.github.io/flakestat/docs/explain/): flakestat explain shows the full evidence behind one test's verdict: its outcome history, same-commit disagreements, and where its failures concentrate.
-- [GitHub Actions](https://rowhitswami.github.io/flakestat/docs/ci/github-actions/): Add flaky test detection to GitHub Actions: record every run, post a pull request comment, annotate new flakes in the diff and fail only on regressions.
-- [GitLab and others](https://rowhitswami.github.io/flakestat/docs/ci/gitlab/): Use flakestat in GitLab CI, CircleCI, Buildkite, Jenkins or Azure Pipelines. Provider context is detected automatically; nothing is GitHub-specific.
-- [Commands](https://rowhitswami.github.io/flakestat/docs/commands/): Full reference for every flakestat command: init, hunt, ingest, report, explain, check, quarantine, ci-report and compact, with all flags and defaults.
-- [Configuration](https://rowhitswami.github.io/flakestat/docs/config/): Configure flakestat once with .flakestat.json so the day-to-day command is a single word. Flags always override the file.
-- [How scoring works](https://rowhitswami.github.io/flakestat/docs/scoring/): flakestat scores state transitions rather than failure rate and classifies on a lower bound, so a verdict needs evidence rather than a lucky flip.
-- [Supported runners](https://rowhitswami.github.io/flakestat/docs/runners/): flakestat works with any runner that writes JUnit XML: pytest, Jest, Vitest, go test, JUnit 5, TestNG, RSpec, PHPUnit, Playwright, Cypress, xUnit, NUnit and more.
-- [FAQ](https://rowhitswami.github.io/flakestat/docs/faq/): Answers about flaky test detection with flakestat: data privacy, how many runs you need, monorepos and sharding, re-run double counting, and CI overhead.
-- [pytest](https://rowhitswami.github.io/flakestat/flaky-tests/pytest/): Detect flaky tests in pytest. Run the suite repeatedly or record CI runs over time, using the JUnit XML pytest already writes. Free and open source.
-- [Jest](https://rowhitswami.github.io/flakestat/flaky-tests/jest/): Detect flaky tests in Jest. Run the suite repeatedly or record CI runs over time, using the JUnit XML Jest already writes. Free and open source.
-- [go test](https://rowhitswami.github.io/flakestat/flaky-tests/go/): Detect flaky tests in go test. Run the suite repeatedly or record CI runs over time, using the JUnit XML go test already writes. Free and open source.
-- [vs Trunk](https://rowhitswami.github.io/flakestat/compare/trunk/): An honest comparison of flakestat and Trunk Flaky Tests: what each does well, what flakestat deliberately does not do, and which one fits your situation.
-- [vs BuildPulse](https://rowhitswami.github.io/flakestat/compare/buildpulse/): An honest comparison of flakestat and BuildPulse: what each does well, what flakestat deliberately does not do, and which one fits your situation.
+- [Full documentation](https://rowhitswami.github.io/flakestat/docs/): every section on one page.
+  - [Install flakestat](https://rowhitswami.github.io/flakestat/docs/#install): Install flakestat via Homebrew, npm, pip, Go, a shell script or Docker. Same static binary on macOS, Linux and Windows, x86_64 and arm64.
+  - [Quickstart](https://rowhitswami.github.io/flakestat/docs/#quickstart): Two ways to detect flaky tests: run your suite N times locally with hunt, or record CI runs over time with ingest. Working examples for pytest, Jest and go test.
+  - [Reading a report](https://rowhitswami.github.io/flakestat/docs/#reading-a-report): What each flakestat verdict means, why score is not a failure rate, and how confidence is derived from the amount of evidence behind a verdict.
+  - [Hunting flaky tests locally](https://rowhitswami.github.io/flakestat/docs/#hunting): Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.
+  - [Tracking flakiness over time](https://rowhitswami.github.io/flakestat/docs/#history): Record every CI run with flakestat ingest to measure flakiness over time, and choose where to keep the history: committed, an artifact, or a dedicated branch.
+  - [Recording where tests ran](https://rowhitswami.github.io/flakestat/docs/#dimensions): Attach platform, runtime and CI context to observations with --dimension, and see where failures concentrate, without flakestat ever claiming causation.
+  - [Gating CI without a permanently red build](https://rowhitswami.github.io/flakestat/docs/#ci-gate): flakestat check is a ratchet: accept today's flakiness in a committed baseline, then fail the build only when a test becomes newly flaky or measurably worse.
+  - [Unblocking the pipeline](https://rowhitswami.github.io/flakestat/docs/#quarantine): Generate a skip list your test runner already understands, so flaky tests stop blocking merges while you work the list down.
+  - [Explaining a verdict](https://rowhitswami.github.io/flakestat/docs/#explain): flakestat explain shows the full evidence behind one test's verdict: its outcome history, same-commit disagreements, and where its failures concentrate.
+  - [GitHub Actions](https://rowhitswami.github.io/flakestat/docs/#github-actions): Add flaky test detection to GitHub Actions: record every run, post a pull request comment, annotate new flakes in the diff and fail only on regressions.
+  - [GitLab, CircleCI and others](https://rowhitswami.github.io/flakestat/docs/#gitlab): Use flakestat in GitLab CI, CircleCI, Buildkite, Jenkins or Azure Pipelines. Provider context is detected automatically; nothing is GitHub-specific.
+  - [Command reference](https://rowhitswami.github.io/flakestat/docs/#commands): Full reference for every flakestat command: init, hunt, ingest, report, explain, check, quarantine, ci-report and compact, with all flags and defaults.
+  - [Configuration](https://rowhitswami.github.io/flakestat/docs/#config): Configure flakestat once with .flakestat.json so the day-to-day command is a single word. Flags always override the file.
+  - [How scoring works](https://rowhitswami.github.io/flakestat/docs/#scoring): flakestat scores state transitions rather than failure rate and classifies on a lower bound, so a verdict needs evidence rather than a lucky flip.
+  - [Supported test runners](https://rowhitswami.github.io/flakestat/docs/#runners): flakestat works with any runner that writes JUnit XML: pytest, Jest, Vitest, go test, JUnit 5, TestNG, RSpec, PHPUnit, Playwright, Cypress, xUnit, NUnit and more.
+  - [Frequently asked questions](https://rowhitswami.github.io/flakestat/docs/#faq): Answers about flaky test detection with flakestat: data privacy, how many runs you need, monorepos and sharding, re-run double counting, and CI overhead.
+
+## By framework
+
+- [Find flaky tests in pytest](https://rowhitswami.github.io/flakestat/flaky-tests/pytest/): Detect flaky tests in pytest. Run the suite repeatedly or record CI runs over time, using the JUnit XML pytest already writes. Free and open source.
+- [Find flaky tests in Jest](https://rowhitswami.github.io/flakestat/flaky-tests/jest/): Detect flaky tests in Jest. Run the suite repeatedly or record CI runs over time, using the JUnit XML Jest already writes. Free and open source.
+- [Find flaky tests in go test](https://rowhitswami.github.io/flakestat/flaky-tests/go/): Detect flaky tests in go test. Run the suite repeatedly or record CI runs over time, using the JUnit XML go test already writes. Free and open source.
+- [flakestat vs Trunk Flaky Tests](https://rowhitswami.github.io/flakestat/compare/trunk/): An honest comparison of flakestat and Trunk Flaky Tests: what each does well, what flakestat deliberately does not do, and which one fits your situation.
+- [flakestat vs BuildPulse](https://rowhitswami.github.io/flakestat/compare/buildpulse/): An honest comparison of flakestat and BuildPulse: what each does well, what flakestat deliberately does not do, and which one fits your situation.
 
 ## Optional
 
-- [Full documentation as one file](https://rowhitswami.github.io/flakestat/llms-full.txt): every page, plain text.
+- [Full documentation as one plain-text file](https://rowhitswami.github.io/flakestat/llms-full.txt)
 - [Source and issues](https://github.com/rowhitswami/flakestat)
 - [Design notes](https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md): why the scoring works the way it does.

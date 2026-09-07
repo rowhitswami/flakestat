@@ -46,7 +46,7 @@
   --sh-2: 0 2px 4px rgba(8,20,42,.05), 0 12px 28px -14px rgba(8,20,42,.18);
   --sh-3: 0 24px 70px -28px rgba(8,20,42,.42);
 
-  --nav-h: 58px;
+  --nav-h: 66px;
   --measure: 74ch;
 }
 
@@ -141,7 +141,7 @@ pre code { background: none; padding: 0; font-size: inherit; font-weight: 400; c
 .nav-in { max-width: 1380px; margin: 0 auto; height: 100%; padding: 0 1.4rem;
   display: flex; align-items: center; gap: 1.1rem; }
 .brand { display: flex; align-items: center; flex-shrink: 0; }
-.brand img { height: 26px; width: auto; display: block; }
+.brand img { height: 34px; width: auto; display: block; }
 .brand:hover { text-decoration: none; }
 .nav-links { display: flex; gap: 1.15rem; margin-left: .6rem; font-size: .905rem; }
 .nav-links a { color: var(--fg-2); font-weight: 500; }
@@ -167,6 +167,12 @@ pre code { background: none; padding: 0; font-size: inherit; font-weight: 400; c
 /* -------------------------------------------------------------- shell --- */
 .shell { max-width: 1380px; margin: 0 auto; padding: 0 1.4rem;
   display: grid; grid-template-columns: 234px minmax(0,1fr) 210px; gap: 2.6rem; }
+/* The single docs page lists its sections in the sidebar already, so a second
+   contents column on the right would only repeat it. Give it the width. */
+.shell-2col { grid-template-columns: 244px minmax(0,1fr); gap: 3.2rem; }
+.content-wide { max-width: 86ch; }
+.content-wide section { scroll-margin-top: calc(var(--nav-h) + 1.2rem); }
+.content-wide section + section h2 { margin-top: 4rem; }
 .sidebar { position: sticky; top: var(--nav-h); align-self: start;
   max-height: calc(100vh - var(--nav-h)); overflow-y: auto; padding: 2rem .5rem 3rem 0;
   font-size: .875rem; scrollbar-width: thin; }
@@ -178,8 +184,8 @@ pre code { background: none; padding: 0; font-size: inherit; font-weight: 400; c
 .sb-group a { display: block; padding: .27rem .7rem; color: var(--fg-2); font-weight: 500;
   border-left: 2px solid var(--line); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
 .sb-group a:hover { color: var(--blue); background: var(--surface); text-decoration: none; }
-.sb-group a[aria-current="page"] { color: var(--blue); border-left-color: var(--blue);
-  background: var(--blue-soft); font-weight: 600; }
+.sb-group a[aria-current="page"], .sb-group a.on { color: var(--blue);
+  border-left-color: var(--blue); background: var(--blue-soft); font-weight: 600; }
 
 .content { min-width: 0; padding: 2.2rem 0 6rem; max-width: var(--measure); }
 .toc { position: sticky; top: var(--nav-h); align-self: start; padding: 2.4rem 0 3rem;
@@ -347,7 +353,7 @@ a.card h4 { color: var(--fg); }
 footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-top: 2rem; }
 .foot-in { max-width: 1380px; margin: 0 auto; padding: 2.6rem 1.4rem 3.4rem;
   display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 2rem; }
-.foot-in img { height: 30px; width: auto; margin-bottom: .5rem; }
+.foot-in img.foot-lockup { height: 62px; width: auto; margin-bottom: .7rem; }
 .foot-in p { margin: 0; font-size: .855rem; color: var(--fg-2); max-width: 26rem; }
 .foot-col h6 { margin: 0 0 .5rem; font-size: .69rem; text-transform: uppercase;
   letter-spacing: .09em; color: var(--fg-3); font-weight: 700; }
