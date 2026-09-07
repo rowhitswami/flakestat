@@ -31,6 +31,7 @@ COMMANDS
   check       Fail CI when flakiness gets worse, not when it exists
   quarantine  Emit a skip list your test runner accepts
   ci-report   Render a CI-facing report for job summaries and PR comments
+  compact     Drop observations that duplicate an execution already recorded
   version     Print the version
 
 Run "flakestat <command> -h" for command flags.
@@ -83,6 +84,8 @@ func Main(args []string, stdout, stderr io.Writer) int {
 		err = runCIReport(rest, stdout, stderr)
 	case "quarantine":
 		err = runQuarantine(rest, stdout, stderr)
+	case "compact":
+		err = runCompact(rest, stdout, stderr)
 	case "version", "--version", "-v":
 		fmt.Fprintf(stdout, "flakestat %s\n", Version)
 		return 0

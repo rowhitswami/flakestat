@@ -204,6 +204,11 @@ func (s *Store) Append(obs []Observation) error {
 // artifacts never passes through Append, so a duplicate arriving that way
 // would otherwise reach the statistics unchallenged.
 func (s *Store) All() ([]Observation, []error) {
+	obs, errs := s.all()
+	return Dedup(obs), errs
+}
+
+func (s *Store) all() ([]Observation, []error) {
 	f, err := os.Open(s.path)
 	if errors.Is(err, os.ErrNotExist) {
 		return nil, nil
@@ -236,7 +241,7 @@ func (s *Store) All() ([]Observation, []error) {
 	if err := sc.Err(); err != nil && !errors.Is(err, io.EOF) {
 		errs = append(errs, fmt.Errorf("store: read log: %w", err))
 	}
-	return Dedup(obs), errs
+	return obs, errs
 }
 
 // Keys returns the execution keys already recorded, so a caller can tell what
@@ -251,6 +256,59 @@ func (s *Store) Keys() (map[string]struct{}, []error) {
 		}
 	}
 	return keys, errs
+}
+
+// Rewrite replaces the log with obs, atomically.
+//
+// The only supported reason to rewrite an append-only log is to remove records
+// that were never evidence in the first place. A temporary file and a rename
+// keep a crash from leaving a partial history behind: losing the whole update
+// is recoverable, losing half of it silently is not.
+func (s *Store) Rewrite(obs []Observation) error {
+	buf := make([]byte, 0, len(obs)*256)
+	for _, o := range obs {
+		line, err := json.Marshal(o)
+		if err != nil {
+			return fmt.Errorf("store: encode observation: %w", err)
+		}
+		buf = append(buf, line...)
+		buf = append(buf, '\n')
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	tmp, err := os.CreateTemp(filepath.Dir(s.path), ".runs-*.ndjson")
+	if err != nil {
+		return fmt.Errorf("store: create temp log: %w", err)
+	}
+	name := tmp.Name()
+	defer os.Remove(name)
+
+	if _, err := tmp.Write(buf); err != nil {
+		tmp.Close()
+		return fmt.Errorf("store: write temp log: %w", err)
+	}
+	// Durability before visibility: a rename that beats the data to disk would
+	// leave a truncated history looking complete.
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return fmt.Errorf("store: sync temp log: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("store: close temp log: %w", err)
+	}
+	if err := os.Rename(name, s.path); err != nil {
+		return fmt.Errorf("store: replace log: %w", err)
+	}
+	return nil
+}
+
+// Raw reads every line without dropping duplicates, so a caller can report how
+// many there were.
+func (s *Store) Raw() ([]Observation, []error) {
+	obs, errs := s.all()
+	return obs, errs
 }
 
 // ByTest groups observations by test ID, each group ordered oldest first so
