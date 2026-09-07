@@ -345,8 +345,8 @@ anything similarly high-cardinality. Including them would place every
 observation alone in its own context, leaving no transitions to measure
 anywhere.
 
-This invariant has now been violated twice, in the same way, at two different
-levels:
+This invariant has now been violated three times, in the same way, at three
+different levels:
 
   - Interleaved *branches* made a test that passed on main and failed on an
     in-progress feature branch read as repeated disagreement.
@@ -354,10 +354,22 @@ levels:
     passes elsewhere read as constant disagreement, scoring 0.45 with an
     explanation asserting "direct evidence of nondeterminism". The test is
     perfectly deterministic on every platform.
+  - The *display layer* kept grouping by branch after scoring moved to
+    execution context, so the history strip printed "flip on identical code"
+    at every platform boundary. The verdict was right and the evidence shown
+    beneath it was wrong, which is arguably worse than being wrong outright:
+    the number a reader would check against was the one still violating the
+    rule.
 
-Both were found only with real data; no synthetic fixture written beforehand
-produced either. The second surfaced within minutes of pointing flakestat at
-its own CI matrix.
+The first two were found only with real data. The third was found by asking
+whether a rule stated in one place was actually obeyed in every place that
+depends on it — a question worth asking of any invariant recorded here, since
+the comment in the offending function claimed agreement that had silently
+stopped being true.
+
+The structural fix is that there is now exactly one definition,
+`score.ExecutionContext`, and everything that presents transition evidence
+calls it. Duplicating the rule is what let it drift.
 
 The general shape is worth remembering when adding any new axis: two outcomes
 are evidence of nondeterminism only if everything that could legitimately
