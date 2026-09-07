@@ -20,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -245,6 +246,40 @@ func ParseFile(path string) (*Report, error) {
 		return nil, fmt.Errorf("%s: %w", path, err)
 	}
 	return rep, nil
+}
+
+// Expand resolves patterns to matching file paths in a stable order.
+//
+// Callers that need to know which file a case came from must expand and parse
+// themselves rather than using ParseGlob, which deliberately discards that.
+func Expand(patterns []string) ([]string, []error) {
+	var (
+		paths []string
+		errs  []error
+		seen  = map[string]bool{}
+	)
+	for _, pattern := range patterns {
+		matches, err := filepath.Glob(pattern)
+		if err != nil {
+			errs = append(errs, fmt.Errorf("%s: %w", pattern, err))
+			continue
+		}
+		// A literal path that does not exist is a user error worth naming;
+		// a glob matching nothing is not necessarily.
+		if len(matches) == 0 && !strings.ContainsAny(pattern, "*?[") {
+			errs = append(errs, fmt.Errorf("%s: no such file", pattern))
+			continue
+		}
+		for _, m := range matches {
+			m = filepath.Clean(m)
+			if !seen[m] {
+				seen[m] = true
+				paths = append(paths, m)
+			}
+		}
+	}
+	sort.Strings(paths)
+	return paths, errs
 }
 
 // ParseGlob parses every file matching pattern and merges the results. Files

@@ -64,6 +64,12 @@ type Observation struct {
 	// to ask whether failures cluster somewhere. Absent on older records,
 	// which read back as an empty map.
 	Dimensions map[string]string `json:"dimensions,omitempty"`
+
+	// ExecKey identifies the execution this observation describes, so that the
+	// same execution recorded twice counts once. See identity.go. Empty when
+	// no identity could be formed, in which case the observation is always
+	// kept.
+	ExecKey string `json:"exec_key,omitempty"`
 }
 
 // Meta describes the run an observation batch belongs to.
@@ -76,6 +82,11 @@ type Meta struct {
 
 	// Dimensions are attached to every observation in the batch.
 	Dimensions map[string]string
+
+	// Scope identifies where these results were executed, and is what makes
+	// re-ingesting them idempotent. Zero when the caller cannot establish an
+	// identity, which leaves every observation unconditionally distinct.
+	Scope ExecutionScope
 }
 
 // Store is an append-only observation log on disk.
@@ -108,11 +119,24 @@ func NewRunID() string {
 }
 
 // FromCases converts parsed JUnit cases into observations for one run.
+//
+// Cases must arrive in document order and cover exactly one report, because
+// each case's position among the repetitions of its own test is part of its
+// execution identity. Splitting one report across two calls, or merging two
+// reports into one, would renumber those repetitions and break idempotence.
 func FromCases(cases []junit.Case, meta Meta) []Observation {
 	now := time.Now().UTC()
 	out := make([]Observation, 0, len(cases))
 
+	// A test may legitimately appear many times in one report: -count=12, a
+	// parameterised suite, a framework that records its own reruns.
+	ordinal := make(map[string]int, len(cases))
+
 	for _, c := range cases {
+		id := c.ID()
+		n := ordinal[id]
+		ordinal[id] = n + 1
+
 		out = append(out, Observation{
 			TS:         now,
 			RunID:      meta.RunID,
@@ -120,7 +144,7 @@ func FromCases(cases []junit.Case, meta Meta) []Observation {
 			Branch:     meta.Branch,
 			Source:     meta.Source,
 			Attempt:    meta.Attempt,
-			TestID:     c.ID(),
+			TestID:     id,
 			Suite:      c.Suite,
 			Class:      c.Class,
 			Name:       c.Name,
@@ -130,6 +154,7 @@ func FromCases(cases []junit.Case, meta Meta) []Observation {
 			Message:    c.Message,
 			KnownFlaky: c.KnownFlaky,
 			Dimensions: meta.Dimensions,
+			ExecKey:    ExecutionKey(meta.Scope, id, n),
 		})
 	}
 	return out
@@ -168,9 +193,16 @@ func (s *Store) Append(obs []Observation) error {
 	return nil
 }
 
-// All reads every observation in write order. Corrupt lines are skipped and
-// returned as errors rather than aborting the read: a truncated line from a
-// killed CI job should not make the whole history unreadable.
+// All reads every distinct observation in write order.
+//
+// Corrupt lines are skipped and returned as errors rather than aborting the
+// read: a truncated line from a killed CI job should not make the whole
+// history unreadable.
+//
+// Executions already present are dropped here rather than only at write time,
+// because the log is meant to be merged with cat. Concatenating several jobs'
+// artifacts never passes through Append, so a duplicate arriving that way
+// would otherwise reach the statistics unchallenged.
 func (s *Store) All() ([]Observation, []error) {
 	f, err := os.Open(s.path)
 	if errors.Is(err, os.ErrNotExist) {
@@ -204,7 +236,21 @@ func (s *Store) All() ([]Observation, []error) {
 	if err := sc.Err(); err != nil && !errors.Is(err, io.EOF) {
 		errs = append(errs, fmt.Errorf("store: read log: %w", err))
 	}
-	return obs, errs
+	return Dedup(obs), errs
+}
+
+// Keys returns the execution keys already recorded, so a caller can tell what
+// it is about to re-record. Observations with no key are not represented,
+// since nothing can be said about whether they are duplicates.
+func (s *Store) Keys() (map[string]struct{}, []error) {
+	obs, errs := s.All()
+	keys := make(map[string]struct{}, len(obs))
+	for _, o := range obs {
+		if o.ExecKey != "" {
+			keys[o.ExecKey] = struct{}{}
+		}
+	}
+	return keys, errs
 }
 
 // ByTest groups observations by test ID, each group ordered oldest first so
