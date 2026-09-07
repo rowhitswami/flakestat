@@ -36,6 +36,10 @@ const (
 	CIJobID    = "ci.job_id"
 	CIWorker   = "ci.worker"
 	CIShard    = "ci.shard"
+	// CIAttempt separates a retried execution from a duplicated one. A job
+	// re-run really did execute the tests again and must count; the same
+	// artifact ingested twice did not.
+	CIAttempt = "ci.attempt"
 
 	RuntimeName    = "runtime.name"
 	RuntimeVersion = "runtime.version"
@@ -128,6 +132,7 @@ type provider struct {
 	jobID   string
 	worker  string
 	shard   string
+	attempt string
 	require string // optional exact value the detect var must have
 }
 
@@ -135,17 +140,20 @@ type provider struct {
 // process environment would eventually capture tokens and secrets.
 var providers = []provider{
 	{name: "github", detect: "GITHUB_ACTIONS", require: "true",
-		runID: "GITHUB_RUN_ID", jobID: "GITHUB_JOB"},
+		runID: "GITHUB_RUN_ID", jobID: "GITHUB_JOB", attempt: "GITHUB_RUN_ATTEMPT"},
+	// GitLab and CircleCI mint a fresh job id on retry, so the attempt is
+	// already carried by the job identity and there is nothing extra to read.
 	{name: "gitlab", detect: "GITLAB_CI", require: "true",
 		runID: "CI_PIPELINE_ID", jobID: "CI_JOB_ID", shard: "CI_NODE_INDEX"},
 	{name: "circleci", detect: "CIRCLECI", require: "true",
 		runID: "CIRCLE_WORKFLOW_ID", jobID: "CIRCLE_JOB", shard: "CIRCLE_NODE_INDEX"},
 	{name: "buildkite", detect: "BUILDKITE", require: "true",
-		runID: "BUILDKITE_BUILD_ID", jobID: "BUILDKITE_JOB_ID", shard: "BUILDKITE_PARALLEL_JOB"},
+		runID: "BUILDKITE_BUILD_ID", jobID: "BUILDKITE_JOB_ID", shard: "BUILDKITE_PARALLEL_JOB",
+		attempt: "BUILDKITE_RETRY_COUNT"},
 	{name: "jenkins", detect: "JENKINS_URL",
 		runID: "BUILD_ID", jobID: "JOB_NAME"},
 	{name: "azure", detect: "TF_BUILD", require: "True",
-		runID: "BUILD_BUILDID", jobID: "AGENT_JOBNAME"},
+		runID: "BUILD_BUILDID", jobID: "AGENT_JOBNAME", attempt: "SYSTEM_JOBATTEMPT"},
 }
 
 // DetectCI reports the recognized CI context, or nil when not running in one.
@@ -161,7 +169,8 @@ func DetectCI() Set {
 
 		s := Set{CIProvider: p.name}
 		for key, env := range map[string]string{
-			CIRunID: p.runID, CIJobID: p.jobID, CIWorker: p.worker, CIShard: p.shard,
+			CIRunID: p.runID, CIJobID: p.jobID, CIWorker: p.worker,
+			CIShard: p.shard, CIAttempt: p.attempt,
 		} {
 			if env == "" {
 				continue

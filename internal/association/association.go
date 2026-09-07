@@ -110,9 +110,14 @@ type Association struct {
 // A run id partitions the data perfectly by construction, since every failure
 // happened during some run. Analysing it yields findings that are true and
 // worthless: "failures are associated with CI run 9381732".
+//
+// Attempt is worse than worthless. Jobs are retried precisely because the
+// first attempt failed, so failures concentrate in attempt 1 by definition and
+// the analysis would confidently report the reason retries exist.
 var contextDimensions = map[string]bool{
-	dimension.CIRunID: true,
-	dimension.CIJobID: true,
+	dimension.CIRunID:   true,
+	dimension.CIJobID:   true,
+	dimension.CIAttempt: true,
 }
 
 // Analyzable reports whether a dimension is a population worth grouping by

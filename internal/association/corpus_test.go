@@ -152,6 +152,17 @@ var corpus = []corpusCase{
 		wantSignals: nil,
 		why:         "provenance identifiers are excluded from analysis by default",
 	},
+	{
+		name: "retries are not a population either",
+		dims: map[string]map[string]group{
+			// Jobs get retried because they failed, so the first attempt
+			// always holds the failures. Reporting it would dress up the
+			// definition of a retry as a discovery.
+			"ci.attempt": {"1": {20, 40}, "2": {0, 40}},
+		},
+		wantSignals: nil,
+		why:         "the attempt number is downstream of failure, not upstream of it",
+	},
 }
 
 // observations renders a case into a history the engine can consume.

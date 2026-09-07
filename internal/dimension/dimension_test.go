@@ -97,7 +97,7 @@ func TestHostReportsThisMachine(t *testing.T) {
 func isolateCI(t *testing.T) {
 	t.Helper()
 	for _, p := range providers {
-		for _, name := range []string{p.detect, p.runID, p.jobID, p.worker, p.shard} {
+		for _, name := range []string{p.detect, p.runID, p.jobID, p.worker, p.shard, p.attempt} {
 			if name != "" {
 				t.Setenv(name, "")
 			}
@@ -112,6 +112,7 @@ func TestDetectCIReadsOnlyKnownVariables(t *testing.T) {
 	t.Setenv("GITHUB_ACTIONS", "true")
 	t.Setenv("GITHUB_RUN_ID", "21948210")
 	t.Setenv("GITHUB_JOB", "test")
+	t.Setenv("GITHUB_RUN_ATTEMPT", "2")
 	t.Setenv("AWS_SECRET_ACCESS_KEY", "hunter2")
 	t.Setenv("SOME_INTERNAL_TOKEN", "sensitive")
 
@@ -122,6 +123,11 @@ func TestDetectCIReadsOnlyKnownVariables(t *testing.T) {
 	}
 	if got[CIRunID] != "21948210" || got[CIJobID] != "test" {
 		t.Errorf("run/job = %q/%q", got[CIRunID], got[CIJobID])
+	}
+	// Without the attempt, a re-run is indistinguishable from the same
+	// artifact ingested twice.
+	if got[CIAttempt] != "2" {
+		t.Errorf("attempt = %q, want 2", got[CIAttempt])
 	}
 	for k, v := range got {
 		if strings.Contains(v, "hunter2") || strings.Contains(v, "sensitive") {
