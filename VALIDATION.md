@@ -218,6 +218,20 @@ subject's XML is **re-ingested and re-scored with the frozen build** before any
 result is reported, so all three subjects are measured by one implementation
 regardless of which build produced the XML.
 
+### 2026-09-07 — a perturbation during subject A, recorded not hidden
+
+Docker Desktop was started around executions 29-31 of subject A, in preparation
+for subject B, and its startup competed for CPU: execution time rose from ~110s
+to ~2min. Subject A includes wall-clock threshold assertions ("Docs page load
+took 5932ms - threshold: 4500ms"), so added CPU load can inflate exactly the
+failure rates being measured.
+
+Docker was stopped again and subject B deferred until A completes. The overlap
+is recorded here rather than corrected away: three of a hundred executions ran
+under load, which is noted beside subject A's rates so a reader can judge it.
+Nothing was re-run, because selectively discarding executions that ran under
+conditions one dislikes is how a measured rate becomes a chosen one.
+
 ## Frozen implementation
 
 Fixed for the duration of A, B and C. If a genuine correctness bug is found
