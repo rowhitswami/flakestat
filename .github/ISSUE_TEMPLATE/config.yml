@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/rowhitswami/flakestat/security/advisories/new
+    about: Report privately instead. Please do not open a public issue.
+  - name: Documentation
+    url: https://flakestat.com/docs/
+    about: Install, CI recipes, every command and flag, and how scoring works.
+  - name: How it was validated
+    url: https://flakestat.com/validation/
+    about: The protocol, the subjects, and every result including the ones that found nothing.

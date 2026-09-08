@@ -1,0 +1,46 @@
+name: A verdict looks wrong
+description: A test was called flaky and is not, or is flaky and was not caught
+labels: [scoring]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        Worth its own template, because these are the most valuable reports this
+        project gets and the hardest to act on without the evidence.
+
+  - type: dropdown
+    id: direction
+    attributes:
+      label: Which way is it wrong
+      options:
+        - Called flaky, but it is not nondeterministic
+        - Called stable or suspect, but it is genuinely flaky
+        - Called consistently-failing, but it is flaky
+        - Called flaky, but it is just broken
+        - Confidence looks wrong for the amount of evidence
+    validations: { required: true }
+
+  - type: textarea
+    id: explain
+    attributes:
+      label: Output of `flakestat explain <test> --json`
+      description: The full evidence behind the verdict. This is the important part.
+      render: json
+    validations: { required: true }
+
+  - type: textarea
+    id: truth
+    attributes:
+      label: How do you know
+      description: >
+        How was the real behaviour established? A rerun count, a known race, a
+        fix that made it stop. "It feels wrong" is a fine starting point, but say
+        so, because the alternative is guessing.
+    validations: { required: true }
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: flakestat 0.2.0
+    validations: { required: true }

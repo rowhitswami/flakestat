@@ -1,0 +1,51 @@
+name: Bug report
+description: flakestat did something wrong, crashed, or would not run
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you expected, and what you got instead.
+    validations: { required: true }
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: The exact command
+      description: Paste it verbatim, including flags and quoting.
+      render: shell
+    validations: { required: true }
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `flakestat version`.
+      placeholder: flakestat 0.2.0
+    validations: { required: true }
+
+  - type: input
+    id: platform
+    attributes:
+      label: Platform and test runner
+      placeholder: macOS 15 arm64, pytest 8.3
+    validations: { required: true }
+
+  - type: textarea
+    id: report
+    attributes:
+      label: JUnit XML
+      description: >
+        The smallest report that reproduces it, if the problem involves parsing
+        or scoring. Redact anything private; test names are usually enough.
+      render: xml
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: What flakestat thought
+      description: >
+        If a verdict looks wrong, `flakestat explain <test> --json` prints the
+        evidence behind it. That usually shows where the disagreement is.
+      render: json

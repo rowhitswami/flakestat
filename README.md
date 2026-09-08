@@ -121,9 +121,11 @@ supports.
 
 ## Contributing
 
-Issues and pull requests are welcome. [`DESIGN.md`](DESIGN.md) explains why the
-tool works the way it does, including the mistakes that shaped it, and is worth
-reading before proposing a change to scoring.
+Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers
+what a useful bug report contains and the extra bar a scoring change has to
+clear. [DESIGN.md](DESIGN.md) explains why the tool works the way it does,
+including the mistakes that shaped it, and is worth reading before proposing a
+change to scoring.
 
 ```bash
 git clone https://github.com/rowhitswami/flakestat
@@ -132,6 +134,14 @@ cd flakestat && go test ./...
 
 flakestat has no dependencies. Please keep it that way.
 
+## Security
+
+Found something exploitable? Please report it privately through
+[GitHub's private vulnerability reporting](https://github.com/rowhitswami/flakestat/security/advisories/new)
+rather than opening an issue. [SECURITY.md](SECURITY.md) sets out the threat
+model: flakestat parses XML it does not control, its installers download and
+verify a binary, and it runs the test command you give it.
+
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE). See also the [code of conduct](CODE_OF_CONDUCT.md).

@@ -1,0 +1,13 @@
+# go.mod has no require block and is meant to stay that way, so the only thing
+# with a supply chain here is the actions the workflows run.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }
+    commit-message: { prefix: "ci" }
+
+  - package-ecosystem: gomod
+    directory: /
+    schedule: { interval: weekly }
+    commit-message: { prefix: "deps" }
