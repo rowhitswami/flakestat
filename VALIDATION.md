@@ -188,7 +188,7 @@ means nothing.
 So subject C is run at two commits instead of one:
 
     C1  612f5bfb  the parent of "test: deflake known-flaky tests from #2534"
-                  (#2537, 2026-07-05). Ground truth: documented flaky.
+                  (#2537, 2026-07-06). Ground truth: documented flaky.
     C2  104f91a9  current HEAD, after that fix and the follow-up backlog
                   commit (#2542). Ground truth: documented fixed.
 

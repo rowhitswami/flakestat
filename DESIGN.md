@@ -554,7 +554,8 @@ Still open:
 
 - ☐ **Default `same_commit_weight` of 3.0** remains a judgment call rather than
   an empirical result. There is now data it could be calibrated against, in
-  three external subjects and ~13,000 observations of this project's own suite,
+  three external subjects and this project's own accumulated history, which
+  grows with every CI run and lives on the `flakestat-history` branch,
   but nobody has done that work, and until someone does, 3.0 is a defensible
   guess and not a finding.
 - ☐ **Sensitivity below ~5%** is unestablished. Several tests during external

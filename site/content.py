@@ -1133,53 +1133,85 @@ list shrinks.</p>
             title_tag=f"{name} alternative: free and self-hosted",
             description=f"An honest comparison of flakestat and {name}: what each does well, what flakestat deliberately does not do, and which one fits your situation.",
             keywords=kw,
-            lede=f"An honest comparison, including the cases where {name} is the better choice.",
+            lede=f"What each one is for, what flakestat does differently, and the cases where {name} is the better choice.",
             body=f"""
-<p>{blurb} flakestat is a local binary that does the detection part, for free, without your test
-data leaving your machines.</p>
+<p>{blurb} flakestat is a single binary that does the detection part locally, for free, with your
+test data never leaving your machines.</p>
+
+<p>Both read the JUnit XML your runner already writes. The difference is where the analysis
+happens, what it is allowed to claim, and whether you can check that it works.</p>
+
+<h2>What flakestat does differently</h2>
+
+<p><strong>It ranks by inconsistency, not failure rate.</strong> A test that fails every single time
+is not flaky, it is broken, and the two need completely different fixes. flakestat scores how often
+a test disagrees with <em>itself</em> between runs, so an always-failing test scores <code>0.00</code>
+and is reported separately as <code>consistently-failing</code> instead of topping the list and
+costing somebody an afternoon.</p>
+
+<p><strong>Every verdict carries a confidence level.</strong> A score of 0.62 from three runs and
+0.62 from three hundred are different claims. Classification uses a lower bound on the score rather
+than the score itself, so a small sample can never reach a confident verdict no matter how dramatic
+the failures look.</p>
+
+<p><strong>You can verify the detection works.</strong> Two commands reproduce a before and after
+against somebody else&rsquo;s bug: ConduitIO&rsquo;s repository at the commit before their own
+deflaking fix, and at the fix. Three tests come back flaky on one side and stable on the other.
+No hosted service lets you audit its scoring this way, because the scoring is the product.</p>
+
+{cb("git clone " + REPO + " && cd flakestat\n./scripts/reproduce-validation.sh")}
+
+<p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
+cluster on Windows. When <code>os</code> and <code>arch</code> vary together, as they do on most CI
+matrices, it says the observations cannot tell which one matters rather than picking one.
+<a href="{BASE}docs/#dimensions">More on that</a>.</p>
+
+<p><strong>The history is a file you own.</strong> Append-only NDJSON in your repository or your
+artifact store. You can read it, diff it, merge shards with <code>cat</code>, and take it with you.
+There is no export step because there is nothing to export from.</p>
+
+<h2>Side by side</h2>
 
 {tbl(["", "flakestat", name], [
-  ["Cost", "Free at any volume", "Per seat or per run"],
+  ["Cost", "Free at any volume, MIT licensed", "Per seat or per run"],
+  ["Where analysis runs", "Your machine or your CI runner", "Their service"],
   ["Test data leaves your machine", "No", "Yes, results are uploaded"],
-  ["Works before you push", "Yes, <code>hunt</code> runs locally", "No, it needs CI results"],
-  ["Setup", "One binary", "Account plus CI integration"],
+  ["Works before you push", "Yes, <code>hunt</code> reruns locally", "No, it needs CI results"],
+  ["Scoring you can audit", "Yes, readable source plus a reproduction script", "Proprietary"],
+  ["Broken separated from flaky", "Yes, <code>consistently-failing</code> scores 0.00", "Varies"],
+  ["Confidence on each verdict", "Yes, and thin evidence is refused", "Varies"],
+  ["History format", "NDJSON you own", "Their database"],
+  ["Setup", "One binary, no account", "Account plus CI integration"],
   ["Languages", "Any that writes JUnit XML", "Many"],
-  ["Dashboards and history UI", "No", "Yes"],
-  ["Org-wide rollups, alerting", "No", "Yes"],
+  ["Dashboards and history UI", "No, terminal and CI job summary", "Yes"],
+  ["Org-wide rollups, alerting, ownership", "No", "Yes"],
   ["Auto-quarantine in the platform", "Emits a skip list you apply", "Yes, managed"],
-  ["Source available", "MIT licensed", "Proprietary"],
 ])}
 
+<h2>When flakestat is the better choice</h2>
+<ul>
+  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
+  <li>You want to catch a flake <em>before</em> pushing, not after CI reports it.</li>
+  <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
+  <li>You want to read the scoring and check it yourself rather than trust a number.</li>
+  <li>You want one tool across a polyglot monorepo, because the input is JUnit XML rather than a
+      language integration.</li>
+</ul>
+
 <h2>When {name} is the better choice</h2>
+<p>Worth saying plainly, because a comparison that finds no case for the alternative is an
+advertisement.</p>
 <ul>
   <li>You want a dashboard non-engineers can read.</li>
   <li>You need rollups across many repositories and teams.</li>
   <li>You want alerting, ownership routing and SLA tracking.</li>
   <li>You would rather buy the whole workflow than assemble it.</li>
 </ul>
-<p>flakestat does not try to do any of that, and pretending otherwise would waste your time.</p>
-
-<h2>When flakestat is the better choice</h2>
-<ul>
-  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
-  <li>You want to find a flake <em>before</em> pushing, not after CI reports it.</li>
-  <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
-  <li>You want the detection logic to be readable and auditable rather than a black box.</li>
-</ul>
-
-<h2>What flakestat does differently</h2>
-<p><strong>It ranks by inconsistency, not failure rate.</strong> A test that fails every time scores
-zero and is reported as <code>consistently-failing</code>, so your most broken test does not sit at
-the top of the flaky list wasting the time of whoever is hunting nondeterminism.</p>
-<p><strong>Every verdict carries a confidence level.</strong> A score from three runs and the same
-score from three hundred are different claims, and small samples can never reach high confidence.</p>
-<p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
-cluster on Windows, and when <code>os</code> and <code>arch</code> vary together it says the
-observations cannot tell which one matters. <a href="{BASE}docs/#dimensions">More on that</a>.</p>
+<p>flakestat does not try to do any of that.</p>
 
 <h2>Can I use both?</h2>
 <p>Yes, and it is a reasonable setup: the hosted service for org-wide visibility, flakestat locally
-so engineers can reproduce and confirm a flake in ten minutes without pushing. They read the same
+so an engineer can reproduce and confirm a flake in ten minutes without pushing. They read the same
 JUnit XML and neither interferes with the other.</p>
 
 <div class="callout"><b>Try it in two minutes</b>
