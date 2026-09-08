@@ -182,7 +182,7 @@ jobs:
 
       # Catches a broken release config on every PR rather than at tag time,
       # when it is far more painful to discover.
-      - uses: goreleaser/goreleaser-action@v6
+      - uses: goreleaser/goreleaser-action@v7
         with:
           version: "~> v2"
           args: release --snapshot --clean --skip=publish,docker
