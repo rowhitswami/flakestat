@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en" data-base="/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>flakestat changelog — every release</title>
+<meta name="description" content="Every flakestat release and what changed in it, including behaviour changes that affect existing scores.">
+<link rel="canonical" href="https://flakestat.com/changelog/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="flakestat changelog, flakestat releases, flakestat versions">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="flakestat changelog">
+<meta property="og:description" content="Every flakestat release and what changed in it, including behaviour changes that affect existing scores.">
+<meta property="og:url" content="https://flakestat.com/changelog/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="flakestat changelog">
+<meta name="twitter:description" content="Every flakestat release and what changed in it, including behaviour changes that affect existing scores.">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/changelog/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Changelog","item":"https://flakestat.com/changelog/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/changelog/#article","headline":"Changelog","description":"Every flakestat release and what changed in it, including behaviour changes that affect existing scores.","url":"https://flakestat.com/changelog/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+</head>
+<body>
+<div class="progress" id="fs-progress"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="fs-menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="fs-theme" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell"><nav class="sidebar" aria-label="Evidence"><div class="sb-group"><h5>Evidence</h5><a href="/validation/">Validation</a><a href="/findings/">Flake hunt findings</a><a href="/design/">Design notes</a><a href="/changelog/" aria-current="page">Changelog</a></div><div class="sb-group"><h5>Documentation</h5><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div><div class="sb-group"><h5>Writing</h5><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Evidence</span><span>/</span><span>Changelog</span></nav><h1>Changelog</h1><p class="lede">What changed in each release, and which changes move existing scores.</p><p class="src-note">Generated from <a href="https://github.com/rowhitswami/flakestat/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a> in the repository, which is the copy of record — its history and timestamps are checkable there.</p><p>Notable changes to flakestat. Versions follow <a href="https://semver.org">semantic versioning</a>,
+with the usual caveat that 0.x makes no compatibility promise.</p>
+<h2 id="v0-2-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.2.0">0.2.0</a> — 2026-09-07<a class="anchor" href="#v0-2-0" aria-label="Link to this section">#</a></h2>
+<p>Everything the documentation describes now exists in the binary. v0.1.1 shipped
+six commands; this ships ten, plus the analysis that makes the verdicts worth
+reading.</p>
+<h3 id="added">Added<a class="anchor" href="#added" aria-label="Link to this section">#</a></h3>
+<p><strong><code>flakestat explain &lt;test&gt;</code></strong> — the full evidence behind one verdict: outcome
+history as a strip, how many disagreements happened on identical code, which
+commits and branches it was seen on, and where its failures concentrate.
+<code>--json</code> emits the same evidence for tooling.</p>
+<p><strong>Confidence on every verdict</strong> — <code>low</code>, <code>medium</code> or <code>high</code>, derived from how
+much evidence exists. A score of 0.62 from three runs and the same score from
+three hundred are different claims, and a small sample can never reach <code>high</code>.
+Classification uses a lower bound on the score rather than the score itself, so
+a verdict needs evidence rather than a lucky flip.</p>
+<p><strong>Dimensions and association analysis</strong> — <code>--dimension key=value</code>, repeatable,
+records the platform, runtime and CI context an observation was made in.
+flakestat then reports where failures concentrate:</p>
+<pre><code>Where the failures concentrate
+  os=windows
+    failures here:  12 / 12 (100.0%)
+    elsewhere:      0 / 24 (0.0%)
+    difference:     +100.0 pp
+</code></pre>
+<p>Findings must clear an evidence floor, an effect-size floor and a
+Benjamini–Hochberg correction, because testing several dimensions will otherwise
+turn up something significant by chance. Associations never influence the score,
+and the wording stays correlational: failures <em>cluster</em> on Windows, not Windows
+<em>causes</em> them. Where dimensions vary together, it says the observations cannot
+tell which one matters.</p>
+<p>Only a whitelist of known CI variables is read, and only JUnit properties
+flakestat recognizes — the process environment is never scraped, so secrets
+cannot reach your history.</p>
+<p><strong>Execution identity</strong> — every observation carries the identity of the execution
+it describes, so an artifact uploaded twice, a re-run aggregation step or a shard
+collected by two jobs counts once, while a genuine retry still counts.</p>
+<p>This mattered more than it sounds. A duplicate carries its original's timestamp,
+sorts beside it and always agrees with itself, so uncounted duplicates make a
+flaky test look <strong>stable</strong>. Measured on a test failing 4 of 12 runs, ingesting
+the same reports twice moved the score from 0.64 to 0.30 — the error ran towards
+false negatives.</p>
+<p><strong><code>flakestat compact</code></strong> — removes duplicate executions from the log file itself,
+which matters when the file is the record you keep. Refuses to rewrite a log
+containing unreadable lines, since reading skips those and rewriting would
+discard evidence you might still recover.</p>
+<p><strong><code>flakestat ci-report</code></strong> — renders job summaries and pull request comments. The
+GitHub Action gained <code>comment</code>, <code>annotations</code> and <code>max-rows</code> inputs; a re-run
+updates the same comment rather than adding another.</p>
+<p><strong><code>--no-host</code></strong> on <code>ingest</code>, for jobs that aggregate artifacts produced
+elsewhere. Without it the aggregator's platform is stamped onto results from
+every other machine.</p>
+<h3 id="fixed">Fixed<a class="anchor" href="#fixed" aria-label="Link to this section">#</a></h3>
+<p><strong>Outcomes are only compared when they are comparable.</strong> A test that always
+passes on Linux and always fails on Windows is deterministic, but read as one
+chronological series it looked like constant disagreement — it scored 0.45 with
+an explanation asserting direct evidence of nondeterminism. Transitions are now
+counted within one execution context: branch, os, arch and runtime held
+constant.</p>
+<p><strong>The history strip agrees with the verdict.</strong> It grouped by branch while
+scoring grouped by execution context, so it printed "flip on identical code" at
+every platform boundary — at precisely the points the verdict had ruled out as
+incomparable.</p>
+<p><strong>Execution identity uses the whole recorded context.</strong> GitHub reports the same
+<code>GITHUB_JOB</code> for every leg of a matrix, so three platforms can ingest under one
+provider, run, job and attempt. Keying on the CI fields alone would have merged
+them and silently discarded two platforms' evidence.</p>
+<h3 id="validation">Validation<a class="anchor" href="#validation" aria-label="Link to this section">#</a></h3>
+<p>Validated against three external projects under a contract committed before any
+experiment ran, and scored with a single frozen build. Full report in
+<a href="/validation/">VALIDATION.md</a>.</p>
+<p>The load-bearing result: at the commit before ConduitIO's own deflaking fix,
+three of the four tests their issue named scored <code>flaky</code> at 0.67 with high
+confidence; at the fix itself, all four were <code>stable</code> at 0.00, under an identical
+protocol. Their contributors documented the defect, named the tests and wrote the
+repair — flakestat was handed observations from both sides of a commit it had no
+part in and separated them.</p>
+<p>Also recorded there: the protocol arm that found nothing, and a contaminated run
+that was discarded rather than reported.</p>
+<h2 id="v0-1-1"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.1">0.1.1</a> — 2026-09-06<a class="anchor" href="#v0-1-1" aria-label="Link to this section">#</a></h2>
+<p>Fixed the Python wrapper reporting <code>0.0.0</code> regardless of the installed version,
+which made it build a download URL for a release that does not exist. The
+release workflow now verifies the built wheel reports the tagged version before
+anything is published.</p>
+<h2 id="v0-1-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.0">0.1.0</a> — 2026-09-06<a class="anchor" href="#v0-1-0" aria-label="Link to this section">#</a></h2>
+<p>First release. <code>init</code>, <code>hunt</code>, <code>ingest</code>, <code>report</code>, <code>check</code> and <code>quarantine</code>,
+distributed via Homebrew, npm, PyPI, a container image, an install script and a
+GitHub Action.</p>
+<p>Yanked from PyPI: the wrapper shipped with a hardcoded <code>0.0.0</code> version and could
+not download its binary. Superseded by 0.1.1.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#v0-2-0">0.2.0 — 2026-09-07</a><a class="lvl3" href="#added">Added</a><a class="lvl3" href="#fixed">Fixed</a><a class="lvl3" href="#validation">Validation</a><a class="lvl2" href="#v0-1-1">0.1.1 — 2026-09-06</a><a class="lvl2" href="#v0-1-0">0.1.0 — 2026-09-06</a></div></div>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
+    </div>
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
+      <a href="/docs/#runners">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/flaky-tests/pytest/">Flaky pytest tests</a>
+      <a href="/flaky-tests/jest/">Flaky Jest tests</a>
+      <a href="/flaky-tests/go/">Flaky Go tests</a>
+    </div>
+    <div class="foot-col"><h6>Evidence</h6>
+      <a href="/validation/">Validation record</a>
+      <a href="/findings/">Flake hunt findings</a>
+      <a href="/design/">Design notes</a>
+      <a href="/changelog/">Changelog</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
+      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
+      <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
+      <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
+      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
+    </div>
+  </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
+</footer>
+
+<div class="scrim" id="fs-scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="fs-q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="fs-results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

@@ -8,4 +8,8 @@
 <url><loc>https://flakestat.com/compare/trunk/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
 <url><loc>https://flakestat.com/compare/buildpulse/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
 <url><loc>https://flakestat.com/writing/validating-a-flaky-test-detector/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.7</priority></url>
+<url><loc>https://flakestat.com/validation/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://flakestat.com/findings/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://flakestat.com/design/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
+<url><loc>https://flakestat.com/changelog/</loc><lastmod>2026-09-08</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
 </urlset>

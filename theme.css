@@ -355,7 +355,7 @@ a.card h4 { color: var(--fg); }
 /* ------------------------------------------------------------- footer --- */
 footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-top: 2rem; }
 .foot-in { max-width: 1380px; margin: 0 auto; padding: 2.6rem 1.4rem 3.4rem;
-  display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 2rem; }
+  display: grid; grid-template-columns: 1.25fr repeat(4, 1fr); gap: 1.8rem; }
 .foot-in img.foot-lockup { height: 62px; width: auto; margin-bottom: .7rem; }
 .foot-in p { margin: 0; font-size: .855rem; color: var(--fg-2); max-width: 26rem; }
 .foot-col h6 { margin: 0 0 .5rem; font-size: .69rem; text-transform: uppercase;
@@ -370,6 +370,7 @@ footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-to
 @media (max-width: 1140px) {
   .shell { grid-template-columns: 220px minmax(0,1fr); gap: 2.2rem; }
   .toc { display: none; }
+  .foot-in { grid-template-columns: 1fr 1fr 1fr; }
 }
 @media (max-width: 900px) {
   .hero-in { grid-template-columns: 1fr; gap: 2.2rem; padding: 3rem 1.2rem; }
@@ -479,3 +480,37 @@ footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-to
   .ba { grid-template-columns: 1fr; }
   .ba-arrow { transform: rotate(90deg); justify-self: center; }
 }
+
+
+/* ============================================================================
+   Evidence documents.
+
+   VALIDATION.md, HUNT-FINDINGS.md, DESIGN.md and CHANGELOG.md are rendered
+   here straight from the repository. They are dense, table-heavy and read
+   top-to-bottom, so they get a slightly narrower measure than the reference
+   docs and clearer separation between sections than plain prose needs.
+   ------------------------------------------------------------------------- */
+.content-doc { max-width: 78ch; }
+.content-doc > h2 { margin-top: 3.4rem; padding-top: 1.6rem; border-top: 1px solid var(--line);
+  font-size: 1.42rem; letter-spacing: -.015em; scroll-margin-top: calc(var(--nav-h) + 1rem); }
+.content-doc > h2:first-of-type { border-top: none; padding-top: 0; margin-top: 2.4rem; }
+.content-doc > h3 { margin-top: 2.2rem; font-size: 1.08rem;
+  scroll-margin-top: calc(var(--nav-h) + 1rem); }
+.content-doc > h4 { margin-top: 1.6rem; font-size: .95rem; color: var(--fg-2); }
+.content-doc li { margin: .28rem 0; }
+.content-doc li > p { margin: .3rem 0; }
+.content-doc pre { font-size: .82rem; }
+.content-doc table { font-size: .845rem; }
+
+/* Point at the file this page was generated from. The repository is the copy
+   of record; saying so is the whole reason these pages are trustworthy. */
+.src-note { margin: 1.4rem 0 0; padding: .6rem .85rem; font-size: .82rem;
+  color: var(--fg-3); background: var(--bg-alt); border: 1px solid var(--line);
+  border-radius: var(--r-sm); }
+.src-note code { font-size: .95em; }
+
+blockquote { margin: 1.3rem 0; padding: .1rem 0 .1rem 1.1rem;
+  border-left: 3px solid var(--line-2); color: var(--fg-2); }
+blockquote p { margin: .55rem 0; }
+blockquote > :first-child { margin-top: 0; }
+blockquote > :last-child { margin-bottom: 0; }

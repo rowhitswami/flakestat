@@ -30,7 +30,7 @@
     });
   }
   paintLogos();
-  var tbtn = $('#theme');
+  var tbtn = $('#fs-theme');
   if (tbtn) tbtn.addEventListener('click', function () {
     root.setAttribute('data-theme', isDark() ? 'light' : 'dark');
     try { localStorage.setItem(KEY, root.getAttribute('data-theme')); } catch (e) {}
@@ -39,7 +39,7 @@
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintLogos);
 
   /* ----------------------------------------------------------- mobile nav */
-  var mbtn = $('#menu'), sidebar = $('.sidebar');
+  var mbtn = $('#fs-menu'), sidebar = $('.sidebar');
   if (mbtn && sidebar) mbtn.addEventListener('click', function () {
     sidebar.hidden = !sidebar.hidden;
     mbtn.setAttribute('aria-expanded', String(!sidebar.hidden));
@@ -95,7 +95,7 @@
   } catch (e) {}
 
   /* ------------------------------------------------------ progress + toc */
-  var bar = $('#progress');
+  var bar = $('#fs-progress');
   var tocLinks = $$('.toc a');
   var heads = tocLinks.length ? $$('.content h2[id], .content h3[id]') : [];
 
@@ -134,7 +134,7 @@
   onScroll();
 
   /* ------------------------------------------------------------- search */
-  var scrim = $('#scrim'), input = $('#q'), results = $('#results'), index = null, sel = 0, hits = [];
+  var scrim = $('#fs-scrim'), input = $('#fs-q'), results = $('#fs-results'), index = null, sel = 0, hits = [];
 
   function load() {
     if (index) return Promise.resolve(index);

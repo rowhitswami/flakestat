@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en" data-base="/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hunting flaky tests in five open-source Go projects — flakestat</title>
+<meta name="description" content="What happened when flakestat was pointed at five active open-source Go projects overnight: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<link rel="canonical" href="https://flakestat.com/findings/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="flaky tests in open source, hashicorp raft flaky test, litestream flaky test, go test count shuffle flaky">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="Hunting flaky tests in five open-source projects">
+<meta property="og:description" content="What happened when flakestat was pointed at five active open-source Go projects overnight: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<meta property="og:url" content="https://flakestat.com/findings/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Hunting flaky tests in five open-source projects">
+<meta name="twitter:description" content="What happened when flakestat was pointed at five active open-source Go projects overnight: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/findings/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Flake hunt findings","item":"https://flakestat.com/findings/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/findings/#article","headline":"Flake hunt findings","description":"What happened when flakestat was pointed at five active open-source Go projects overnight: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.","url":"https://flakestat.com/findings/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+</head>
+<body>
+<div class="progress" id="fs-progress"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="fs-menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="fs-theme" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell"><nav class="sidebar" aria-label="Evidence"><div class="sb-group"><h5>Evidence</h5><a href="/validation/">Validation</a><a href="/findings/" aria-current="page">Flake hunt findings</a><a href="/design/">Design notes</a><a href="/changelog/">Changelog</a></div><div class="sb-group"><h5>Documentation</h5><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div><div class="sb-group"><h5>Writing</h5><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Evidence</span><span>/</span><span>Flake hunt findings</span></nav><h1>Flake hunt findings</h1><p class="lede">Nine real flaky tests across five projects. Seven were already filed. The two that were not turned out not to be flaky tests at all.</p><p class="src-note">Generated from <a href="https://github.com/rowhitswami/flakestat/blob/main/HUNT-FINDINGS.md"><code>HUNT-FINDINGS.md</code></a> in the repository, which is the copy of record — its history and timestamps are checkable there.</p><p><strong>Complete. Nothing here has been filed on anyone's tracker.</strong></p>
+<p>Ran flakestat's validation protocol against active open-source Go projects to
+answer one question the validation report leaves open: <em>can it surface a flaky
+test nobody has already filed?</em></p>
+<h2 id="protocol">Protocol<a class="anchor" href="#protocol" aria-label="Link to this section">#</a></h2>
+<p>Identical to validation subject C, so results are comparable:</p>
+<pre><code>go test -count=3 -shuffle=&lt;recorded seed&gt;    fresh process per execution
+</code></pre>
+<p><code>-count=3</code> because process-global-state flakes only surface with in-process
+repetition — that is what Conduit's own flake-hunt job uses. <code>-shuffle</code> with a
+seed chosen and recorded by the harness, so any failure handed to a maintainer
+is reproducible rather than "run 47 failed". Scored with the frozen build
+<code>a4672ece</code>. No repository was modified.</p>
+<p>Every candidate was screened first for existing flake-hunting: all 33 workflow
+files across the five repos were checked for <code>shuffle</code>, <code>count&gt;1</code>, scheduled
+test jobs and flake-named jobs.</p>
+<h2 id="results">Results<a class="anchor" href="#results" aria-label="Link to this section">#</a></h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Repo</th>
+<th>Executions</th>
+<th>Distinct tests</th>
+<th>Failing tests</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>benbjohnson/litestream</code></td>
+<td>100</td>
+<td>1,438</td>
+<td>1</td>
+<td>rate 2/301 observations</td>
+</tr>
+<tr>
+<td><code>sourcegraph/conc</code></td>
+<td>101</td>
+<td>162</td>
+<td>0</td>
+<td>clean</td>
+</tr>
+<tr>
+<td><code>charmbracelet/bubbletea</code></td>
+<td>101</td>
+<td>69</td>
+<td>0</td>
+<td>clean</td>
+</tr>
+<tr>
+<td><code>hashicorp/raft</code></td>
+<td>31 *</td>
+<td>~500</td>
+<td>7</td>
+<td>flakiest suite by far</td>
+</tr>
+<tr>
+<td><code>panjf2000/ants</code></td>
+<td>2 †</td>
+<td>65</td>
+<td>1</td>
+<td>deterministic hang, see below</td>
+</tr>
+<tr>
+<td><code>etcd-io/bbolt</code></td>
+<td>not run</td>
+<td>—</td>
+<td>—</td>
+<td>606s baseline; the protocol would cost ~50h</td>
+</tr>
+</tbody>
+</table></div>
+<p>* reduced from 100: baseline 131s, so <code>-count=3</code> costs ~6.5min per execution
+and 100 would have consumed the whole window and starved the other repos.
+† full-suite run abandoned at 2 executions — each hang costs the 10-minute Go
+test timeout — and replaced with a targeted diagnostic.</p>
+<h2 id="every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known<a class="anchor" href="#every-real-flake-found-and-whether-it-was-already-known" aria-label="Link to this section">#</a></h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Finding</th>
+<th>Rate</th>
+<th>Already known?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>raft <code>TestRaft_HasExistingState</code></td>
+<td>2/31 runs</td>
+<td><strong>no — clean on four checks</strong></td>
+</tr>
+<tr>
+<td>ants <code>TestAntsPool</code> hangs under <code>-count&gt;1</code></td>
+<td>15/15</td>
+<td><strong>no — clean on three checks</strong></td>
+</tr>
+<tr>
+<td>raft <code>TestRaft_FollowerRemovalNoElection</code></td>
+<td>4/31</td>
+<td>yes — open PR #669, unmerged since 2026-03-19</td>
+</tr>
+<tr>
+<td>raft <code>TestRaft_SendSnapshotFollower</code></td>
+<td>2/31</td>
+<td>yes — issue #311, and listed in #372</td>
+</tr>
+<tr>
+<td>raft <code>TestRaft_ProtocolVersion_Upgrade_2_3</code></td>
+<td>2/31</td>
+<td>yes — listed in #372</td>
+</tr>
+<tr>
+<td>raft <code>TestRaft_RecoverCluster</code></td>
+<td>2/31</td>
+<td>yes — listed in #372</td>
+</tr>
+<tr>
+<td>raft <code>TestRaft_ProtocolVersion_Upgrade_1_2</code></td>
+<td>1/31</td>
+<td>yes — listed in #372</td>
+</tr>
+<tr>
+<td>raft <code>TestNetworkTransport_AppendEntriesPipeline_CloseStreams</code></td>
+<td>1/31</td>
+<td>yes — has prior issues</td>
+</tr>
+<tr>
+<td>litestream <code>TestResumableReader_ContextCancelAbortsBackoff</code></td>
+<td>2/301</td>
+<td>yes — open issue #1502</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Seven of nine were already filed.</strong> That is the honest headline of this
+exercise: projects with active maintainers usually already know. It is not a
+failure of the tool, it is what the world looks like.</p>
+<h2 id="the-two-unreported-candidates">The two unreported candidates<a class="anchor" href="#the-two-unreported-candidates" aria-label="Link to this section">#</a></h2>
+<h3 id="hashicorpraft-testraft-hasexistingstate"><code>hashicorp/raft</code> — <code>TestRaft_HasExistingState</code><a class="anchor" href="#hashicorpraft-testraft-hasexistingstate" aria-label="Link to this section">#</a></h3>
+<pre><code>testing.go:705: peer mismatch
+  expected  2 servers  [b3bfde62, c21909b3]
+  observed  3 servers  [b3bfde62, c21909b3, 1a02a2fe]
+</code></pre>
+<p>Failed on runs 003 and 011 under independent seeds (<code>758137489003</code>,
+<code>837114709011</code>). A third node appears in a two-node configuration.</p>
+<p>Cross-checked against four sources, all clean: issue search, PR search, commit
+search, and raft's own community-collected flaky-test inventory (issue #372,
+whose comments name twenty tests — this is not among them).</p>
+<p><strong>Diagnostic results — and two corrections to my own reasoning.</strong></p>
+<pre><code>test alone,  -count=1                  25/25 pass
+test alone,  -count=3                  25/25 pass
+full suite,  -count=1, no shuffle      12/12 pass
+full suite,  -count=1, shuffled        12/12 pass
+full suite,  ./... -count=1            10/10 pass for this test
+full suite,  ./... -count=3, shuffled   2/31 FAIL
+</code></pre>
+<p>The failure needs the full suite <strong>and</strong> <code>-count=3</code>. Neither alone reproduces
+it in 74 attempts.</p>
+<p>I was wrong twice getting here. First I assumed repetition of the test itself
+was leaking state, and tested it in isolation — where it is clean. Then I
+assumed the trigger might be shuffle ordering, which arm B rules out.</p>
+<p><strong>hashicorp/raft runs <code>-count=1</code> in CI, so their CI cannot hit this.</strong> It is not
+a flaky test they experience. It is the same category as the ants finding: the
+package does not survive in-process repetition of the whole suite.</p>
+<h3 id="panjf2000ants-testantspool"><code>panjf2000/ants</code> — <code>TestAntsPool</code><a class="anchor" href="#panjf2000ants-testantspool" aria-label="Link to this section">#</a></h3>
+<pre><code>-count=1    15 passed,  0 hung
+-count=2     0 passed,  5 hung   (all rc=124)
+-count=3     0 passed, 15 hung   (all rc=124)
+</code></pre>
+<p>Deterministic, and the trigger is repetition itself rather than anything
+specific to three iterations: a single extra run of the test in the same
+process is enough. Thirty-five attempts, no ambiguity.</p>
+<p>The test binary times out at 10 minutes with <code>TestAntsPool</code> blocked; the
+goroutine dump shows <code>testing.(*T).Run</code> waiting while several pools'
+<code>purgeStaleWorkers</code> and <code>ticktock</code> janitors remain alive across iterations.</p>
+<p>Cross-check clean: no issue, no PR, no commit mentions it.</p>
+<p><strong>How to characterise it:</strong> a test-hygiene bug, not a flaky test and not a
+proven pool deadlock. It blocks <code>go test -count=N</code>, which is the standard way
+to hunt real flakes — so the practical impact is that this project cannot use
+the technique that finds genuine flakes. Same class as Conduit's <em>"make
+entrypoint SIGTERM handling testable under <code>-count&gt;1</code>"</em> fix.</p>
+<h2 id="what-flakestat-itself-did-precisely">What flakestat itself did, precisely<a class="anchor" href="#what-flakestat-itself-did-precisely" aria-label="Link to this section">#</a></h2>
+<p>Worth separating, because it is easy to overclaim:</p>
+<ol>
+<li>Its <strong>protocol</strong> — repeated fresh processes, <code>-count=3</code>, shuffled — surfaced
+   every finding here.</li>
+<li>Its <strong>scoring</strong> correctly declined to classify the ants hang on two captured
+   runs (<code>insufficient-data</code>, not <code>flaky</code>), which is the right answer on that
+   evidence. A naive detector would have shouted about a 10-minute hang.</li>
+<li>The <strong>characterisation</strong> of both candidates came from targeted follow-up
+   experiments, not from the tool.</li>
+</ol>
+<p>The tool contributed the sampling discipline and the restraint. It did not, on
+its own, diagnose anything.</p>
+<h2 id="does-this-close-the-gap">Does this close the gap?<a class="anchor" href="#does-this-close-the-gap" aria-label="Link to this section">#</a></h2>
+<p><strong>No.</strong> And the way it fails to is worth more than a weak yes.</p>
+<p>Nine real flaky tests were found. Seven were already filed by their maintainers. The
+two that were not — ants <code>TestAntsPool</code> and raft <code>TestRaft_HasExistingState</code> —
+are <strong>both</strong> artefacts of running a suite with <code>-count&gt;1</code>. Neither is a flaky
+test that the project's own CI can encounter.</p>
+<p>So the count of previously-unknown flaky tests found in the wild is <strong>zero</strong>.</p>
+<h3 id="the-protocol-produced-its-own-signal">The protocol produced its own signal<a class="anchor" href="#the-protocol-produced-its-own-signal" aria-label="Link to this section">#</a></h3>
+<p>The raft finding failed only under the exact conditions the hunt imposed:
+<code>-count=3</code> across the full suite. That is not a bug their CI can hit; it is a
+consequence of how the hunt was run.</p>
+<p>This project has been here before. From DESIGN.md, on <code>--parallel</code>:</p>
+<blockquote>
+<p>The deeper lesson: the measurement apparatus was itself a source of signal,
+which is precisely the failure this project exists to prevent.</p>
+</blockquote>
+<p>It happened again, in the hunt rather than the tool. Had I stopped after the
+first cross-check came back clean — unreported test, real intermittent failure,
+9.1k-star library — I would have filed a bug report that misattributed the
+cause, and told you the gap was closed.</p>
+<p>The four experiments that prevented that cost about an hour.</p>
+<h3 id="what-can-be-said">What can be said<a class="anchor" href="#what-can-be-said" aria-label="Link to this section">#</a></h3>
+<ul>
+<li>flakestat reliably surfaces real flakes in third-party code,
+  including one with an unmerged fix open since March and one their nightly
+  race sweep needed a week to catch.</li>
+<li>It stays quiet when it should: two repositories clean across 202 executions
+  and 231 distinct tests, and it correctly refused to classify a dramatic
+  10-minute hang on two observations.</li>
+<li><strong>Every genuinely flaky test it found was already known to its maintainers.</strong>
+  It has still never surfaced one that nobody had filed.</li>
+</ul>
+<p>The honest claim for a launch post is the speed and the restraint, not
+discovery. Anyone writing "found bugs in real projects" from this data would be
+overstating it, and the third sentence of the FAQ would have to walk it back.</p>
+<h3 id="still-worth-telling-the-maintainers">Still worth telling the maintainers<a class="anchor" href="#still-worth-telling-the-maintainers" aria-label="Link to this section">#</a></h3>
+<p>Both <code>-count&gt;1</code> findings are real and unreported, and both have the same
+practical consequence: <strong>the project cannot use <code>go test -count=N</code></strong>, which is
+the standard way to find genuine flakes. That is worth a friendly issue, worded
+as what it is — a test-hygiene limitation, not a product bug, with the
+reproduction attached and no claim about their CI.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#protocol">Protocol</a><a class="lvl2" href="#results">Results</a><a class="lvl2" href="#every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known</a><a class="lvl2" href="#the-two-unreported-candidates">The two unreported candidates</a><a class="lvl3" href="#hashicorpraft-testraft-hasexistingstate">hashicorp/raft — TestRaft_HasExistingState</a><a class="lvl3" href="#panjf2000ants-testantspool">panjf2000/ants — TestAntsPool</a><a class="lvl2" href="#what-flakestat-itself-did-precisely">What flakestat itself did, precisely</a><a class="lvl2" href="#does-this-close-the-gap">Does this close the gap?</a><a class="lvl3" href="#the-protocol-produced-its-own-signal">The protocol produced its own signal</a><a class="lvl3" href="#what-can-be-said">What can be said</a><a class="lvl3" href="#still-worth-telling-the-maintainers">Still worth telling the maintainers</a></div></div>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
+    </div>
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
+      <a href="/docs/#runners">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/flaky-tests/pytest/">Flaky pytest tests</a>
+      <a href="/flaky-tests/jest/">Flaky Jest tests</a>
+      <a href="/flaky-tests/go/">Flaky Go tests</a>
+    </div>
+    <div class="foot-col"><h6>Evidence</h6>
+      <a href="/validation/">Validation record</a>
+      <a href="/findings/">Flake hunt findings</a>
+      <a href="/design/">Design notes</a>
+      <a href="/changelog/">Changelog</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
+      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
+      <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
+      <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
+      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
+    </div>
+  </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
+</footer>
+
+<div class="scrim" id="fs-scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="fs-q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="fs-results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

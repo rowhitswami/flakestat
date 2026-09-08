@@ -32,21 +32,21 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="/theme.css">
 <script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/flaky-tests/go/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Flaky Tests","item":"https://flakestat.com/flaky-tests/"},{"@type":"ListItem","position":3,"name":"Find flaky tests in go test","item":"https://flakestat.com/flaky-tests/go/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/flaky-tests/go/#article","headline":"Find flaky tests in go test","description":"Detect flaky tests in go test. Run the suite repeatedly or record CI runs over time, using the JUnit XML go test already writes. Free and open source.","url":"https://flakestat.com/flaky-tests/go/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/flaky-tests/go/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Flaky Tests","item":"https://flakestat.com/flaky-tests/"},{"@type":"ListItem","position":3,"name":"Find flaky tests in go test","item":"https://flakestat.com/flaky-tests/go/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/flaky-tests/go/#article","headline":"Find flaky tests in go test","description":"Detect flaky tests in go test. Run the suite repeatedly or record CI runs over time, using the JUnit XML go test already writes. Free and open source.","url":"https://flakestat.com/flaky-tests/go/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
 </head>
 <body>
-<div class="progress" id="progress"></div>
+<div class="progress" id="fs-progress"></div>
 
 <header class="nav">
   <div class="nav-in">
-    <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
+    <button class="ibtn menu-btn" id="fs-menu" aria-label="Toggle navigation" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <a class="brand" href="/" aria-label="flakestat home">
       <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
            data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -55,7 +55,7 @@
       <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
       </a>
-      <button class="ibtn" id="theme" aria-label="Toggle dark mode">◐</button>
+      <button class="ibtn" id="fs-theme" aria-label="Toggle dark mode">◐</button>
     </div>
   </div>
 </header>
@@ -118,28 +118,37 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="/docs/#quickstart">Quickstart</a>
       <a href="/docs/#commands">Commands</a>
       <a href="/docs/#scoring">How scoring works</a>
+      <a href="/docs/#runners">Supported runners</a>
     </div>
     <div class="foot-col"><h6>Guides</h6>
       <a href="/docs/#github-actions">GitHub Actions</a>
       <a href="/docs/#history">Tracking over time</a>
       <a href="/docs/#ci-gate">Gating CI</a>
-      <a href="/docs/#runners">Supported runners</a>
+      <a href="/flaky-tests/pytest/">Flaky pytest tests</a>
+      <a href="/flaky-tests/jest/">Flaky Jest tests</a>
+      <a href="/flaky-tests/go/">Flaky Go tests</a>
+    </div>
+    <div class="foot-col"><h6>Evidence</h6>
+      <a href="/validation/">Validation record</a>
+      <a href="/findings/">Flake hunt findings</a>
+      <a href="/design/">Design notes</a>
+      <a href="/changelog/">Changelog</a>
     </div>
     <div class="foot-col"><h6>Project</h6>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
-      <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
+      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
       <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>
   <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
 </footer>
 
-<div class="scrim" id="scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+<div class="scrim" id="fs-scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
   <div class="palette">
-    <input id="q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
-    <div class="results" id="results"></div>
+    <input id="fs-q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="fs-results"></div>
     <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
   </div>
 </div>

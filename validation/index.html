@@ -1,0 +1,1003 @@
+<!doctype html>
+<html lang="en" data-base="/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How flakestat was validated — protocol, subjects and results</title>
+<meta name="description" content="The complete validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, every outcome including the arm that found nothing and a contaminated run that was thrown away.">
+<link rel="canonical" href="https://flakestat.com/validation/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="flaky test detector validation, flaky test detection accuracy, how to validate a flaky test tool, flakestat validation">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="How flakestat was validated">
+<meta property="og:description" content="The complete validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, every outcome including the arm that found nothing and a contaminated run that was thrown away.">
+<meta property="og:url" content="https://flakestat.com/validation/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How flakestat was validated">
+<meta name="twitter:description" content="The complete validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, every outcome including the arm that found nothing and a contaminated run that was thrown away.">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/validation/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Validation","item":"https://flakestat.com/validation/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/validation/#article","headline":"Validation","description":"The complete validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, every outcome including the arm that found nothing and a contaminated run that was thrown away.","url":"https://flakestat.com/validation/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+</head>
+<body>
+<div class="progress" id="fs-progress"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="fs-menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="fs-theme" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="shell"><nav class="sidebar" aria-label="Evidence"><div class="sb-group"><h5>Evidence</h5><a href="/validation/" aria-current="page">Validation</a><a href="/findings/">Flake hunt findings</a><a href="/design/">Design notes</a><a href="/changelog/">Changelog</a></div><div class="sb-group"><h5>Documentation</h5><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div><div class="sb-group"><h5>Writing</h5><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Evidence</span><span>/</span><span>Validation</span></nav><h1>Validation</h1><p class="lede">A detector that only reports what you hoped to find is not a detector. This is the contract that was written before the experiments, and what they returned.</p><p class="src-note">Generated from <a href="https://github.com/rowhitswami/flakestat/blob/main/VALIDATION.md"><code>VALIDATION.md</code></a> in the repository, which is the copy of record — its history and timestamps are checkable there.</p><p>Written <strong>before</strong> any external experiment was run, and committed so its
+timestamp is checkable. Everything below — subjects, stopping rules, frozen
+configuration, and what each outcome is allowed to mean — is fixed in advance.
+Deciding what counts as success after seeing results is how a detector gets
+graded on noise.</p>
+<h2 id="results-at-a-glance">Results at a glance<a class="anchor" href="#results-at-a-glance" aria-label="Link to this section">#</a></h2>
+<p>Three external subjects and this project's own suite, all scored with one
+frozen build. Written after every experiment finished; the contract that
+grades them was committed before any of them ran.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>Ground truth established by</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong> <code>playwright-flaky-tests</code></td>
+<td>fixture author, purpose-built</td>
+<td>10 intentional flakes detected at high confidence; 5 controls clean at 0/100</td>
+</tr>
+<tr>
+<td><strong>B</strong> <code>techstories-demo-app</code></td>
+<td>fixture author, app-shaped, real PostgreSQL</td>
+<td>5 flaky, 5 consistently-failing, 57 stable, <strong>0 suspect</strong></td>
+</tr>
+<tr>
+<td><strong>C</strong> <code>ConduitIO/conduit</code></td>
+<td>the project's own contributors</td>
+<td><code>flaky</code> 0.67 before their fix, <code>stable</code> 0.00 after</td>
+</tr>
+<tr>
+<td><strong>self</strong> flakestat's own CI</td>
+<td>none known</td>
+<td>293 tests, 10,305 observations, all stable</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>No bug row in the contract ever fired.</strong> Nine always-failing tests across A and
+B were called <code>consistently-failing</code>, not flaky. No healthy test was flagged
+anywhere. No association was reported from evidence below the thresholds.</p>
+<h3 id="what-each-subject-is-worth">What each subject is worth<a class="anchor" href="#what-each-subject-is-worth" aria-label="Link to this section">#</a></h3>
+<p><strong>C is the load-bearing result.</strong> The defect was documented by Conduit's
+contributors, the tests were named by them, and the repair was written by them —
+all before this tool was pointed at the repository. flakestat was handed
+observations from both sides of a commit it had no part in and separated them:
+three of the four in-scope tests <code>flaky</code> at 0.67 with high confidence at
+<code>612f5bfb</code>, and <code>stable</code> at 0.00 at <code>9e00e594</code>, under a protocol identical on
+both sides and fixed in advance.</p>
+<p><strong>A and B establish that the classifier separates cleanly</strong> when ground truth is
+known — including the distinction that motivates the whole design. Nine tests
+failed 100 out of 100 times. A detector ranking by failure rate would put all
+nine at the top of a flaky list; flakestat scored them 0.00 and filed them
+separately as broken.</p>
+<p><strong>The self-measurement is specificity on real data.</strong> 293 tests over 33 runs
+across three platforms, with branch, os, arch and runtime all varying — the exact
+conditions under which earlier versions of the scorer manufactured phantom
+transitions. Zero false positives.</p>
+<h3 id="what-this-does-not-establish">What this does not establish<a class="anchor" href="#what-this-does-not-establish" aria-label="Link to this section">#</a></h3>
+<p><strong>Sensitivity below roughly 5%.</strong> Three tests across the subjects fired once or
+twice in a hundred runs and were correctly left <code>stable</code>; that is the right
+reading of the evidence, and it is also the boundary at which this sampling
+approach stops being the right instrument.</p>
+<p><strong>Discovery of unknown flakiness.</strong> Every flake found here was already known to
+someone. flakestat has not yet surfaced a flake nobody had filed, and nothing in
+this report should be read as evidence that it can.</p>
+<h3 id="two-results-that-are-worth-more-than-the-pass-rate">Two results that are worth more than the pass rate<a class="anchor" href="#two-results-that-are-worth-more-than-the-pass-rate" aria-label="Link to this section">#</a></h3>
+<p><strong>A null arm was published.</strong> The pre-registered <code>-count=1</code> protocol found zero
+failures in a hundred executions of a suite its own maintainers had documented as
+flaky. Reporting only the <code>-count=3</code> arm — which found everything — would have
+been exactly the adjustment this contract exists to police. Both are above.</p>
+<p><strong>A contaminated run was discarded rather than reported.</strong> Subject B was first
+run with backup copies of the working tests left inside the project, which Jest
+collected; thirteen identities ended up with two implementations feeding one
+name. That run is void and was re-run clean. flakestat had been right about the
+corrupt input too — one identity genuinely alternated on identical code, which is
+flakiness — but a result obtained from a broken fixture is not a result.</p>
+<h2 id="the-failure-mode-this-guards-against">The failure mode this guards against<a class="anchor" href="#the-failure-mode-this-guards-against" aria-label="Link to this section">#</a></h2>
+<p>The tempting protocol is "run flakestat against real repositories until it
+finds something". Given enough repositories and enough executions, it always
+will, and the finding means nothing.</p>
+<p>So the central rule is:</p>
+<pre><code>Absence of reproduced flakiness is not evidence that flakestat failed.
+</code></pre>
+<p>If a project has a test that fails 2% of the time and our sample contains 200
+passes, the correct output is silence. A detector cannot be graded against an
+event that did not occur in its input. Where that happens, the run is recorded
+as <strong>inconclusive for sensitivity</strong> — not as a pass and not as a failure.</p>
+<h2 id="frozen-configuration">Frozen configuration<a class="anchor" href="#frozen-configuration" aria-label="Link to this section">#</a></h2>
+<p>Defaults are frozen as of this commit and <strong>must not be tuned in response to
+any external result</strong>. Tuning after seeing whether the tool detects a project's
+named tests would make the validation no longer external.</p>
+<pre><code>scoring
+  min_runs             5
+  ewma_alpha           0.3
+  same_commit_weight   3.0
+  suspect_threshold    0.05
+  flaky_threshold      0.10
+  branch_weight        0.5
+  medium_evidence      10 transitions
+  high_evidence        30 transitions
+
+association
+  min_group            10
+  min_others           10
+  candidate_diff       0.10
+  strong_diff          0.15
+  max_q                0.01
+</code></pre>
+<p>If a genuine defect is found — as opposed to a threshold one would prefer to be
+different — the fix is recorded here with the reasoning, and every prior
+subject is re-run against the corrected build.</p>
+<h2 id="subjects">Subjects<a class="anchor" href="#subjects" aria-label="Link to this section">#</a></h2>
+<p>Ordered from strongest ground truth to weakest, so that the instrument is
+checked against known answers before it is pointed at unknown ones.</p>
+<h3 id="a-known-positive-control-uppadhyayrajplaywright-flaky-tests">A. Known positive control — <code>uppadhyayraj/playwright-flaky-tests</code><a class="anchor" href="#a-known-positive-control-uppadhyayrajplaywright-flaky-tests" aria-label="Link to this section">#</a></h3>
+<p>Deliberately contains a stable control alongside random, race,
+network/timing and shared-state flaky tests.</p>
+<p>Protocol: independent executions with <strong>framework retries disabled</strong>. Playwright
+retries would collapse a fail-then-pass into a single reported outcome, which
+is the framework's own flakiness handling standing in for the run-to-run
+history flakestat is supposed to measure.</p>
+<p>Expected:</p>
+<pre><code>stable control            -&gt; stable
+intentional flaky tests   -&gt; suspect or flaky
+no healthy test           -&gt; flaky
+</code></pre>
+<p><strong>Not</strong> expected, and not checked: that a flakestat score equals the repository's
+advertised failure probability. A flake score measures inconsistency between
+consecutive runs; an advertised rate is a marginal failure probability. For a
+Bernoulli process the first is roughly <code>2p(1-p)</code> of the second — they are
+different quantities and agreement between them would be a coincidence.</p>
+<h3 id="b-realistic-controlled-positive-datadogtechstories-demo-app">B. Realistic controlled positive — <code>DataDog/techstories-demo-app</code><a class="anchor" href="#b-realistic-controlled-positive-datadogtechstories-demo-app" aria-label="Link to this section">#</a></h3>
+<p>An actual application with Jest and Cypress, with deliberately flaky
+integration scenarios — concurrent registration, database timeout simulation,
+network latency, session-state races — kept separate from the normal suite.</p>
+<p>This adds a second ecosystem and application-shaped behaviour.</p>
+<p>Expected:</p>
+<ul>
+<li>intentionally flaky cases accumulate temporal evidence;</li>
+<li>ordinary tests stay quiet;</li>
+<li>differing failure mechanisms need no special handling;</li>
+<li>JUnit dialect and test identity stay correct across two runners.</li>
+</ul>
+<h3 id="c-wild-documented-flakiness-conduitioconduit">C. Wild documented flakiness — <code>ConduitIO/conduit</code><a class="anchor" href="#c-wild-documented-flakiness-conduitioconduit" aria-label="Link to this section">#</a></h3>
+<p>Ground truth documented by the project's own contributors before flakestat
+touched it: an open issue (July 2026) reporting three consecutive CI reruns
+failing in unrelated suites before a fourth passed, naming</p>
+<pre><code>TestServiceLifecycle_Stop/user_stop:_forceful
+TestClient_NotFound
+TestClient_CacheMiss
+TestClient_CacheHit
+TestEncodeDecode_ExtractAndUploadSchemaStrategy
+TestEncodeDecode_DownloadStrategy_Avro
+TestRandOld
+</code></pre>
+<p>attributed to timing, shared registry/cache state, parallel contention and
+shared <code>math/rand</code> state.</p>
+<p>Being Go, <code>gotestsum --junitfile</code> produces JUnit XML with no modification to
+the repository.</p>
+<h4>Amended before running: a before/after design</h4>
+<p>Inspecting the repository first — as the contract intends, since the protocol
+must be fixed before results exist — turned up something better than the
+original plan.</p>
+<p>The issue is still open, but the named tests have since been repaired by the
+maintainers in an identifiable series of commits, and the project added its own
+<code>flake-hunt.yml</code> job that repeats the suite nightly. At <code>HEAD</code> those tests are
+expected to be clean, so pointing flakestat there would produce silence that
+means nothing.</p>
+<p>So subject C is run at two commits instead of one:</p>
+<pre><code>C1  612f5bfb  the parent of "test: deflake known-flaky tests from #2534"
+              (#2537, 2026-07-05). Ground truth: documented flaky.
+C2  104f91a9  current HEAD, after that fix and the follow-up backlog
+              commit (#2542). Ground truth: documented fixed.
+</code></pre>
+<p>Both use the identical protocol. That converts a one-sided test into a
+controlled comparison whose ground truth — both the defect and the repair —
+was established by the project's own contributors, with no involvement from
+this tool:</p>
+<pre><code>detected at C1, silent at C2   -&gt; strong positive validation
+silent at both                 -&gt; inconclusive for sensitivity
+flagged at C2                  -&gt; false positive, a bug
+silent at C1 but flagged at C2 -&gt; a bug, and a serious one
+</code></pre>
+<p>Scope is limited to the packages that commit touched, which hold four of the
+seven named tests:</p>
+<pre><code>pkg/plugin/processor/builtin/internal/diff/lcs   TestRandOld
+pkg/schemaregistry                               TestClient_NotFound
+                                                 TestClient_CacheMiss
+                                                 TestClient_CacheHit
+</code></pre>
+<p><strong>Executions use <code>-shuffle=on</code>, one fresh process each.</strong> These are
+order-dependent failures rooted in process-global state — shared <code>math/rand</code>,
+a shared in-memory registry — so Go's default declaration order would produce
+the same outcome every run and no run-to-run variation to observe. Shuffling
+samples the orderings real CI and real developers actually encounter, and it is
+what the project's own flake-hunt job does. This is sampling the subject's
+behaviour, not provoking it: no test is modified, and the same protocol runs at
+both commits, so C2 has every opportunity to flake that C1 does.</p>
+<p>This is the only subject where catching a real flake is genuinely attempted. It
+is a bonus result, not a requirement.</p>
+<h2 id="subject-a-results">Subject A — results<a class="anchor" href="#subject-a-results" aria-label="Link to this section">#</a></h2>
+<p><code>uppadhyayraj/playwright-flaky-tests @ dd4738a4</code>, 100 independent executions,
+<code>--workers=1 --retries=0</code>, scored with the frozen build.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Advertised</th>
+<th>Observed</th>
+<th>flakestat</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>docs sidebar loads before content</td>
+<td>30%</td>
+<td>100/100</td>
+<td><code>consistently-failing</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td>API reference loads all section headings</td>
+<td>15%</td>
+<td>100/100</td>
+<td><code>consistently-failing</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td>cookie-reader: checks consent state</td>
+<td>—</td>
+<td>100/100</td>
+<td><code>consistently-failing</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td>docs page loads within strict threshold</td>
+<td>25%</td>
+<td>44/100</td>
+<td><code>flaky</code></td>
+<td>0.35</td>
+</tr>
+<tr>
+<td>homepage CTA renders in time</td>
+<td>40%</td>
+<td>40/100</td>
+<td><code>flaky</code></td>
+<td>0.45</td>
+</tr>
+<tr>
+<td>concurrent page loads complete without timeout</td>
+<td>20%</td>
+<td>38/100</td>
+<td><code>flaky</code></td>
+<td>0.34</td>
+</tr>
+<tr>
+<td>version badge matches expected</td>
+<td>25%</td>
+<td>32/100</td>
+<td><code>flaky</code></td>
+<td>0.38</td>
+</tr>
+<tr>
+<td>docs search index loaded</td>
+<td>30%</td>
+<td>31/100</td>
+<td><code>flaky</code></td>
+<td>0.44</td>
+</tr>
+<tr>
+<td>back navigation preserves scroll position</td>
+<td>25%</td>
+<td>29/100</td>
+<td><code>flaky</code></td>
+<td>0.42</td>
+</tr>
+<tr>
+<td>cookie-polluter: sets analytics consent</td>
+<td>—</td>
+<td>24/100</td>
+<td><code>flaky</code></td>
+<td>0.41</td>
+</tr>
+<tr>
+<td>step-2: validate title from shared state</td>
+<td>—</td>
+<td>20/100</td>
+<td><code>flaky</code></td>
+<td>0.32</td>
+</tr>
+<tr>
+<td>step-3: assert visit count</td>
+<td>—</td>
+<td>20/100</td>
+<td><code>flaky</code></td>
+<td>0.32</td>
+</tr>
+<tr>
+<td>homepage loads within strict threshold</td>
+<td>30%</td>
+<td>18/100</td>
+<td><code>flaky</code></td>
+<td>0.20</td>
+</tr>
+<tr>
+<td>navbar renders before JS finishes loading</td>
+<td>35%</td>
+<td>2/100</td>
+<td><code>stable</code></td>
+<td>0.04</td>
+</tr>
+<tr>
+<td>image assets load before scroll interaction</td>
+<td>20%</td>
+<td>1/100</td>
+<td><code>stable</code></td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>step-1: capture homepage title</td>
+<td>—</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><strong>control</strong> · homepage has correct title</td>
+<td>control</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><strong>control</strong> · homepage has Get Started link</td>
+<td>control</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><strong>control</strong> · docs intro page loads</td>
+<td>control</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><strong>control</strong> · API reference page loads</td>
+<td>control</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td><strong>control</strong> · navbar is present on all pages</td>
+<td>control</td>
+<td>0/100</td>
+<td><code>stable</code></td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table></div>
+<p>Against the contract:</p>
+<ul>
+<li><strong>Positive validation.</strong> Ten intentionally flaky tests reached <code>flaky</code>, every
+  one at high confidence.</li>
+<li><strong>Negative validation.</strong> All five controls sat at 0/100 and stayed <code>stable</code>.
+  No false positive anywhere in the run.</li>
+<li><strong>No bug row fired.</strong> Three tests failed 100/100 and were called
+  <code>consistently-failing</code>, not flaky. Nothing healthy was called flaky. No
+  association was reported from sparse evidence.</li>
+</ul>
+<h3 id="detection-latency">Detection latency<a class="anchor" href="#detection-latency" aria-label="Link to this section">#</a></h3>
+<p>Measured from a verdict snapshot taken after every execution.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>1st failure</th>
+<th>1st contradiction</th>
+<th>→ suspect</th>
+<th>→ flaky</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>homepage CTA renders in time (40%)</td>
+<td>1</td>
+<td>5</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>docs page loads within threshold (25%)</td>
+<td>1</td>
+<td>2</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>version badge matches expected (25%)</td>
+<td>3</td>
+<td>3</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr>
+<td>docs search index loaded (30%)</td>
+<td>6</td>
+<td>6</td>
+<td>6</td>
+<td>8</td>
+</tr>
+<tr>
+<td>step-2 / step-3 shared state</td>
+<td>9</td>
+<td>9</td>
+<td>9</td>
+<td>10</td>
+</tr>
+</tbody>
+</table></div>
+<p>Nothing was classified before <code>--min-runs</code> allowed it, which is why the earliest
+<code>suspect</code> is run 5. Every test failing 18% or more of the time was <code>flaky</code>
+within ten executions.</p>
+<h3 id="three-fixtures-were-deterministic-here-not-flaky">Three fixtures were deterministic here, not flaky<a class="anchor" href="#three-fixtures-were-deterministic-here-not-flaky" aria-label="Link to this section">#</a></h3>
+<p>Named as flaky, they failed 100/100:</p>
+<ul>
+<li><em>docs sidebar loads before content</em> — <code>toBeVisible()</code> fails outright.
+  playwright.dev's DOM has changed since the fixture was written.</li>
+<li><em>API reference loads all section headings</em> — "Expected ≥2 headings, found 1".
+  Same cause.</li>
+<li><em>cookie-reader: checks consent state</em> — needs a cookie set by an earlier test
+  in the same browser context, which Playwright's per-test isolation prevents.</li>
+</ul>
+<p>flakestat called all three <code>consistently-failing</code>. That is the contract's
+"an always-failing test called flaky" bug row <strong>not</strong> firing, on data that
+would trip a failure-rate-based detector: each has a 100% failure rate and zero
+flakiness.</p>
+<h3 id="two-fixtures-barely-fired-and-were-correctly-not-flagged">Two fixtures barely fired, and were correctly not flagged<a class="anchor" href="#two-fixtures-barely-fired-and-were-correctly-not-flagged" aria-label="Link to this section">#</a></h3>
+<p><em>navbar renders before JS finishes loading</em> advertises 35% and failed <strong>2/100</strong>.
+<em>image assets load before scroll interaction</em> advertises 20% and failed
+<strong>1/100</strong>.</p>
+<p>flakestat scored them 0.04 and 0.02 and left both <code>stable</code>. For a Bernoulli
+process at p = 0.02 the expected flip rate is 2p(1-p) ≈ 0.039, so 0.04 is the
+right measurement of what actually happened. The gap is between the fixture's
+advertised rate and its behaviour in this environment, not between the evidence
+and the verdict — which is exactly why the contract forbids grading a score
+against an advertised probability.</p>
+<p>The honest reading: these two are <strong>inconclusive for sensitivity</strong>. A detector
+cannot be graded on an event that occurred twice in its input.</p>
+<h2 id="subject-c-results">Subject C — results<a class="anchor" href="#subject-c-results" aria-label="Link to this section">#</a></h2>
+<p>Identical protocol at both commits: 100 independent executions, fresh process
+each, <code>-shuffle=&lt;seed&gt;</code> with a distinct recorded seed per execution.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th></th>
+<th><code>-count=1</code></th>
+<th><code>-count=3</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C1</strong> <code>612f5bfb</code> — documented flaky</td>
+<td>0/100 runs had failures</td>
+<td><strong>100/100 runs had failures</strong></td>
+</tr>
+<tr>
+<td><strong>C2</strong> <code>9e00e594</code> — the repair</td>
+<td>0/100</td>
+<td><strong>0/100</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="what-flakestat-said">What flakestat said<a class="anchor" href="#what-flakestat-said" aria-label="Link to this section">#</a></h3>
+<p>At <code>-count=3</code>, scored with the frozen build:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>External evidence</th>
+<th>C1 observed</th>
+<th>C1 verdict</th>
+<th>C2 observed</th>
+<th>C2 verdict</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>TestClient_NotFound</code></td>
+<td>documented flaky, #2534</td>
+<td>200/300</td>
+<td><code>flaky</code> 0.67 high</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+</tr>
+<tr>
+<td><code>TestClient_CacheMiss</code></td>
+<td>documented flaky, #2534</td>
+<td>200/300</td>
+<td><code>flaky</code> 0.67 high</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+</tr>
+<tr>
+<td><code>TestClient_CacheHit</code></td>
+<td>documented flaky, #2534</td>
+<td>200/300</td>
+<td><code>flaky</code> 0.67 high</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+</tr>
+<tr>
+<td><code>TestRandOld</code></td>
+<td>documented flaky, #2534</td>
+<td>2/300</td>
+<td><code>stable</code> 0.01 *</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+</tr>
+<tr>
+<td><code>TestAlgosOld</code> (and subtests)</td>
+<td>not implicated</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+<td>0/300</td>
+<td><code>stable</code> 0.00</td>
+</tr>
+</tbody>
+</table></div>
+<p>* two contradictory outcomes in three hundred; see below.</p>
+<p><strong>This is the contract's strongest row: detected at C1, silent at C2.</strong> Three of
+the four in-scope tests were called flaky at high confidence before the repair
+and stable after it, under a protocol that was identical on both sides and fixed
+before either ran.</p>
+<p>The value is in who established what. Conduit's contributors documented the
+defect, named the tests, and wrote the fix — all before this tool was pointed at
+their repository. flakestat was handed observations from both sides of a commit
+it had no part in, and separated them.</p>
+<h3 id="detection-latency-2">Detection latency<a class="anchor" href="#detection-latency-2" aria-label="Link to this section">#</a></h3>
+<p><code>flaky</code> by <strong>run 2</strong> for all three. With <code>-count=3</code> each execution contributes
+three observations, so run 2 is the first point at which six scored runs exist —
+one above the <code>min_runs</code> floor of five. Nothing was classified earlier than the
+evidence allowed.</p>
+<h3 id="-count1-found-nothing-and-that-is-the-finding"><code>-count=1</code> found nothing, and that is the finding<a class="anchor" href="#-count1-found-nothing-and-that-is-the-finding" aria-label="Link to this section">#</a></h3>
+<p>The pre-registered protocol said <code>-count=1</code>. Under it, C1 produced <strong>zero</strong>
+failures in a hundred executions of a suite its own maintainers had documented
+as flaky.</p>
+<p>The reason is in the defect: these are process-global-state bugs — a shared
+in-memory registry, shared <code>math/rand</code> state — so the pollution has to happen
+<em>within</em> one process before a later test can trip over it. One repetition per
+process never gets there, however many processes you start. Conduit's own
+<code>flake-hunt.yml</code> uses <code>-count=3 -shuffle=on</code> for exactly this reason, and the
+original protocol under-specified by not matching it.</p>
+<p>Both were run and both are reported. The <code>-count=1</code> result is not a flakestat
+failure and not a success: it is a <strong>detector correctly staying silent on an
+input that contained no contradictory outcome</strong>, and a reminder that a sampling
+protocol can be too weak to see a defect that is definitely there.</p>
+<p>Changing the repetition count after seeing a null result is the kind of
+adjustment this contract exists to police, so the honest handling is to publish
+both arms rather than the flattering one, and to note that <code>-count=3</code> was
+adopted from the project's own reproduction recipe rather than tuned until
+something appeared.</p>
+<h3 id="testrandold-two-failures-in-three-hundred"><code>TestRandOld</code>: two failures in three hundred<a class="anchor" href="#testrandold-two-failures-in-three-hundred" aria-label="Link to this section">#</a></h3>
+<p>Named in the issue and repaired by the same commit, but it fired twice in three
+hundred observations here and flakestat scored it 0.01 and left it <code>stable</code>.
+That is the right reading of the evidence in hand — and <strong>inconclusive for
+sensitivity</strong>, not a miss. The shared <code>math/rand</code> dependency it exercises is
+order-sensitive in a way that a hundred shuffles happened to trip only twice.</p>
+<h2 id="subject-b-results">Subject B — results<a class="anchor" href="#subject-b-results" aria-label="Link to this section">#</a></h2>
+<p><code>DataDog/techstories-demo-app @ 1ca082de</code>, 100 independent executions, Jest with
+no retries against PostgreSQL 16, the repository's own <code>broken-tests/</code> swapped
+in over their working counterparts.</p>
+<p>67 tests, 100 executions each:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Verdict</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>stable</code></td>
+<td>57</td>
+</tr>
+<tr>
+<td><code>flaky</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>consistently-failing</code></td>
+<td>5</td>
+</tr>
+<tr>
+<td><code>suspect</code></td>
+<td>0</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>No stable test failed even once, and nothing landed in <code>suspect</code>.</strong> The
+separation was total: every test either fired repeatedly or never.</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Test</th>
+<th>Observed</th>
+<th>flakestat</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>PostList</code> expects PostListItem to be called</td>
+<td>49/100</td>
+<td><code>flaky</code></td>
+<td>0.58</td>
+</tr>
+<tr>
+<td>Post and Comment — can create a post</td>
+<td>54/100</td>
+<td><code>flaky</code></td>
+<td>0.56</td>
+</tr>
+<tr>
+<td>Database — email uniqueness race</td>
+<td>39/100</td>
+<td><code>flaky</code></td>
+<td>0.54</td>
+</tr>
+<tr>
+<td>User Registration — concurrent registration</td>
+<td>55/100</td>
+<td><code>flaky</code></td>
+<td>0.47</td>
+</tr>
+<tr>
+<td>SignUp — registration (flaky variant)</td>
+<td>13/100</td>
+<td><code>flaky</code></td>
+<td>0.22</td>
+</tr>
+<tr>
+<td>Header — renders the user's name</td>
+<td>100/100</td>
+<td><code>consistently-failing</code></td>
+<td>0.00</td>
+</tr>
+<tr>
+<td>Quotes API — four cases</td>
+<td>100/100 each</td>
+<td><code>consistently-failing</code></td>
+<td>0.00</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>PostList</code> is the one fixture with a mechanism visible in the source:
+<code>Math.random() &gt; 0.5</code>. It fired 49 times in 100. That is the closest thing to a
+known-rate positive control in this subject, and the observation matches it.</p>
+<p>Detection latency: four of the five reached <code>flaky</code> at run 5, the earliest
+<code>min_runs</code> permits. The 13% case took until run 11.</p>
+<h3 id="a-contaminated-first-run-and-what-it-showed">A contaminated first run, and what it showed<a class="anchor" href="#a-contaminated-first-run-and-what-it-showed" aria-label="Link to this section">#</a></h3>
+<p>The first attempt at this subject is void. Backups of the working test files
+were left in <code>.originals/</code> <strong>inside the project</strong>, and Jest collected them, so
+five working files ran alongside the broken versions that replaced them.
+Thirteen test identities therefore had two different implementations
+contributing outcomes under one name.</p>
+<p>That run is discarded, not reported, and 100 executions were re-run against a
+tree where <code>jest --listTests</code> returns 18 files and a single run yields 67
+testcases with no repeated identity.</p>
+<p>The comparison is worth keeping, because flakestat was right both times:</p>
+<pre><code>Header renders the user's name when signed in
+  contaminated:  flaky 0.99          (working + broken version alternating)
+  clean:         consistently-failing 0.00   (only the broken version runs)
+</code></pre>
+<p>Under contamination, one identity really did alternate between passing and
+failing on identical code — which is flakiness, and reporting it as such was
+correct analysis of a corrupt input. The fault was in the fixture, not the
+tool. It is a fair reminder that a detector can only be as good as the identity
+its inputs give it, and that <code>-count</code>-style repetition and accidental
+duplication look alike from the outside.</p>
+<h2 id="protocol-amendments">Protocol amendments<a class="anchor" href="#protocol-amendments" aria-label="Link to this section">#</a></h2>
+<p>Recorded as additions with their reasoning. Earlier entries are left standing,
+because a preregistration that gets edited is not one.</p>
+<h3 id="2026-09-07-c2-tightened-to-the-exact-repair-commit">2026-09-07 — C2 tightened to the exact repair commit<a class="anchor" href="#2026-09-07-c2-tightened-to-the-exact-repair-commit" aria-label="Link to this section">#</a></h3>
+<p>Originally C2 was <code>HEAD</code>. That answers a weaker question than intended: if C1
+flakes and HEAD does not, the honest conclusion is only <em>something between
+these commits removed the behaviour</em>, not <em>the documented repair removed it</em>.
+Hundreds of unrelated commits sit in between.</p>
+<p>The comparison is now against the repair itself, with <code>HEAD</code> retained
+separately as a durability check rather than as the contrast:</p>
+<pre><code>C1  612f5bfb  parent of the repair          documented flaky
+C2  9e00e594  the repair, #2537             documented fixed
+C3  104f91a9  HEAD, optional                is the repair still holding?
+</code></pre>
+<p>C1 -&gt; C2 differ only by that commit, so a difference in behaviour is
+attributable to it. C1 -&gt; C3 answers a separate and also useful question.</p>
+<p>No Conduit execution had been run when this was written.</p>
+<h3 id="2026-09-07-conduit-invocation-stated-explicitly">2026-09-07 — Conduit invocation stated explicitly<a class="anchor" href="#2026-09-07-conduit-invocation-stated-explicitly" aria-label="Link to this section">#</a></h3>
+<pre><code>go test -count=1 -shuffle=on &lt;packages&gt;
+</code></pre>
+<p><code>-shuffle=on</code> alone already defeats the test cache in this invocation, but
+<code>-count=1</code> states the experimental requirement rather than relying on that:
+<strong>execute the tests, never reuse a cached result.</strong></p>
+<p><code>go test</code> prints the shuffle seed it used. That seed is recorded per execution,
+so any failure carries</p>
+<pre><code>commit + runtime + test + shuffle seed + failure message
+</code></pre>
+<p>and is reproducible by a third party, rather than being "run 47 failed".</p>
+<h3 id="2026-09-07-a-defect-found-before-the-freeze-and-how-it-was-handled">2026-09-07 — a defect found before the freeze, and how it was handled<a class="anchor" href="#2026-09-07-a-defect-found-before-the-freeze-and-how-it-was-handled" aria-label="Link to this section">#</a></h3>
+<p>Checking the skip invariant surfaced an unrelated bug: the history strip in
+<code>explain</code> grouped transitions by branch while scoring grouped them by execution
+context, so the rendered evidence printed "flip on identical code" at every
+platform boundary. Verdicts were correct; the evidence displayed beneath them
+was not.</p>
+<p>It cannot affect any external subject, all of which run on a single machine
+with one platform, one runtime and one branch — branch grouping and execution
+context coincide there, so the strip and the verdict agree by construction. It
+was fixed before the freeze rather than during the experiments.</p>
+<p>Subject A was already executing against the pre-fix build when this was found.
+Rather than restart it, note that execution and measurement are separable here:
+the raw evidence is the JUnit XML on disk, and scoring happens afterwards. Every
+subject's XML is <strong>re-ingested and re-scored with the frozen build</strong> before any
+result is reported, so all three subjects are measured by one implementation
+regardless of which build produced the XML.</p>
+<h3 id="2026-09-07-a-perturbation-during-subject-a-recorded-not-hidden">2026-09-07 — a perturbation during subject A, recorded not hidden<a class="anchor" href="#2026-09-07-a-perturbation-during-subject-a-recorded-not-hidden" aria-label="Link to this section">#</a></h3>
+<p>Docker Desktop was started around executions 29-31 of subject A, in preparation
+for subject B, and its startup competed for CPU: execution time rose from ~110s
+to ~2min. Subject A includes wall-clock threshold assertions ("Docs page load
+took 5932ms - threshold: 4500ms"), so added CPU load can inflate exactly the
+failure rates being measured.</p>
+<p>Docker was stopped again and subject B deferred until A completes. The overlap
+is recorded here rather than corrected away: three of a hundred executions ran
+under load, which is noted beside subject A's rates so a reader can judge it.
+Nothing was re-run, because selectively discarding executions that ran under
+conditions one dislikes is how a measured rate becomes a chosen one.</p>
+<h2 id="flakestat-against-its-own-suite">flakestat against its own suite<a class="anchor" href="#flakestat-against-its-own-suite" aria-label="Link to this section">#</a></h2>
+<p>Accumulated on the <code>flakestat-history</code> branch across every CI run of this
+project: <strong>10,305 observations of 293 distinct tests over 33 runs, on three
+platforms. All 293 stable, no false positives.</strong></p>
+<p>Not a sensitivity result — nothing in that suite is known to be flaky — but it
+is specificity measured on real, unsynthetic data, from a matrix where branch,
+platform and runtime all vary and where earlier versions of the scorer produced
+phantom transitions.</p>
+<h2 id="frozen-implementation">Frozen implementation<a class="anchor" href="#frozen-implementation" aria-label="Link to this section">#</a></h2>
+<p>Fixed for the duration of A, B and C. If a genuine correctness bug is found
+mid-experiment, affected results are invalidated, the build gets a new SHA
+recorded here, and every affected subject is re-scored from its retained XML.
+Nothing is quietly patched and continued.</p>
+<pre><code>flakestat commit   a4672ece  (code identical to 465faaec; later commits
+                              in the range are documentation only)
+flakestat version  dev (built from source)
+binary sha256      e5db674fe97f6de323f24f88a30f27282c4ccd4fb332ff710d07
+                   cf1b332af760
+go                 go1.25.4
+host               Darwin arm64
+
+subject A          uppadhyayraj/playwright-flaky-tests @ dd4738a4
+                   npx playwright test --workers=1 --retries=0 --reporter=junit
+                   CI unset, so the repo's own config yields retries=0
+
+subject B          DataDog/techstories-demo-app @ (recorded when run)
+
+subject C          ConduitIO/conduit @ 612f5bfb / 9e00e594 / 104f91a9
+                   go test -count=1 -shuffle=on &lt;in-scope packages&gt;
+                   repo targets go 1.25.8
+</code></pre>
+<h2 id="descriptive-metrics">Descriptive metrics<a class="anchor" href="#descriptive-metrics" aria-label="Link to this section">#</a></h2>
+<p>Captured for every subject and reported alongside the verdict. These describe
+behaviour; they are <strong>not</strong> success criteria and must not be used to move the
+bar set above.</p>
+<pre><code>observations until first contradictory outcome
+observations until suspect
+observations until flaky
+final pass/fail counts
+final classification, score and confidence
+</code></pre>
+<p>Detection latency is the interesting one, and is a far more meaningful property
+of a detector than whether a flake score resembles an advertised failure
+probability. Reported per test:</p>
+<pre><code>test_random_failure
+  first failure             run 7
+  first contradictory pair  run 7
+  reached suspect           run 11
+  reached flaky             run 24
+  final                     74 pass / 26 fail, flaky, high confidence
+</code></pre>
+<p>A verdict snapshot is written after every execution, so these are recovered
+from the record rather than estimated afterwards.</p>
+<h2 id="stopping-rule">Stopping rule<a class="anchor" href="#stopping-rule" aria-label="Link to this section">#</a></h2>
+<p>For each subject, stop at whichever comes first:</p>
+<pre><code>A. enough contradictory outcomes to cross the evidence threshold, or
+B. 100 independent executions
+</code></pre>
+<p>100 is chosen so that a missed detection is meaningful rather than
+unremarkable. Prior measured sensitivity was 100% recall at p &gt;= 0.25 and
+roughly 80% at p = 0.10 with 50+ runs, so a test flaky at those rates that goes
+undetected in 100 executions is a real finding. Below p = 0.05 detection was
+already known to be unreliable, and silence there says nothing.</p>
+<h2 id="what-each-outcome-means">What each outcome means<a class="anchor" href="#what-each-outcome-means" aria-label="Link to this section">#</a></h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Known flaky test reproduces and flakestat detects it</td>
+<td>positive validation</td>
+</tr>
+<tr>
+<td>Known flaky test never fails in our sample, flakestat silent</td>
+<td>correct, but <strong>inconclusive for sensitivity</strong></td>
+</tr>
+<tr>
+<td>Stable test stays stable</td>
+<td>negative validation</td>
+</tr>
+<tr>
+<td>Environment-specific deterministic behaviour becomes <code>stable</code> + association</td>
+<td>positive validation</td>
+</tr>
+<tr>
+<td>An always-failing test called flaky</td>
+<td><strong>bug</strong></td>
+</tr>
+<tr>
+<td>A healthy test called flaky from interleaving or context effects</td>
+<td><strong>bug</strong></td>
+</tr>
+<tr>
+<td>A correlation reported from sparse evidence below thresholds</td>
+<td><strong>bug</strong></td>
+</tr>
+<tr>
+<td>Wild undocumented flake found and reproducible</td>
+<td>major result, not required</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="reporting-format">Reporting format<a class="anchor" href="#reporting-format" aria-label="Link to this section">#</a></h2>
+<p>Raw evidence is recorded next to the judgment, never replaced by it. No row
+states an expectation as though it were an observation:</p>
+<pre><code>Test                    External evidence    Observed   flakestat
+stable-control          stable               0/100      stable
+random-flake            intentional          27/100     flaky
+TestRandOld             documented wild      3/80       suspect
+TestClient_CacheHit     documented wild      0/80       stable *
+
+* no contradictory outcome observed in this experiment; historical
+  flakiness was not supplied to flakestat as input
+</code></pre>
+<h2 id="status">Status<a class="anchor" href="#status" aria-label="Link to this section">#</a></h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Subject</th>
+<th>State</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A. playwright-flaky-tests</td>
+<td><strong>complete</strong> — see results below</td>
+</tr>
+<tr>
+<td>B. techstories-demo-app</td>
+<td><strong>complete</strong></td>
+</tr>
+<tr>
+<td>C1. conduit @ 612f5bfb (pre-fix)</td>
+<td><strong>complete</strong></td>
+</tr>
+<tr>
+<td>C2. conduit @ 9e00e594 (the repair)</td>
+<td><strong>complete</strong></td>
+</tr>
+</tbody>
+</table></div>
+<p>Subject A is pinned at <code>dd4738a4</code>. Its "stable" control navigates to the live
+<code>playwright.dev</code>, so a control failure there is ambiguous between a tool error
+and a genuine network event; raw failure messages are kept so the two can be
+told apart rather than assumed.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#results-at-a-glance">Results at a glance</a><a class="lvl3" href="#what-each-subject-is-worth">What each subject is worth</a><a class="lvl3" href="#what-this-does-not-establish">What this does not establish</a><a class="lvl3" href="#two-results-that-are-worth-more-than-the-pass-rate">Two results that are worth more than the pass rate</a><a class="lvl2" href="#the-failure-mode-this-guards-against">The failure mode this guards against</a><a class="lvl2" href="#frozen-configuration">Frozen configuration</a><a class="lvl2" href="#subjects">Subjects</a><a class="lvl3" href="#a-known-positive-control-uppadhyayrajplaywright-flaky-tests">A. Known positive control — uppadhyayraj/playwright-flaky-tests</a><a class="lvl3" href="#b-realistic-controlled-positive-datadogtechstories-demo-app">B. Realistic controlled positive — DataDog/techstories-demo-app</a><a class="lvl3" href="#c-wild-documented-flakiness-conduitioconduit">C. Wild documented flakiness — ConduitIO/conduit</a><a class="lvl2" href="#subject-a-results">Subject A — results</a><a class="lvl3" href="#detection-latency">Detection latency</a><a class="lvl3" href="#three-fixtures-were-deterministic-here-not-flaky">Three fixtures were deterministic here, not flaky</a><a class="lvl3" href="#two-fixtures-barely-fired-and-were-correctly-not-flagged">Two fixtures barely fired, and were correctly not flagged</a><a class="lvl2" href="#subject-c-results">Subject C — results</a><a class="lvl3" href="#what-flakestat-said">What flakestat said</a><a class="lvl3" href="#detection-latency-2">Detection latency</a><a class="lvl3" href="#-count1-found-nothing-and-that-is-the-finding">-count=1 found nothing, and that is the finding</a><a class="lvl3" href="#testrandold-two-failures-in-three-hundred">TestRandOld: two failures in three hundred</a><a class="lvl2" href="#subject-b-results">Subject B — results</a><a class="lvl3" href="#a-contaminated-first-run-and-what-it-showed">A contaminated first run, and what it showed</a><a class="lvl2" href="#protocol-amendments">Protocol amendments</a><a class="lvl3" href="#2026-09-07-c2-tightened-to-the-exact-repair-commit">2026-09-07 — C2 tightened to the exact repair commit</a><a class="lvl3" href="#2026-09-07-conduit-invocation-stated-explicitly">2026-09-07 — Conduit invocation stated explicitly</a><a class="lvl3" href="#2026-09-07-a-defect-found-before-the-freeze-and-how-it-was-handled">2026-09-07 — a defect found before the freeze, and how it was handled</a><a class="lvl3" href="#2026-09-07-a-perturbation-during-subject-a-recorded-not-hidden">2026-09-07 — a perturbation during subject A, recorded not hidden</a><a class="lvl2" href="#flakestat-against-its-own-suite">flakestat against its own suite</a><a class="lvl2" href="#frozen-implementation">Frozen implementation</a><a class="lvl2" href="#descriptive-metrics">Descriptive metrics</a><a class="lvl2" href="#stopping-rule">Stopping rule</a><a class="lvl2" href="#what-each-outcome-means">What each outcome means</a><a class="lvl2" href="#reporting-format">Reporting format</a><a class="lvl2" href="#status">Status</a></div></div>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
+    </div>
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
+      <a href="/docs/#runners">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/flaky-tests/pytest/">Flaky pytest tests</a>
+      <a href="/flaky-tests/jest/">Flaky Jest tests</a>
+      <a href="/flaky-tests/go/">Flaky Go tests</a>
+    </div>
+    <div class="foot-col"><h6>Evidence</h6>
+      <a href="/validation/">Validation record</a>
+      <a href="/findings/">Flake hunt findings</a>
+      <a href="/design/">Design notes</a>
+      <a href="/changelog/">Changelog</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
+      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
+      <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
+      <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
+      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
+    </div>
+  </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
+</footer>
+
+<div class="scrim" id="fs-scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="fs-q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="fs-results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
