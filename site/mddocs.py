@@ -21,10 +21,9 @@ DOCS = [
         title="How flakestat was validated",
         title_tag="How flakestat was validated: protocol, subjects and results",
         og_title="How flakestat was validated",
-        description="The full validation record for flakestat. A protocol registered "
+        description="The full validation record for flakestat: a protocol registered "
                     "before any experiment ran, three third-party subjects, and every "
-                    "outcome, including the arm that found nothing and a contaminated "
-                    "run that was thrown away.",
+                    "outcome it produced.",
         keywords=["flaky test detector validation", "flaky test detection accuracy",
                   "how to validate a flaky test tool", "flakestat validation"],
         lede="The contract was written before the experiments. This is that contract, "
@@ -37,9 +36,9 @@ DOCS = [
         title="Hunting flaky tests in open source",
         title_tag="Hunting flaky tests in five open-source Go projects",
         og_title="Hunting flaky tests in five open-source projects",
-        description="What happened when flakestat ran overnight against five active "
-                    "open-source Go projects: nine real flaky tests, seven already "
-                    "filed by their maintainers, and zero previously-unknown flakes.",
+        description="flakestat ran overnight against five active open-source Go "
+                    "projects. Nine real flaky tests, seven already filed, and zero "
+                    "previously-unknown flakes.",
         keywords=["flaky tests in open source", "hashicorp raft flaky test",
                   "litestream flaky test", "go test count shuffle flaky"],
         lede="Nine real flaky tests across five projects. Seven were already filed, "
@@ -53,8 +52,7 @@ DOCS = [
         title_tag="flakestat design notes: how the scoring actually works",
         og_title="flakestat design notes",
         description="Why flakestat scores inconsistency rather than failure rate, how "
-                    "execution context is compared, what the confidence level is "
-                    "derived from, and which questions are still open.",
+                    "execution context is compared, and which questions are still open.",
         keywords=["flaky test scoring algorithm", "wilson score flaky test",
                   "flaky test detection design", "junit xml parsing"],
         lede="The reasoning behind the scoring, the storage format and the command "

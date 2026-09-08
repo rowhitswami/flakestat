@@ -167,6 +167,11 @@ def heading_ids(body: str, reserved=()):
 
     def repl(m):
         level, attrs, text = m.group(1), m.group(2) or "", m.group(3)
+        # A heading carrying a class is a component label, not a section: card
+        # titles, figure captions. They do not belong in the contents, and a
+        # card that is itself a link cannot contain the anchor link either.
+        if "class=" in attrs:
+            return m.group(0)
         if "id=" in attrs:
             hid = re.search(r'id="([^"]+)"', attrs).group(1)
             taken.add(hid)
@@ -227,7 +232,7 @@ def jsonld(page) -> str:
         "url": "https://github.com/rowhitswami",
     }]
 
-    if page["slug"]:
+    if page["slug"] and page["slug"] != "404":
         crumbs = [{"@type": "ListItem", "position": 1, "name": "flakestat", "item": SITE + "/"}]
         parts = page["slug"].split("/")
         for i, part in enumerate(parts, start=2):
@@ -294,7 +299,7 @@ def doc_search_rows(page):
 def sidebar_html(active: str, tree=None, label="Documentation") -> str:
     out = [f'<nav class="sidebar" aria-label="{label}">']
     for group, items in (tree if tree is not None else SIDEBAR):
-        out.append(f'<div class="sb-group"><h5>{group}</h5>')
+        out.append(f'<div class="sb-group"><p class="sb-h">{group}</p>')
         for text, target in items:
             label = text
             if target.startswith("#"):
@@ -317,7 +322,7 @@ def toc_html(toc) -> str:
         f'<a class="lvl{lvl}" href="#{hid}">{html.escape(text)}</a>'
         for lvl, hid, text in toc
     )
-    return f'<div class="toc"><h6>On this page</h6>{items}</div>'
+    return f'<div class="toc"><p class="toc-h">On this page</p>{items}</div>'
 
 
 def pager_html(slug: str) -> str:
@@ -338,7 +343,7 @@ SHELL = """<!doctype html>
 <title>{title_tag}</title>
 <meta name="description" content="{description}">
 <link rel="canonical" href="{canonical}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="robots" content="{robots}">
 <meta name="author" content="Rohit Swami">
 {keywords}
 <meta property="og:type" content="{og_type}">
@@ -399,14 +404,14 @@ SHELL = """<!doctype html>
            data-light="{base}assets/logo-lockup.png" data-dark="{base}assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="foot-col"><h6>Docs</h6>
+    <div class="foot-col"><p class="foot-h">Docs</p>
       <a href="{base}docs/#install">Install</a>
       <a href="{base}docs/#quickstart">Quickstart</a>
       <a href="{base}docs/#commands">Commands</a>
       <a href="{base}docs/#scoring">How scoring works</a>
       <a href="{base}docs/#runners">Supported runners</a>
     </div>
-    <div class="foot-col"><h6>Guides</h6>
+    <div class="foot-col"><p class="foot-h">Guides</p>
       <a href="{base}docs/#github-actions">GitHub Actions</a>
       <a href="{base}docs/#history">Tracking over time</a>
       <a href="{base}docs/#ci-gate">Gating CI</a>
@@ -414,14 +419,14 @@ SHELL = """<!doctype html>
       <a href="{base}flaky-tests/jest/">Flaky Jest tests</a>
       <a href="{base}flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Writing</h6>
+    <div class="foot-col"><p class="foot-h">Writing</p>
       <a href="{base}writing/">All writing</a>
       <a href="{base}validation/">Validation record</a>
       <a href="{base}findings/">Flake hunt findings</a>
       <a href="{base}design/">Design notes</a>
       <a href="{base}changelog/">Changelog</a>
     </div>
-    <div class="foot-col"><h6>Project</h6>
+    <div class="foot-col"><p class="foot-h">Project</p>
       <a href="{repo}">GitHub</a>
       <a href="{repo}/releases">Releases</a>
       <a href="{repo}/issues">Issues</a>
@@ -505,7 +510,9 @@ def render(page):
         description=html.escape(page["description"]),
         og_title=html.escape(page.get("og_title") or page["title"]),
         og_type="website" if not slug else "article",
-        canonical=canonical(slug),
+        canonical=(ORIGIN + BASE + "404.html") if slug == "404" else canonical(slug),
+        robots=("noindex, follow" if slug == "404"
+                else "index, follow, max-image-preview:large, max-snippet:-1"),
         keywords=keywords,
         jsonld=jsonld(page),
         navlinks=navlinks,
@@ -532,12 +539,53 @@ def main():
     long_form = [essay] + md_pages
     pages += long_form
     pages.append(writing.index(BASE, REPO, long_form))
+
+    # /compare/ and /flaky-tests/ appeared in every BreadcrumbList and returned
+    # 404. They are also the paths a reader trims a URL down to.
+    pages.append(writing.section_index(
+        BASE, "flaky-tests", "Flaky tests by framework",
+        "How to find flaky tests in pytest, Jest and go test",
+        "Framework-specific guides to detecting flaky tests, using the JUnit XML "
+        "your test runner already writes. Free, open source, and local.",
+        ["flaky tests pytest", "flaky tests jest", "flaky tests go test",
+         "how to find flaky tests"],
+        "By framework", "Find flaky tests in your suite.",
+        "One tool, whichever runner you use. Each guide covers the reporter flag, "
+        "the command, and how to read what comes back.",
+        [{"slug": "flaky-tests/pytest", "kicker": "Python",
+          "title": "Flaky tests in pytest",
+          "summary": "Using the JUnit XML pytest already writes, with no plugin to install."},
+         {"slug": "flaky-tests/jest", "kicker": "JavaScript and TypeScript",
+          "title": "Flaky tests in Jest",
+          "summary": "With jest-junit, locally or from the runs your CI already does."},
+         {"slug": "flaky-tests/go", "kicker": "Go",
+          "title": "Flaky tests in go test",
+          "summary": "With gotestsum, scored properly rather than eyeballed across reruns."}]))
+
+    pages.append(writing.section_index(
+        BASE, "compare", "Alternatives",
+        "flakestat vs Trunk and BuildPulse: the free alternative",
+        "How flakestat compares with hosted flaky test services: what each does "
+        "well, and which one fits your situation.",
+        ["flaky test tool comparison", "trunk alternative", "buildpulse alternative",
+         "open source flaky test detector"],
+        "Alternatives", "How it compares.",
+        "Hosted services do dashboards, rollups and alerting well. flakestat does "
+        "the detection locally, for free, with the scoring open to inspection. "
+        "Both comparisons say where the other one wins.",
+        [{"slug": "compare/trunk", "kicker": "Hosted", "title": "flakestat vs Trunk Flaky Tests",
+          "summary": "Local and auditable against hosted and managed, and when each is right."},
+         {"slug": "compare/buildpulse", "kicker": "Hosted", "title": "flakestat vs BuildPulse",
+          "summary": "Same comparison for BuildPulse, including what flakestat deliberately will not do."}]))
+
+    pages.append(writing.not_found(BASE))
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
     os.makedirs(OUT)
 
     docs_parts = [p for p in pages if p["slug"].startswith("docs/")]
-    others = [p for p in pages if not p["slug"].startswith("docs/")]
+    others = [p for p in pages if not p["slug"].startswith("docs/") and p["slug"] != "404"]
+    notfound = [p for p in pages if p["slug"] == "404"]
 
     # ---------------------------------------------- assemble the docs page
     order = [t[1:] for _, items in SIDEBAR for _, t in items if t.startswith("#")]
@@ -579,10 +627,17 @@ def main():
         "faq": faq_pairs,
     }
 
-    for page in [docs_page] + others:
+    for page in [docs_page] + others + notfound:
         slug = page["slug"]
-        out = os.path.join(OUT, slug, "index.html") if slug else os.path.join(OUT, "index.html")
+        if slug == "404":
+            out = os.path.join(OUT, "404.html")
+        elif slug:
+            out = os.path.join(OUT, slug, "index.html")
+        else:
+            out = os.path.join(OUT, "index.html")
         write(out, render(page))
+        if slug == "404":
+            continue
         if page.get("layout") == "doc":
             index_rows.append({
                 "url": slug + "/",
@@ -614,9 +669,10 @@ def main():
     urls = []
     for r in routes:
         pri = "1.0" if not r else (
-            "0.9" if r == DOCS_SLUG or r.startswith("flaky-tests")
+            "0.9" if r == DOCS_SLUG or r.startswith("flaky-tests/")
             else "0.8" if r in ("validation", "findings", "design", "changelog",
                                 "writing", "writing/validating-a-flaky-test-detector")
+            else "0.75" if r in ("compare", "flaky-tests")
             else "0.7")
         urls.append(f"<url><loc>{canonical(r)}</loc>"
                     f"<lastmod>{lastmod.get(r, content_date)}</lastmod>"

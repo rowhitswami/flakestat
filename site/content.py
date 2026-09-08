@@ -115,16 +115,16 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
 
   <h2>Why the verdicts can be trusted</h2>
   <div class="cards">
-    <div class="card"><h4>Inconsistency, not failure</h4>
+    <div class="card"><h3 class="card-h">Inconsistency, not failure</h3>
       <p>A test failing 100% of the time isn't flaky, it's broken. flakestat scores
       pass→fail→pass transitions, so a broken test scores zero and is reported separately.</p></div>
-    <div class="card"><h4>Evidence is weighed</h4>
+    <div class="card"><h3 class="card-h">Evidence is weighed</h3>
       <p>Disagreement on the same commit is proof; across commits it may be a regression
       someone already fixed, so it counts for less.</p></div>
-    <div class="card"><h4>Confidence, not just a number</h4>
+    <div class="card"><h3 class="card-h">Confidence, not just a number</h3>
       <p>A score of 0.62 from three runs and from three hundred are different claims. A small
       sample can never reach <code>high</code>.</p></div>
-    <div class="card"><h4>Only comparable things compared</h4>
+    <div class="card"><h3 class="card-h">Only comparable things compared</h3>
       <p>Two outcomes are evidence of nondeterminism only if branch, platform and runtime were
       held constant.</p></div>
   </div>
@@ -133,10 +133,10 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
 
   <h2>Start where you are</h2>
   <div class="cards">
-    <a class="card" href="{BASE}flaky-tests/pytest/"><h4>pytest →</h4><p>Find flaky tests in a Python suite.</p></a>
-    <a class="card" href="{BASE}flaky-tests/jest/"><h4>Jest →</h4><p>Find flaky tests in a JS or TS suite.</p></a>
-    <a class="card" href="{BASE}flaky-tests/go/"><h4>go test →</h4><p>Find flaky tests in a Go suite.</p></a>
-    <a class="card" href="{BASE}docs/#github-actions"><h4>GitHub Actions →</h4><p>Record every CI run and gate on regressions.</p></a>
+    <a class="card" href="{BASE}flaky-tests/pytest/"><h3 class="card-h">pytest →</h3><p>Find flaky tests in a Python suite.</p></a>
+    <a class="card" href="{BASE}flaky-tests/jest/"><h3 class="card-h">Jest →</h3><p>Find flaky tests in a JS or TS suite.</p></a>
+    <a class="card" href="{BASE}flaky-tests/go/"><h3 class="card-h">go test →</h3><p>Find flaky tests in a Go suite.</p></a>
+    <a class="card" href="{BASE}docs/#github-actions"><h3 class="card-h">GitHub Actions →</h3><p>Record every CI run and gate on regressions.</p></a>
   </div>
 </div>
 """))
@@ -365,12 +365,12 @@ file is the record you keep.</p>
 
 <h2>Where to keep the history</h2>
 <div class="cards">
-  <div class="card"><h4>Commit it</h4><p>Simplest. The file goes in the repo and everyone shares
+  <div class="card"><h3 class="card-h">Commit it</h3><p>Simplest. The file goes in the repo and everyone shares
   one history. Downside: every CI run wants to write to it, so telemetry lands in your development
   history.</p></div>
-  <div class="card"><h4>A CI artifact</h4><p>Zero setup, but nothing accumulates. Each run sees
+  <div class="card"><h3 class="card-h">A CI artifact</h3><p>Zero setup, but nothing accumulates. Each run sees
   only itself, so you never build the long history that makes the tool accurate.</p></div>
-  <div class="card pick"><span class="tag">Recommended</span><h4>A dedicated branch</h4>
+  <div class="card pick"><span class="tag">Recommended</span><h3 class="card-h">A dedicated branch</h3>
   <p>What flakestat uses for itself. Keeps telemetry out of development history, avoids a bot
   commit retriggering your workflow, and gives one place to serialize writers.</p></div>
 </div>

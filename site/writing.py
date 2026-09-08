@@ -72,14 +72,14 @@ detector that works should say different things about them.</p>
   <div class="fig-body">
     <div class="ba">
       <div class="ba-col pending">
-        <h4>612f5bfb, before their fix</h4>
+        <p class="ba-h">612f5bfb, before their fix</p>
         <div class="ba-row"><span>TestClient_NotFound</span><b class="v-f">flaky 0.66</b></div>
         <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-f">flaky 0.66</b></div>
         <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-f">flaky 0.66</b></div>
       </div>
       <div class="ba-arrow" aria-hidden="true">&rarr;</div>
       <div class="ba-col pending">
-        <h4>9e00e594, their fix</h4>
+        <p class="ba-h">9e00e594, their fix</p>
         <div class="ba-row"><span>TestClient_NotFound</span><b class="v-s">stable 0.00</b></div>
         <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-s">stable 0.00</b></div>
         <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-s">stable 0.00</b></div>
@@ -320,5 +320,75 @@ def index(BASE, REPO, entries):
     <p>Essays and records from building flakestat.</p>
   </header>
   <ol class="wr-list">{"".join(items)}</ol>
+</div>
+""")
+
+
+def section_index(BASE, slug, title, title_tag, description, keywords, eyebrow,
+                  heading, standfirst, entries):
+    """A landing page for a directory that previously only existed in URLs.
+
+    /compare/ and /flaky-tests/ were named in every BreadcrumbList on the site
+    and both returned 404, so the structured data pointed at pages that did not
+    exist. They are also the two paths a reader trims a URL down to.
+    """
+    items = []
+    for e in entries:
+        items.append(
+            f'<li class="wr-item"><a href="{BASE}{e["slug"]}/">'
+            f'<p class="wr-kicker"><span>{e["kicker"]}</span></p>'
+            f'<h2>{e["title"]}</h2>'
+            f'<p class="wr-sum">{e["summary"]}</p>'
+            f'<span class="wr-go">Read<i></i></span></a></li>'
+        )
+    return dict(
+        slug=slug, section=title, layout="index", title=title,
+        title_tag=title_tag, og_title=title, description=description,
+        keywords=keywords, lede="",
+        body=f"""
+<div class="wr-wrap">
+  <header class="wr-head">
+    <p class="wr-eyebrow">{eyebrow}</p>
+    <h1>{heading}</h1>
+    <p>{standfirst}</p>
+  </header>
+  <ol class="wr-list">{"".join(items)}</ol>
+</div>
+""")
+
+
+def not_found(BASE):
+    """Served by GitHub Pages for any unknown path."""
+    return dict(
+        slug="404", layout="index", title="Page not found",
+        title_tag="Page not found", og_title="Page not found",
+        description="That page does not exist.", keywords=[], lede="",
+        body=f"""
+<div class="wr-wrap">
+  <header class="wr-head">
+    <p class="wr-eyebrow">404</p>
+    <h1>That page does not exist.</h1>
+    <p>It may have moved. The documentation is one page now, so most old links
+    are anchors on it.</p>
+  </header>
+  <ol class="wr-list">
+    <li class="wr-item"><a href="{BASE}docs/">
+      <p class="wr-kicker"><span>Documentation</span></p>
+      <h2>Everything on one page</h2>
+      <p class="wr-sum">Install, quickstart, CI recipes, every command and flag,
+      and how the scoring works.</p>
+      <span class="wr-go">Read<i></i></span></a></li>
+    <li class="wr-item"><a href="{BASE}writing/">
+      <p class="wr-kicker"><span>Writing</span></p>
+      <h2>Essays and records</h2>
+      <p class="wr-sum">How it was built, how it was tested, and what it failed
+      to find.</p>
+      <span class="wr-go">Read<i></i></span></a></li>
+    <li class="wr-item"><a href="{BASE}">
+      <p class="wr-kicker"><span>Home</span></p>
+      <h2>Start over</h2>
+      <p class="wr-sum">What flakestat is and how to install it.</p>
+      <span class="wr-go">Read<i></i></span></a></li>
+  </ol>
 </div>
 """)
