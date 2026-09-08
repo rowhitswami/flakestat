@@ -391,3 +391,91 @@ footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-to
   .nav, .sidebar, .toc, .pager, .progress, .scrim, footer { display: none !important; }
   .shell { grid-template-columns: 1fr; } body { font-size: 11pt; }
 }
+
+/* ============================================================================
+   Long-form posts.
+
+   Motion here is earned or absent. Two interactive figures demonstrate claims
+   the prose can only assert - the reader drags a slider and watches a flake
+   score fall - and everything else is a quiet entrance so the page does not
+   arrive all at once. No parallax, no scroll-jacking, no fade on every
+   paragraph: on a technical essay that reads as filler, and it fights the
+   thing people came to do, which is read.
+   ============================================================================ */
+
+.post-wrap { max-width: 1380px; margin: 0 auto; padding: 0 1.4rem; }
+.post { max-width: 68ch; margin: 0 auto; padding: 3.5rem 0 5rem; }
+.post h1 { font-size: clamp(2rem, 1.4rem + 2.4vw, 3rem); margin: .4rem 0 1rem; letter-spacing: -0.03em; }
+.post h2 { font-size: clamp(1.4rem, 1.15rem + 1vw, 1.8rem); margin: 3.4rem 0 .6rem; border: 0; padding: 0; }
+.post h2::before { display: none; }
+.post h3 { font-size: 1.12rem; margin: 2.4rem 0 .4rem; color: var(--fg); }
+.post p { font-size: 1.075rem; line-height: 1.78; margin: 1.05rem 0; }
+.post p strong { font-weight: 700; }
+.post-meta { font-size: .82rem; color: var(--fg-3); text-transform: uppercase;
+  letter-spacing: .09em; font-weight: 600; margin: 0; }
+.post-standfirst { font-size: 1.22rem !important; line-height: 1.55 !important;
+  color: var(--fg-2); margin: 0 0 2.2rem !important; font-weight: 500; }
+.post pre { font-size: .78rem; }
+.post hr { margin: 3rem 0 1.5rem; }
+.post-foot { font-size: .93rem !important; color: var(--fg-2); }
+.post-foot code { font-size: .84em; }
+
+/* Quiet entrance. Sections only, never paragraphs. */
+.rise { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+.rise.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rise { opacity: 1; transform: none; transition: none; } }
+
+/* ---- figure: the two interactive demonstrations ---- */
+.fig { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg-alt);
+  margin: 2rem 0; overflow: hidden; }
+.fig-head { padding: .75rem 1.15rem; border-bottom: 1px solid var(--line);
+  font-size: .74rem; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--fg-3); font-weight: 700; }
+.fig-body { padding: 1.15rem; }
+.fig-note { padding: .8rem 1.15rem; border-top: 1px solid var(--line);
+  background: var(--surface); font-size: .89rem; color: var(--fg-2); }
+.fig-note p { font-size: .89rem !important; margin: 0 !important; line-height: 1.6 !important; }
+
+.dup-controls { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.dup-controls label { font-size: .86rem; color: var(--fg-2); font-weight: 600; }
+.dup-controls input[type=range] { flex: 1 1 190px; accent-color: var(--blue); }
+.dup-count { font-family: var(--mono); font-size: .84rem; color: var(--fg);
+  background: var(--surface-2); padding: .12rem .5rem; border-radius: 5px; min-width: 3.4rem; text-align: center; }
+
+.strip { display: flex; flex-wrap: wrap; gap: 3px; margin: .9rem 0; }
+.strip i { width: 15px; height: 22px; border-radius: 3px; display: block;
+  font-style: normal; font-size: .62rem; line-height: 22px; text-align: center;
+  font-family: var(--mono); font-weight: 600; transition: background .25s ease, opacity .25s ease; }
+.strip i.p { background: color-mix(in srgb, var(--green) 20%, var(--bg)); color: var(--green); }
+.strip i.f { background: var(--orange-soft); color: var(--orange-ink); }
+.strip i.dup { opacity: .45; }
+
+.gauge { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px,1fr)); gap: 0; border-top: 1px solid var(--line); }
+.gauge div { padding: .8rem 1.15rem; border-right: 1px solid var(--line); }
+.gauge div:last-child { border-right: 0; }
+.gauge span { display: block; font-size: .67rem; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--fg-3); font-weight: 700; }
+.gauge b { font-family: var(--mono); font-size: 1.3rem; font-weight: 500;
+  transition: color .3s ease; }
+.gauge b.flaky { color: var(--orange-ink); }
+.gauge b.stable { color: var(--green); }
+.gauge b.suspect { color: var(--amber); }
+
+/* the before/after reveal */
+.ba { display: grid; grid-template-columns: 1fr auto 1fr; gap: 1rem; align-items: center; }
+.ba-col { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--bg); }
+.ba-col h4 { margin: 0; padding: .55rem .8rem; font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .08em; background: var(--surface); color: var(--fg-3); border-bottom: 1px solid var(--line); }
+.ba-row { display: flex; justify-content: space-between; gap: .6rem; padding: .42rem .8rem;
+  font-family: var(--mono); font-size: .74rem; border-bottom: 1px solid var(--line); }
+.ba-row:last-child { border-bottom: 0; }
+.ba-row b { font-weight: 500; }
+.ba-row .v-f { color: var(--orange-ink); }
+.ba-row .v-s { color: var(--green); }
+.ba-arrow { font-size: 1.3rem; color: var(--fg-3); }
+.ba-col.pending .ba-row b { opacity: 0; }
+.ba-col .ba-row b { transition: opacity .4s ease; }
+@media (max-width: 620px) {
+  .ba { grid-template-columns: 1fr; }
+  .ba-arrow { transform: rotate(90deg); justify-self: center; }
+}

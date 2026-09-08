@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en" data-base="/">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Validating a flaky-test detector — flakestat</title>
+<meta name="description" content="Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.">
+<link rel="canonical" href="https://flakestat.com/writing/validating-a-flaky-test-detector/">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<meta name="author" content="Rohit Swami">
+<meta name="keywords" content="flaky test detection, test validation, flaky test scoring, junit xml, go testing">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="flakestat">
+<meta property="og:title" content="Validating a flaky-test detector">
+<meta property="og:description" content="Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.">
+<meta property="og:url" content="https://flakestat.com/writing/validating-a-flaky-test-detector/">
+<meta property="og:image" content="https://flakestat.com/assets/social-card.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Validating a flaky-test detector">
+<meta name="twitter:description" content="Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.">
+<meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
+<meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/logo-mark.png">
+<link rel="alternate" type="text/plain" href="https://flakestat.com/llms.txt" title="llms.txt">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/theme.css">
+<script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.1.1","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/writing/validating-a-flaky-test-detector/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Writing","item":"https://flakestat.com/writing/"},{"@type":"ListItem","position":3,"name":"Validating a flaky-test detector","item":"https://flakestat.com/writing/validating-a-flaky-test-detector/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/writing/validating-a-flaky-test-detector/#article","headline":"Validating a flaky-test detector","description":"Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.","url":"https://flakestat.com/writing/validating-a-flaky-test-detector/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+</head>
+<body>
+<div class="progress" id="progress"></div>
+
+<header class="nav">
+  <div class="nav-in">
+    <button class="ibtn menu-btn" id="menu" aria-label="Toggle navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <a class="brand" href="/" aria-label="flakestat home">
+      <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
+           data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
+    </a>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/compare/trunk/">Compare</a></nav>
+    <div class="nav-right">
+      <button class="searchbtn" data-search aria-label="Search documentation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <a class="ibtn" href="https://github.com/rowhitswami/flakestat" aria-label="GitHub repository">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5a12 12 0 0 0-3.8 23.4c.6.1.8-.3.8-.6v-2c-3.3.7-4-1.6-4-1.6-.6-1.4-1.4-1.8-1.4-1.8-1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.7-.3-5.5-1.3-5.5-5.9 0-1.3.5-2.4 1.2-3.2-.1-.3-.5-1.5.1-3.2 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.7.2 2.9.1 3.2.8.8 1.2 1.9 1.2 3.2 0 4.6-2.8 5.6-5.5 5.9.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6A12 12 0 0 0 12 .5Z"/></svg>
+      </a>
+      <button class="ibtn" id="theme" aria-label="Toggle dark mode">◐</button>
+    </div>
+  </div>
+</header>
+
+<div class="post-wrap">
+<article class="post">
+<p class="post-meta">8 September 2026 · Rohit Swami</p>
+<h1>Validating a flaky-test detector</h1>
+
+<p class="post-standfirst">Building it took about a week. Working out whether it
+actually worked took considerably longer, and produced better material.</p>
+
+<p>I once spent an afternoon on a flaky test that wasn't flaky.</p>
+
+<p>It sat at the top of a list ranked by failure rate, which seemed like a
+sensible way to rank flaky tests until I noticed it had failed on every run for
+three weeks. It wasn't nondeterministic. It was broken, and had been broken so
+consistently that the ranking put it exactly where the most nondeterministic
+test in the suite should have been.</p>
+
+<p>That is the whole design argument for the tool I ended up writing, so I'll
+state it once and move on: <strong>flakiness is inconsistency, not
+failure</strong>. A test that fails every time tells you nothing about
+nondeterminism. What you want to know is how often a test disagrees with
+<em>itself</em>. Score that instead, and the always-failing test drops to zero
+and gets filed under a different heading, where it belongs.</p>
+
+<p>flakestat does that. It reads the JUnit XML your runner already emits, scores
+transitions rather than failures, and attaches a confidence level to every
+verdict, because 0.62 from three runs and 0.62 from three hundred are not the
+same claim. One Go binary, no account, nothing leaves the machine.</p>
+
+<p>That part was a week. This post is about the rest.</p>
+
+<h2 id="the-awkward-question">The awkward question<a class="anchor" href="#the-awkward-question" aria-label="Link to this section">#</a></h2>
+
+<p>How do you know a flaky-test detector works?</p>
+
+<p>It's a genuinely annoying question. You can write fixtures with planted
+flakes, and I did — a test that fails on a coin flip is easy to detect and
+proves almost nothing. Real flakiness is rarer, weirder, and entangled with the
+environment. And the failure mode you care about is silent: a detector that
+misses things looks identical to a codebase that isn't flaky.</p>
+
+<p>What I wanted was a case where somebody else had established the ground
+truth. Not my fixture, not my judgement.</p>
+
+<p>ConduitIO had one. Their contributors filed an issue documenting several
+flaky tests, named them, and later merged a commit that fixed them. That gives
+two commits — one either side of a repair I had nothing to do with — and a
+detector that works should say different things about them.</p>
+
+<div class="fig" id="fig-ba">
+  <div class="fig-head">Same protocol, two commits</div>
+  <div class="fig-body">
+    <div class="ba">
+      <div class="ba-col pending">
+        <h4>612f5bfb — before their fix</h4>
+        <div class="ba-row"><span>TestClient_NotFound</span><b class="v-f">flaky 0.66</b></div>
+        <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-f">flaky 0.66</b></div>
+        <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-f">flaky 0.66</b></div>
+      </div>
+      <div class="ba-arrow" aria-hidden="true">&rarr;</div>
+      <div class="ba-col pending">
+        <h4>9e00e594 — their fix</h4>
+        <div class="ba-row"><span>TestClient_NotFound</span><b class="v-s">stable 0.00</b></div>
+        <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-s">stable 0.00</b></div>
+        <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-s">stable 0.00</b></div>
+      </div>
+    </div>
+  </div>
+  <div class="fig-note"><p>One commit apart. 50 of 75 observations failing on the
+  left, none on the right.</p></div>
+</div>
+
+<p>You can run that yourself:</p>
+
+<pre><code>git clone https://github.com/rowhitswami/flakestat &amp;&amp; cd flakestat
+./scripts/reproduce-validation.sh</code></pre>
+
+<p>Two minutes. It fetches their repository at both commits, runs the same
+sampling protocol at each, and prints the table. It also runs in CI on every
+build, so if their commits move or the script rots, it breaks on my end before
+it breaks on yours.</p>
+
+<p>I'd rather be judged on that than on anything I assert.</p>
+
+<h2 id="three-things-i-got-wrong">Three things I got wrong<a class="anchor" href="#three-things-i-got-wrong" aria-label="Link to this section">#</a></h2>
+
+<p>The bugs were more instructive than the features, and they share a shape.</p>
+
+<h3 id="the-measurement-was-the-signal">The measurement was the signal<a class="anchor" href="#the-measurement-was-the-signal" aria-label="Link to this section">#</a></h3>
+
+<p>I added a <code>--parallel</code> mode to run the suite several times at
+once. Pointed at <code>spf13/cobra</code>, it reported
+<code>TestDeadcodeElimination</code> as flaky at 0.60.</p>
+
+<p>It isn't. The test builds a binary at a fixed path, and concurrent copies
+were deleting each other's build. The tool had manufactured the exact phenomenon
+it was built to detect, then reported it with a straight face.</p>
+
+<p>Candidates found under <code>--parallel</code> are now re-run sequentially
+and demoted if they don't reproduce. I kept the mode rather than deleting it,
+because failing to reproduce in five runs is weak evidence of innocence, not
+proof — but the default is sequential and the default is trustworthy.</p>
+
+<h3 id="duplicates-suppress-flakiness">Duplicates suppress flakiness<a class="anchor" href="#duplicates-suppress-flakiness" aria-label="Link to this section">#</a></h3>
+
+<p>CI artifacts get collected twice. A job re-runs, two aggregators pick up the
+same shard, someone re-uploads. I assumed the risk was inflated confidence:
+more observations agreeing, tighter bound, smaller p-value, all resting on
+evidence that only existed once.</p>
+
+<p>It does the opposite, and it took a measurement to notice.</p>
+
+<p>A duplicate carries its original's timestamp. So it sorts <em>next to</em>
+its original — and a duplicate always agrees with itself. Duplication doesn't
+add noise, it adds artificial <em>agreement</em>. On a test failing 4 of 12
+runs, ingesting the same reports twice moved the score from 0.64 to 0.30 while
+the apparent evidence doubled.</p>
+
+<div class="fig" id="fig-dup">
+  <div class="fig-head">Drag to duplicate the same observations</div>
+  <div class="fig-body">
+    <div class="dup-controls">
+      <label for="dup-range">Copies of each observation</label>
+      <input id="dup-range" type="range" min="1" max="4" value="1" step="1">
+      <span class="dup-count">none</span>
+    </div>
+    <div class="strip"></div>
+  </div>
+  <div class="gauge">
+    <div><span>Observations</span><b id="dup-obs">12</b></div>
+    <div><span>Score</span><b id="dup-score">0.64</b></div>
+    <div><span>Verdict</span><b id="dup-verdict" class="flaky">flaky</b></div>
+  </div>
+  <div class="fig-note"><p id="dup-note"></p></div>
+</div>
+
+<p>The error runs towards false negatives. Duplication makes flaky tests look
+stable, which is the direction that loses them quietly. Every observation now
+carries the identity of the execution it describes, so a copy counts once — but
+a genuine retry, which really did run the tests again, still counts.</p>
+
+<h3 id="the-same-invariant-three-times">The same invariant, three times<a class="anchor" href="#the-same-invariant-three-times" aria-label="Link to this section">#</a></h3>
+
+<p>Two outcomes are evidence of nondeterminism only if everything that could
+legitimately change the result was held constant. Obvious once written down. I
+broke it three times.</p>
+
+<p>First branches: a test passing on <code>main</code> and failing on an
+in-progress feature branch, read as one chronological series, looks like
+repeated disagreement.</p>
+
+<p>Then platforms. A test that always fails on Windows and always passes
+everywhere else is perfectly deterministic on every platform — and it scored
+0.45, with an explanation asserting "direct evidence of nondeterminism". That
+one surfaced within minutes of pointing the tool at its own CI matrix.</p>
+
+<p>Then the display layer, which kept grouping by branch after scoring had moved
+on to execution context. The verdict was right; the evidence printed underneath
+it was wrong, marking "flip on identical code" at exactly the boundaries the
+verdict had ruled out. Arguably worse than being wrong outright, since the
+number a careful reader checks against was the one still misbehaving.</p>
+
+<p>There is now one definition of comparability and everything that displays
+transition evidence calls it. Three implementations that agreed by convention
+was the actual bug.</p>
+
+<h2 id="a-night-spent-failing-to-find-something">A night spent failing to find something<a class="anchor" href="#a-night-spent-failing-to-find-something" aria-label="Link to this section">#</a></h2>
+
+<p>One hole I couldn't argue away: every flaky test the tool had found was
+already known to somebody. Conduit's were filed. So were the ones in the
+regression corpus. A detector that only rediscovers documented bugs is a
+plausible detector, not a demonstrated one.</p>
+
+<p>So I pointed it at six active Go projects overnight. Around 430 executions,
+each a fresh process, shuffled, with a recorded seed so anything found would be
+reproducible by its maintainer rather than "run 47 failed".</p>
+
+<p>It found six real flaky tests.</p>
+
+<p><strong>Four were already filed.</strong> One had a fix open and unmerged
+since March. One had been caught by litestream's nightly race-detector sweep the
+week before — flakestat hit it in ten runs, which is a reasonable argument for
+concentrated repetition over nightly sampling, and not an argument for
+discovery.</p>
+
+<p>The two that weren't known looked promising for about an hour. One was an
+unreported intermittent failure in a 9.1k-star consensus library, clean against
+four separate cross-checks: no issue, no pull request, no commit, and absent
+from the project's own community-maintained list of flaky tests.</p>
+
+<p>Then I ran the experiment that mattered.</p>
+
+<pre><code>test alone,  -count=1                  25/25 pass
+test alone,  -count=3                  25/25 pass
+full suite,  -count=1, no shuffle      12/12 pass
+full suite,  -count=1, shuffled        12/12 pass
+full suite,  -count=3, shuffled         2/20 FAIL</code></pre>
+
+<p>It only failed under the exact conditions my harness imposed. Their CI runs
+<code>-count=1</code>. The other unreported finding turned out to be the same
+category — a package that can't be run with <code>-count&gt;1</code> at all,
+which is a real problem worth telling them about and is not flakiness.</p>
+
+<p>So: <strong>zero previously-unknown flaky tests.</strong></p>
+
+<p>Had I stopped when the cross-check came back clean — and it was tempting, it
+was four in the morning and the result was exactly what I'd been hoping for —
+I'd have filed a bug report that misattributed its own cause, and written a post
+claiming the tool found something nobody knew about.</p>
+
+<p>That's the <code>--parallel</code> mistake again. Same shape, different
+layer: the apparatus producing the signal. I've now made it twice in one
+project, which suggests it's less a bug than a standing hazard of measuring
+anything.</p>
+
+<h2 id="what-ill-claim">What I'll claim<a class="anchor" href="#what-ill-claim" aria-label="Link to this section">#</a></h2>
+
+<p>Two things the evidence supports.</p>
+
+<p><strong>Speed.</strong> Concentrated repetition beats nightly sampling.
+Litestream's sweep needed a week of nightly runs to surface a flake; ten runs on
+a laptop found it.</p>
+
+<p><strong>Restraint.</strong> Across two clean repositories — 202 executions,
+231 distinct tests — it reported nothing at all. It refused to classify a
+dramatic ten-minute hang on two observations, correctly, because two
+observations aren't a verdict. It called nine always-failing tests broken rather
+than flaky. A detector that finds something everywhere you point it isn't a
+detector, it's a mirror.</p>
+
+<p>What I won't claim is discovery. It has never surfaced a flaky test nobody
+had already filed, and the write-up in the repository says so in the same words
+I'd use if it had.</p>
+
+<p>I think that's the more useful post anyway. There is a lot of tooling that
+tells you what it found. There is less that tells you what it looked for and
+missed.</p>
+
+<hr>
+
+<p class="post-foot">
+flakestat is MIT-licensed and reads the JUnit XML your test runner already
+writes.
+<code>brew install rowhitswami/tap/flakestat</code>,
+<code>npm install --save-dev flakestat</code> or
+<code>pip install flakestat</code>.
+<a href="/docs/">Documentation</a> ·
+<a href="https://github.com/rowhitswami/flakestat">Source</a> ·
+<a href="https://github.com/rowhitswami/flakestat/blob/main/VALIDATION.md">Full validation record</a> ·
+<a href="https://github.com/rowhitswami/flakestat/blob/main/HUNT-FINDINGS.md">The overnight hunt</a>
+</p>
+</article>
+</div>
+
+<footer>
+  <div class="foot-in">
+    <div>
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+           data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
+      <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
+    </div>
+    <div class="foot-col"><h6>Docs</h6>
+      <a href="/docs/#install">Install</a>
+      <a href="/docs/#quickstart">Quickstart</a>
+      <a href="/docs/#commands">Commands</a>
+      <a href="/docs/#scoring">How scoring works</a>
+    </div>
+    <div class="foot-col"><h6>Guides</h6>
+      <a href="/docs/#github-actions">GitHub Actions</a>
+      <a href="/docs/#history">Tracking over time</a>
+      <a href="/docs/#ci-gate">Gating CI</a>
+      <a href="/docs/#runners">Supported runners</a>
+    </div>
+    <div class="foot-col"><h6>Project</h6>
+      <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
+      <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
+      <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
+      <a href="https://github.com/rowhitswami/flakestat/blob/main/DESIGN.md">Design notes</a>
+      <a href="https://flakestat.com/llms.txt">llms.txt</a>
+    </div>
+  </div>
+  <div class="foot-btm"><div>MIT licensed · Built by <a href="https://github.com/rowhitswami">Rohit Swami</a></div></div>
+</footer>
+
+<div class="scrim" id="scrim" hidden role="dialog" aria-modal="true" aria-label="Search documentation">
+  <div class="palette">
+    <input id="q" type="search" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search query">
+    <div class="results" id="results"></div>
+    <div class="p-foot"><span><kbd>↑</kbd><kbd>↓</kbd> navigate</span><span><kbd>↵</kbd> open</span><span><kbd>esc</kbd> close</span></div>
+  </div>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>

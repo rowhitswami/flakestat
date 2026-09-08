@@ -310,3 +310,105 @@
     draw();
   }
 })();
+
+/* ---------------------------------------------------------------- post ---
+   Two figures that demonstrate rather than assert, plus a quiet entrance for
+   section headings. Everything here is a no-op on pages without a post.     */
+(function () {
+  'use strict';
+  var post = document.querySelector('.post');
+  if (!post) return;
+
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* entrance: section-level only, never per paragraph */
+  if (!reduced && 'IntersectionObserver' in window) {
+    var rise = [].slice.call(post.querySelectorAll('h2, .fig, pre'));
+    rise.forEach(function (el) { el.classList.add('rise'); });
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    rise.forEach(function (el) { io.observe(el); });
+  } else {
+    [].forEach.call(post.querySelectorAll('h2, .fig, pre'), function (el) { el.classList.add('in'); });
+  }
+
+  /* ---- figure 1: duplication suppresses the score -------------------- */
+  var dup = document.getElementById('fig-dup');
+  if (dup) {
+    var BASE_SEQ = 'PPFPPFPPFPPF'.split('');   // 4 failures in 12, as measured
+    var slider = dup.querySelector('input[type=range]');
+    var strip  = dup.querySelector('.strip');
+    var count  = dup.querySelector('.dup-count');
+
+    // Same rules as the binary: z is the one-sided 80% bound, and a duplicate
+    // sorts beside its original because it carries the same timestamp.
+    function wilson(p, n) {
+      if (n <= 0) return 0;
+      var z = 0.8416, z2 = z * z;
+      var c = (p + z2 / (2 * n)) / (1 + z2 / n);
+      var m = (z / (1 + z2 / n)) * Math.sqrt(p * (1 - p) / n + z2 / (4 * n * n));
+      return Math.max(0, c - m);
+    }
+    function expand(copies) {
+      var out = [];
+      BASE_SEQ.forEach(function (c) {
+        for (var k = 0; k < copies; k++) out.push({ v: c, dup: k > 0 });
+      });
+      return out;
+    }
+    function render() {
+      var copies = +slider.value;
+      var seq = expand(copies);
+      count.textContent = copies === 1 ? 'none' : (copies - 1) + '×';
+      strip.innerHTML = seq.map(function (o) {
+        return '<i class="' + (o.v === 'P' ? 'p' : 'f') + (o.dup ? ' dup' : '') + '">' + o.v + '</i>';
+      }).join('');
+
+      var flips = 0, trans = 0;
+      for (var i = 1; i < seq.length; i++) { trans++; if (seq[i].v !== seq[i - 1].v) flips++; }
+      var score = trans ? flips / trans : 0;
+      var lower = wilson(score, trans);
+      var verdict = lower >= 0.10 ? 'flaky' : (score >= 0.05 ? 'suspect' : 'stable');
+
+      dup.querySelector('#dup-score').textContent = score.toFixed(2);
+      dup.querySelector('#dup-obs').textContent = seq.length;
+      var v = dup.querySelector('#dup-verdict');
+      v.textContent = verdict;
+      v.className = verdict;
+      // Say what actually happens, including that a high rate survives it.
+      // A test near the threshold is the one duplication would hide.
+      dup.querySelector('#dup-note').textContent = copies === 1
+        ? 'Twelve real observations: four failures, seven disagreements across eleven comparisons.'
+        : 'Every observation now appears ' + copies + ' times. Copies agree with themselves, so the '
+          + 'measured disagreement rate falls from 0.64 to ' + score.toFixed(2)
+          + ' though nothing new was run. This test is flaky enough to survive it — one sitting '
+          + 'near the threshold is the one that would quietly drop below.';
+    }
+    slider.addEventListener('input', render);
+    render();
+  }
+
+  /* ---- figure 2: the before/after, revealed on scroll ----------------- */
+  var ba = document.getElementById('fig-ba');
+  if (ba) {
+    var cols = [].slice.call(ba.querySelectorAll('.ba-col'));
+    if (reduced || !('IntersectionObserver' in window)) {
+      cols.forEach(function (c) { c.classList.remove('pending'); });
+    } else {
+      var seen = false;
+      var io2 = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (!e.isIntersecting || seen) return;
+          seen = true;
+          // Left column first, then the right after a beat: the point is the
+          // change between them, so showing both at once loses it.
+          cols[0].classList.remove('pending');
+          setTimeout(function () { cols[1].classList.remove('pending'); }, 700);
+          io2.disconnect();
+        });
+      }, { rootMargin: '0px 0px -20% 0px' });
+      io2.observe(ba);
+    }
+  }
+})();
