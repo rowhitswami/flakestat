@@ -259,7 +259,7 @@ func Expand(patterns []string) ([]string, []error) {
 		seen  = map[string]bool{}
 	)
 	for _, pattern := range patterns {
-		matches, err := filepath.Glob(pattern)
+		matches, err := glob(pattern)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("%s: %w", pattern, err))
 			continue
@@ -286,7 +286,7 @@ func Expand(patterns []string) ([]string, []error) {
 // that fail to parse are reported but do not abort the others: a single
 // corrupt shard should not discard an entire run.
 func ParseGlob(pattern string) (*Report, []error) {
-	paths, err := filepath.Glob(pattern)
+	paths, err := glob(pattern)
 	if err != nil {
 		return nil, []error{err}
 	}
