@@ -7,13 +7,17 @@ def post(BASE, REPO):
         slug="writing/validating-a-flaky-test-detector",
         section="Writing",
         layout="post",
+        kicker="Essay",
         title="Validating a flaky-test detector",
-        title_tag="Validating a flaky-test detector — flakestat",
+        title_tag="Validating a flaky-test detector",
         og_title="Validating a flaky-test detector",
         description="Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.",
         keywords=["flaky test detection", "test validation", "flaky test scoring",
                   "junit xml", "go testing"],
         lede="",
+        updated="8 September 2026",
+        summary="A week to build it. Rather longer to work out whether it did "
+                "anything, and three bugs that all had the same shape.",
         body=f"""
 <article class="post">
 <p class="post-meta">8 September 2026 · Rohit Swami</p>
@@ -49,7 +53,7 @@ same claim. One Go binary, no account, nothing leaves the machine.</p>
 <p>How do you know a flaky-test detector works?</p>
 
 <p>It's a genuinely annoying question. You can write fixtures with planted
-flakes, and I did — a test that fails on a coin flip is easy to detect and
+flakes, and I did. A test that fails on a coin flip is easy to detect and
 proves almost nothing. Real flakiness is rarer, weirder, and entangled with the
 environment. And the failure mode you care about is silent: a detector that
 misses things looks identical to a codebase that isn't flaky.</p>
@@ -59,7 +63,7 @@ truth. Not my fixture, not my judgement.</p>
 
 <p>ConduitIO had one. Their contributors filed an issue documenting several
 flaky tests, named them, and later merged a commit that fixed them. That gives
-two commits — one either side of a repair I had nothing to do with — and a
+two commits, one either side of a repair I had nothing to do with, and a
 detector that works should say different things about them.</p>
 
 <div class="fig" id="fig-ba">
@@ -67,14 +71,14 @@ detector that works should say different things about them.</p>
   <div class="fig-body">
     <div class="ba">
       <div class="ba-col pending">
-        <h4>612f5bfb — before their fix</h4>
+        <h4>612f5bfb, before their fix</h4>
         <div class="ba-row"><span>TestClient_NotFound</span><b class="v-f">flaky 0.66</b></div>
         <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-f">flaky 0.66</b></div>
         <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-f">flaky 0.66</b></div>
       </div>
       <div class="ba-arrow" aria-hidden="true">&rarr;</div>
       <div class="ba-col pending">
-        <h4>9e00e594 — their fix</h4>
+        <h4>9e00e594, their fix</h4>
         <div class="ba-row"><span>TestClient_NotFound</span><b class="v-s">stable 0.00</b></div>
         <div class="ba-row"><span>TestClient_CacheMiss</span><b class="v-s">stable 0.00</b></div>
         <div class="ba-row"><span>TestClient_CacheHit</span><b class="v-s">stable 0.00</b></div>
@@ -116,7 +120,7 @@ it was built to detect, then reported it with a straight face.</p>
 <p>Candidates found under <code>--parallel</code> are now re-run sequentially
 and demoted if they don't reproduce. I kept the mode rather than deleting it,
 because failing to reproduce in five runs is weak evidence of innocence, not
-proof — but the default is sequential and the default is trustworthy.</p>
+proof. But the default is sequential, and the default is trustworthy.</p>
 
 <h3>Duplicates suppress flakiness</h3>
 
@@ -128,7 +132,7 @@ evidence that only existed once.</p>
 <p>It does the opposite, and it took a measurement to notice.</p>
 
 <p>A duplicate carries its original's timestamp. So it sorts <em>next to</em>
-its original — and a duplicate always agrees with itself. Duplication doesn't
+its original, and a duplicate always agrees with itself. Duplication doesn't
 add noise, it adds artificial <em>agreement</em>. On a test failing 4 of 12
 runs, ingesting the same reports twice moved the score from 0.64 to 0.30 while
 the apparent evidence doubled.</p>
@@ -153,8 +157,8 @@ the apparent evidence doubled.</p>
 
 <p>The error runs towards false negatives. Duplication makes flaky tests look
 stable, which is the direction that loses them quietly. Every observation now
-carries the identity of the execution it describes, so a copy counts once — but
-a genuine retry, which really did run the tests again, still counts.</p>
+carries the identity of the execution it describes, so a copy counts once. A
+genuine retry, which really did run the tests again, still counts.</p>
 
 <h3>The same invariant, three times</h3>
 
@@ -167,9 +171,9 @@ in-progress feature branch, read as one chronological series, looks like
 repeated disagreement.</p>
 
 <p>Then platforms. A test that always fails on Windows and always passes
-everywhere else is perfectly deterministic on every platform — and it scored
-0.45, with an explanation asserting "direct evidence of nondeterminism". That
-one surfaced within minutes of pointing the tool at its own CI matrix.</p>
+everywhere else is perfectly deterministic on every platform. It scored 0.45,
+with an explanation asserting "direct evidence of nondeterminism". That one
+surfaced within minutes of pointing the tool at its own CI matrix.</p>
 
 <p>Then the display layer, which kept grouping by branch after scoring had moved
 on to execution context. The verdict was right; the evidence printed underneath
@@ -189,7 +193,7 @@ regression corpus. A detector that only rediscovers documented bugs is a
 plausible detector, not a demonstrated one.</p>
 
 <p>So I pointed it at six active Go projects overnight. Five finished the
-protocol — 335 executions, each a fresh process, shuffled, with a recorded seed
+protocol: 335 executions, each a fresh process, shuffled, with a recorded seed
 so anything found would be reproducible by its maintainer rather than "run 47
 failed". The sixth had a ten-minute baseline and would have taken fifty
 hours.</p>
@@ -198,7 +202,7 @@ hours.</p>
 
 <p><strong>Seven were already filed.</strong> One had a fix open and unmerged
 since March. One had been caught by litestream's nightly race-detector sweep the
-week before — flakestat hit it in ten runs, which is a reasonable argument for
+week before. flakestat hit it in ten runs, which is a reasonable argument for
 concentrated repetition over nightly sampling, and not an argument for
 discovery.</p>
 
@@ -218,15 +222,15 @@ full suite,  ./... -count=3, shuffled   2/31 FAIL</code></pre>
 
 <p>It only failed under the exact conditions my harness imposed. Their CI runs
 <code>-count=1</code>. The other unreported finding turned out to be the same
-category — a package that can't be run with <code>-count&gt;1</code> at all,
+category: a package that can't be run with <code>-count&gt;1</code> at all,
 which is a real problem worth telling them about and is not flakiness.</p>
 
 <p>So: <strong>zero previously-unknown flaky tests.</strong></p>
 
-<p>Had I stopped when the cross-check came back clean — and it was tempting, it
-was four in the morning and the result was exactly what I'd been hoping for —
-I'd have filed a bug report that misattributed its own cause, and written a post
-claiming the tool found something nobody knew about.</p>
+<p>Stopping there was tempting. It was four in the morning and the result was
+exactly what I had been hoping for. Had I stopped, I would have filed a bug
+report that misattributed its own cause, and written a post claiming the tool
+found something nobody knew about.</p>
 
 <p>That's the <code>--parallel</code> mistake again. Same shape, different
 layer: the apparatus producing the signal. I've now made it twice in one
@@ -241,12 +245,12 @@ anything.</p>
 Litestream's sweep needed a week of nightly runs to surface a flake; ten runs on
 a laptop found it.</p>
 
-<p><strong>Restraint.</strong> Across two clean repositories — 202 executions,
-231 distinct tests — it reported nothing at all. It refused to classify a
+<p><strong>Restraint.</strong> Across two clean repositories, 202 executions
+and 231 distinct tests, it reported nothing at all. It refused to classify a
 dramatic ten-minute hang on two observations, correctly, because two
 observations aren't a verdict. It called nine always-failing tests broken rather
-than flaky. A detector that finds something everywhere you point it isn't a
-detector, it's a mirror.</p>
+than flaky. A detector that finds something everywhere you point it is just a
+mirror.</p>
 
 <p>What I won't claim is discovery. It has never surfaced a flaky test nobody
 had already filed, and <a href="{BASE}findings/">the write-up</a> says so in the
@@ -270,4 +274,48 @@ writes.
 <a href="{BASE}findings/">The overnight hunt</a>
 </p>
 </article>
+""")
+
+
+def index(BASE, REPO, entries):
+    """The one page that lists everything long-form.
+
+    Separate nav entries for each record turned the header into a filing
+    cabinet. One list, ordered newest first, does the same job.
+    """
+    items = []
+    for e in entries:
+        meta = [f'<span>{e["kicker"]}</span>']
+        if e.get("updated"):
+            meta.append(f'<span>{e["updated"]}</span>')
+        items.append(
+            f'<li class="wr-item"><a href="{BASE}{e["slug"]}/">'
+            f'<p class="wr-kicker">{"".join(meta)}</p>'
+            f'<h2>{e["title"]}</h2>'
+            f'<p class="wr-sum">{e["summary"]}</p>'
+            f'<span class="wr-go">Read<i></i></span>'
+            f"</a></li>"
+        )
+
+    return dict(
+        slug="writing",
+        section="Writing",
+        layout="index",
+        title="Writing",
+        title_tag="Writing about flaky tests and flakestat",
+        og_title="Writing",
+        description="Essays, validation records and design notes from building "
+                    "flakestat, an open-source flaky test detector.",
+        keywords=["flaky test blog", "flaky test detection writing",
+                  "flakestat validation", "flakestat design notes"],
+        lede="",
+        body=f"""
+<div class="wr-wrap">
+  <header class="wr-head">
+    <p class="wr-eyebrow">Writing</p>
+    <h1>How it was built,<br>and what it failed to find.</h1>
+    <p>Essays and records from building flakestat.</p>
+  </header>
+  <ol class="wr-list">{"".join(items)}</ol>
+</div>
 """)

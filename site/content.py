@@ -59,8 +59,8 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
     P.append(dict(
         slug="", section="Home", layout="wide",
         title="flakestat",
-        title_tag="flakestat — find flaky tests in any language",
-        og_title="flakestat — find flaky tests in any language",
+        title_tag="flakestat: find flaky tests in any language",
+        og_title="flakestat, a flaky test detector",
         description="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.",
         keywords=["flaky test detector", "find flaky tests", "flaky test detection",
                   "open source flaky tests", "pytest flaky tests", "jest flaky tests",
@@ -78,7 +78,7 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
       <img class="hero-lockup" src="{BASE}assets/logo-lockup-dark.png" alt="flakestat" width="400" height="126">
       <h1>Some tests disagree<br>with <span class="odd">themselves</span>.</h1>
       <p class="sub">flakestat reads the JUnit XML your test runner already writes and tells you
-      which tests are actually flaky — ranked, with a confidence level, and with the evidence
+      which tests are actually flaky, ranked, with a confidence level, and with the evidence
       behind every verdict.</p>
       <div class="hero-cta">
         <a class="btn btn-pri" href="{BASE}docs/#quickstart">Get started</a>
@@ -100,7 +100,7 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
 
 <div class="band"><div class="band-in">
   <div><b>Local first</b><p>One static binary. No account, no server, no test data leaving your machine.</p></div>
-  <div><b>Any language</b><p>If your runner writes JUnit XML — and they all do — flakestat reads it.</p></div>
+  <div><b>Any language</b><p>If your runner writes JUnit XML, and they all do, flakestat reads it.</p></div>
   <div><b>Free at any volume</b><p>Recording CI runs costs no extra compute. No per-seat or per-run pricing.</p></div>
   <div><b>Zero dependencies</b><p>The Go module has no <code>require</code> block. Nothing to audit but the tool.</p></div>
 </div></div>
@@ -110,7 +110,7 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
   {INSTALL_TABS}
   {HUNT_TABS}
   <p>That runs your suite 20 times on unchanged code and reports what disagreed.
-  Already have CI? <a href="{BASE}docs/#history">Record the runs you already pay for</a> instead —
+  Already have CI? <a href="{BASE}docs/#history">Record the runs you already pay for</a> instead:
   it catches environment-dependent flakes a local burst never will, at no extra compute.</p>
 
   <h2>Why the verdicts can be trusted</h2>
@@ -145,13 +145,13 @@ def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
     P.append(dict(
         slug="docs/install", section="Getting started",
         title="Install flakestat",
-        title_tag="Install flakestat — Homebrew, npm, pip, Go, Docker",
+        title_tag="Install flakestat with Homebrew, npm, pip, Go or Docker",
         description="Install flakestat via Homebrew, npm, pip, Go, a shell script or Docker. Same static binary on macOS, Linux and Windows, x86_64 and arm64.",
         keywords=["install flakestat", "flakestat homebrew", "flakestat npm", "flakestat pip"],
         lede="Same binary whichever route you pick. No runtime to install alongside it.",
         body=f"""
 {INSTALL_TABS}
-<p>Or download a binary directly from <a href="{REPO}/releases">Releases</a> — macOS, Linux and
+<p>Or download a binary directly from <a href="{REPO}/releases">Releases</a>. macOS, Linux and
 Windows, on x86_64 and arm64. The binary is statically linked and has no runtime dependencies.</p>
 
 <h2>Verify the install</h2>
@@ -161,7 +161,7 @@ Windows, on x86_64 and arm64. The binary is statically linked and has no runtime
 {tbl(["Route", "Best when"], [
   ["<code>brew</code>", "You work on macOS or Linux and want it on your PATH globally."],
   ["<code>npm</code>", "The project is JS or TS. Pins the version in <code>package.json</code> so CI and laptops match."],
-  ["<code>pip</code>", "The project is Python. Same benefit — the version is pinned with your other dev tooling."],
+  ["<code>pip</code>", "The project is Python. Same benefit: the version is pinned with your other dev tooling."],
   ["<code>go install</code>", "You have Go and want to build from source."],
   ["Script", "CI images without a package manager. Pin with <code>-b</code> and a version tag."],
   ["Docker", "You'd rather not install anything. Mount the repo at <code>/workspace</code>."],
@@ -173,7 +173,7 @@ The <a href="{BASE}docs/#github-actions">GitHub Action</a> takes a <code>version
 and the install script takes a tag.</div>
 
 <h2>Next</h2>
-<p>Head to the <a href="{BASE}docs/#quickstart">quickstart</a> — two commands, and you'll know
+<p>Head to the <a href="{BASE}docs/#quickstart">quickstart</a>. Two commands, and you'll know
 whether your suite is flaky.</p>
 """))
 
@@ -181,13 +181,13 @@ whether your suite is flaky.</p>
     P.append(dict(
         slug="docs/quickstart", section="Getting started",
         title="Quickstart",
-        title_tag="How to find flaky tests — flakestat quickstart",
+        title_tag="How to find flaky tests: the flakestat quickstart",
         description="Two ways to detect flaky tests: run your suite N times locally with hunt, or record CI runs over time with ingest. Working examples for pytest, Jest and go test.",
         keywords=["how to find flaky tests", "detect flaky tests", "flaky test tutorial",
                   "flakestat quickstart"],
         lede="Two ways to use flakestat. They answer different questions, and most projects end up doing both.",
         body=f"""
-<h2>1. Hunt — is this suite flaky right now?</h2>
+<h2>1. Hunt: is this suite flaky right now?</h2>
 <p>Runs your test command N times on unchanged code and reports what disagreed. Use it when you
 already suspect a suite, or before opening a pull request.</p>
 {HUNT_TABS}
@@ -200,9 +200,9 @@ your command, passed through untouched.</p>
 <p><code>init</code> looks at your project and writes the command and report path once, so the
 day-to-day invocation is a single word. See <a href="{BASE}docs/#config">configuration</a>.</p>
 
-<h2>2. Ingest — which tests are flaky over time?</h2>
+<h2>2. Ingest: which tests are flaky over time?</h2>
 <p>Records the CI runs you already pay for. This is the one that catches flakes that only appear
-on one platform, one runtime, or under CI load — and it costs no extra compute.</p>
+on one platform, one runtime, or under CI load, and it costs no extra compute.</p>
 {cb("# in CI, after your tests run\nflakestat ingest 'reports/**/*.xml'\n\n# any time\nflakestat report --top 20")}
 <p>See <a href="{BASE}docs/#history">tracking flakiness over time</a> for where to keep the
 history, and <a href="{BASE}docs/#github-actions">GitHub Actions</a> for a complete workflow.</p>
@@ -221,7 +221,7 @@ one test with <a href="{BASE}docs/#explain"><code>flakestat explain</code></a>.<
 
 <h2>If it finds nothing</h2>
 <p>That is a real result, not a failure. It means nothing disagreed in that many runs. A test that
-fails 2% of the time will usually survive 20 runs untouched — raise <code>--runs</code>, or record
+fails 2% of the time will usually survive 20 runs untouched. Raise <code>--runs</code>, or record
 CI history where the sample grows for free.</p>
 """))
 
@@ -229,7 +229,7 @@ CI history where the sample grows for free.</p>
     P.append(dict(
         slug="docs/reading-a-report", section="Getting started",
         title="Reading a report",
-        title_tag="Reading a flakestat report — verdicts, score and confidence",
+        title_tag="Reading a flakestat report: verdicts, score and confidence",
         description="What each flakestat verdict means, why score is not a failure rate, and how confidence is derived from the amount of evidence behind a verdict.",
         keywords=["flaky test score", "flaky test verdict", "flakestat report"],
         lede="Six verdicts, one score and one confidence level. Here is what each of them is claiming.",
@@ -243,14 +243,14 @@ consistently-failing   0.00  high    20       0/20  test_demo::test_broken""")}
 <div class="verdict v-flaky"><b>flaky</b><span>Disagrees with itself often enough, with enough evidence, to act on.</span></div>
 <div class="verdict v-suspect"><b>suspect</b><span>Some disagreement, below the flaky threshold. Worth watching, not worth a ticket yet.</span></div>
 <div class="verdict v-stable"><b>stable</b><span>No meaningful disagreement.</span></div>
-<div class="verdict v-other"><b>consistently-failing</b><span>Fails every time. Broken, not flaky — a different problem with a different fix.</span></div>
+<div class="verdict v-other"><b>consistently-failing</b><span>Fails every time. Broken, not flaky, and a different problem with a different fix.</span></div>
 <div class="verdict v-other"><b>insufficient-data</b><span>Fewer runs than needed for a verdict. More runs would help.</span></div>
 <div class="verdict v-other"><b>always-skipped</b><span>Never actually ran. More runs would <em>not</em> help, so this is deliberately not the same as insufficient data.</span></div>
 
 <h2>Score is not a failure rate</h2>
 <p><strong>Score</strong> is how often a test disagrees with itself: 0.62 means roughly six of ten
 consecutive runs changed their answer. A test that fails every single time scores
-<code>0.00</code>, because its outcome never disagrees with itself — it is broken, and it shows up
+<code>0.00</code>, because its outcome never disagrees with itself. It is broken, and it shows up
 as <code>consistently-failing</code> so you can fix it as the different problem it is.</p>
 
 <div class="callout"><b>Why this matters</b>
@@ -270,7 +270,7 @@ verdict requires evidence rather than a lucky flip in a short run. The mechanics
 {tbl(["Column", "Meaning"], [
   ["<code>SCORE</code>", "Weighted rate at which consecutive runs disagreed."],
   ["<code>CONF</code>", "How much evidence supports that score."],
-  ["<code>RUNS</code>", "Scored observations. Skips are excluded — a skip is not evidence either way."],
+  ["<code>RUNS</code>", "Scored observations. Skips are excluded, because a skip is not evidence either way."],
   ["<code>PASS/FAIL</code>", "Counts among scored runs."],
   ["<code>TEST</code>", "Stable identity, from suite, class and name."],
 ])}
@@ -283,7 +283,7 @@ verdict requires evidence rather than a lucky flip in a short run. The mechanics
     P.append(dict(
         slug="docs/hunting", section="Guides",
         title="Hunting flaky tests locally",
-        title_tag="Reproduce a flaky test locally — flakestat hunt",
+        title_tag="Reproduce a flaky test locally with flakestat hunt",
         description="Use flakestat hunt to run a test suite many times on unchanged code and find which tests disagree, including how many runs a given flake rate needs.",
         keywords=["reproduce flaky test", "rerun tests to find flaky", "flakestat hunt"],
         lede="Run the suite many times on unchanged code and see what disagrees.",
@@ -297,12 +297,12 @@ known failure probabilities:</p>
   ["25% or higher", "20 runs is plenty"],
   ["10%", "50 or more"],
   ["5%", "100+, and a local burst is starting to be the wrong instrument"],
-  ["Below 5%", "Record <a href='" + BASE + "docs/history/'>CI history</a> instead"],
+  ["Below 5%", "Record <a href='" + BASE + "docs/#history'>CI history</a> instead"],
 ])}
 
 <h2>Chasing one test</h2>
 {cb("flakestat hunt --runs 50 --junit 'reports/junit-{run}.xml' \\\n  -- pytest tests/test_checkout.py::test_race --junitxml='{junit}'")}
-<p>Narrowing to one test is usually much faster per run, so you can afford far more runs — which
+<p>Narrowing to one test is usually much faster per run, so you can afford far more runs, which
 is exactly what a rare flake needs.</p>
 
 <h2>If it finds nothing</h2>
@@ -315,12 +315,12 @@ Raise <code>--runs</code>, or let CI history accumulate.</p>
 A suite that writes fixed paths, binds a fixed port or shares a database will collide with itself
 and look flaky when it isn't.</p>
 <p>This is real, not theoretical. Running against <code>spf13/cobra</code> with
-<code>--parallel 4</code> reported <code>TestDeadcodeElimination</code> as flaky at 0.60. It isn't —
+<code>--parallel 4</code> reported <code>TestDeadcodeElimination</code> as flaky at 0.60. It isn't.
 the test builds a binary at a fixed path, and concurrent copies deleted each other's build.
 Sequentially, cobra is completely clean.</p>
 <p>So flakestat verifies its own findings. Candidates found under <code>--parallel</code> are
 re-run sequentially and demoted from <code>flaky</code> to <code>suspect</code> if they don't
-reproduce. Sequential (the default) is always trustworthy — use <code>--parallel</code> to hunt
+reproduce. Sequential (the default) is always trustworthy. Use <code>--parallel</code> to hunt
 faster and let verification sort out the difference, or <code>--verify 0</code> to opt out.</p></div>
 
 <h2>Scoring the whole history instead</h2>
@@ -333,7 +333,7 @@ score everything recorded so far, burst and CI runs together.</p>
     P.append(dict(
         slug="docs/history", section="Guides",
         title="Tracking flakiness over time",
-        title_tag="Track flaky tests over time in CI — flakestat ingest",
+        title_tag="Track flaky tests over time in CI with flakestat ingest",
         description="Record every CI run with flakestat ingest to measure flakiness over time, and choose where to keep the history: committed, an artifact, or a dedicated branch.",
         keywords=["track flaky tests over time", "flaky test history", "flakestat ingest",
                   "ci flaky test tracking"],
@@ -341,7 +341,7 @@ score everything recorded so far, burst and CI runs together.</p>
         body=f"""
 {cb("flakestat ingest 'reports/**/*.xml' \\\n  --commit \"$GIT_SHA\" --branch \"$BRANCH\"")}
 <p>Commit and branch default to the current git checkout, so in most CI setups you can omit them.
-Recording the commit is what lets flakestat tell genuine flakiness — same code, different result —
+Recording the commit is what lets flakestat tell genuine flakiness, same code and different result,
 from a regression someone later fixed.</p>
 
 <p>History lives in <code>.flakestat/runs.ndjson</code>, one JSON object per line. Because it is
@@ -350,13 +350,13 @@ step.</p>
 
 <h2>Re-ingesting is safe</h2>
 <p>Every observation carries the identity of the execution it describes, so an artifact uploaded
-twice, a re-run aggregation step, or a shard collected by two jobs is counted once — while a
+twice, a re-run aggregation step, or a shard collected by two jobs is counted once, while a
 genuine retry, which really did run the tests again, still counts.</p>
 
 <div class="callout flag"><b>Duplicates are not harmless</b>
 A duplicate carries its original's timestamp, sorts next to it, and always agrees with itself, so
 uncounted duplicates make a flaky test look <em>stable</em>. Measured on a test failing 4 of 12
-runs, ingesting the same reports twice moved the score from 0.64 to 0.30 — the error runs towards
+runs, ingesting the same reports twice moved the score from 0.64 to 0.30. The error runs towards
 false negatives, which is the direction that loses tests quietly.</div>
 
 <p>Copies are ignored on read, so nothing is required of you.
@@ -365,7 +365,7 @@ file is the record you keep.</p>
 
 <h2>Where to keep the history</h2>
 <div class="cards">
-  <div class="card"><h4>Commit it</h4><p>Simplest — the file goes in the repo and everyone shares
+  <div class="card"><h4>Commit it</h4><p>Simplest. The file goes in the repo and everyone shares
   one history. Downside: every CI run wants to write to it, so telemetry lands in your development
   history.</p></div>
   <div class="card"><h4>A CI artifact</h4><p>Zero setup, but nothing accumulates. Each run sees
@@ -398,7 +398,7 @@ those and rewriting would delete evidence you might still recover.</p>
     P.append(dict(
         slug="docs/dimensions", section="Guides",
         title="Recording where tests ran",
-        title_tag="Find where flaky tests concentrate — platform, runtime, shard",
+        title_tag="Find where flaky tests concentrate: platform, runtime, shard",
         description="Attach platform, runtime and CI context to observations with --dimension, and see where failures concentrate, without flakestat ever claiming causation.",
         keywords=["flaky test only on windows", "flaky test by platform", "flaky test correlation"],
         lede="Attach context to observations and flakestat will tell you where failures concentrate.",
@@ -418,7 +418,7 @@ those and rewriting would delete evidence you might still recover.</p>
   JUnit <code>&lt;property&gt;</code> names flakestat recognizes. The process environment is never
   walked, so secrets, tokens and build ids cannot end up in your history.</li>
   <li><strong>Host details are recorded only when flakestat ran the tests.</strong> If one job
-  downloads other jobs' artifacts and ingests them centrally, pass <code>--no-host</code> —
+  downloads other jobs' artifacts and ingests them centrally, pass <code>--no-host</code>:
   otherwise the aggregator's platform is stamped onto results from everywhere else, and analysis
   can conclude the exact opposite of the truth.</li>
 </ul>
@@ -428,18 +428,18 @@ those and rewriting would delete evidence you might still recover.</p>
   ["<code>os</code>, <code>arch</code>", "Platform the tests ran on"],
   ["<code>runtime.name</code>, <code>runtime.version</code>", "Language runtime under test"],
   ["<code>ci.provider</code>", "github, gitlab, circleci, buildkite, jenkins, azure"],
-  ["<code>ci.run_id</code>, <code>ci.job_id</code>", "Provenance. Recorded, never analysed — every failure happened during <em>some</em> run"],
+  ["<code>ci.run_id</code>, <code>ci.job_id</code>", "Provenance. Recorded, never analysed, since every failure happened during <em>some</em> run"],
   ["<code>ci.attempt</code>", "Separates a retry from a duplicate. Never analysed: retries happen <em>because</em> of failures"],
   ["<code>ci.shard</code>, <code>ci.worker</code>", "Which shard or worker executed the run"],
 ])}
-<p>Anything else you pass is a user dimension and is analysed normally — database version, browser,
+<p>Anything else you pass is a user dimension and is analysed normally: database version, browser,
 feature flag, region.</p>
 
 <h2>Correlation, never causation</h2>
 <p>flakestat says failures <em>cluster</em> on Windows. It will not claim Windows is why.
 Observational data cannot distinguish a cause from anything perfectly correlated with it, and when
-several dimensions vary together — as <code>os</code> and <code>arch</code> usually do on a CI
-matrix — it reports all of them and says the observations cannot tell which one matters.</p>
+several dimensions vary together, as <code>os</code> and <code>arch</code> usually do on a CI
+matrix, it reports all of them and says the observations cannot tell which one matters.</p>
 
 <p>Three guards stop it producing confident nonsense over sparse data: an evidence floor, an
 effect-size floor, and a Benjamini–Hochberg correction for how many dimensions were tested. Testing
@@ -451,7 +451,7 @@ purely by chance.</p>
     P.append(dict(
         slug="docs/ci-gate", section="Guides",
         title="Gating CI without a permanently red build",
-        title_tag="Fail CI on new flaky tests only — flakestat check",
+        title_tag="Fail CI on new flaky tests only, with flakestat check",
         description="flakestat check is a ratchet: accept today's flakiness in a committed baseline, then fail the build only when a test becomes newly flaky or measurably worse.",
         keywords=["fail ci on flaky tests", "flaky test baseline", "flaky test gate"],
         lede="Accept today's flakiness, then fail only on what is new or measurably worse.",
@@ -492,7 +492,7 @@ full sequence.</div>
     P.append(dict(
         slug="docs/quarantine", section="Guides",
         title="Unblocking the pipeline",
-        title_tag="Quarantine flaky tests — skip lists for any runner",
+        title_tag="Quarantine flaky tests: skip lists for any runner",
         description="Generate a skip list your test runner already understands, so flaky tests stop blocking merges while you work the list down.",
         keywords=["quarantine flaky tests", "skip flaky tests", "pytest deselect flaky"],
         lede="Emit a skip list your runner already understands, so merges are unblocked while you fix things.",
@@ -529,7 +529,7 @@ quietly.</div>
     P.append(dict(
         slug="docs/explain", section="Guides",
         title="Explaining a verdict",
-        title_tag="Why is this test flaky? — flakestat explain",
+        title_tag="Why is this test flaky? flakestat explain",
         description="flakestat explain shows the full evidence behind one test's verdict: its outcome history, same-commit disagreements, and where its failures concentrate.",
         keywords=["why is my test flaky", "flaky test evidence", "flakestat explain"],
         lede="Every verdict can be interrogated. Nothing is asserted that the evidence does not show.",
@@ -564,7 +564,7 @@ quietly.</div>
   ["<code>P</code> / <code>F</code>", "Passed / failed"],
   ["<code>-</code>", "Skipped. Carries no signal, so it is shown but never counted as an outcome"],
   ["<code>^</code>", "The outcome changed from the previous comparable run"],
-  ["<code>!</code>", "It changed on <em>identical code</em> — the strongest single piece of evidence a test is flaky"],
+  ["<code>!</code>", "It changed on <em>identical code</em>, the strongest single piece of evidence a test is flaky"],
 ])}
 
 <p>Markers appear only between observations that are actually comparable: same branch, same
@@ -582,7 +582,7 @@ guessing which you meant.</p>
     P.append(dict(
         slug="docs/ci/github-actions", section="Continuous integration",
         title="GitHub Actions",
-        title_tag="Detect flaky tests in GitHub Actions — flakestat action",
+        title_tag="Detect flaky tests in GitHub Actions with the flakestat action",
         description="Add flaky test detection to GitHub Actions: record every run, post a pull request comment, annotate new flakes in the diff and fail only on regressions.",
         keywords=["github actions flaky tests", "flaky test github action", "detect flaky tests ci"],
         lede="Record every run, comment on the pull request, and gate on regressions rather than on flakiness itself.",
@@ -612,12 +612,12 @@ comment. A re-run <strong>updates the same comment</strong> rather than adding a
 
 <div class="callout"><b>continue-on-error matters</b>
 A failed suite is exactly the run you most want in the history. Without it, the job stops before
-ingest and you record only the runs that passed — which is the one sample guaranteed to hide
+ingest and you record only the runs that passed, which is the one sample guaranteed to hide
 flakiness.</div>
 
 <h2>Inputs</h2>
 {tbl(["Input", "Default", "Description"], [
-  ["<code>args</code>", "—", "Arguments passed to flakestat"],
+  ["<code>args</code>", "None", "Arguments passed to flakestat"],
   ["<code>version</code>", "latest", "Release tag to install, e.g. <code>v0.2.0</code>"],
   ["<code>install-only</code>", "<code>false</code>", "Put the binary on PATH without running it"],
   ["<code>summary</code>", "<code>true</code>", "Append the report to the job summary"],
@@ -658,7 +658,7 @@ every observation records the platform it actually ran on, rather than the aggre
                   "buildkite flaky tests"],
         lede="Nothing is GitHub-specific. Install the binary and call it.",
         body=f"""
-<p>Provider context — run id, job id, attempt and shard — is detected automatically for GitLab CI,
+<p>Provider context (run id, job id, attempt and shard) is detected automatically for GitLab CI,
 CircleCI, Buildkite, Jenkins and Azure Pipelines.</p>
 
 {tabs([
@@ -718,7 +718,7 @@ from any source.</p>
     P.append(dict(
         slug="docs/commands", section="Reference",
         title="Command reference",
-        title_tag="flakestat CLI reference — every command and flag",
+        title_tag="flakestat CLI reference: every command and flag",
         description="Full reference for every flakestat command: init, hunt, ingest, report, explain, check, quarantine, ci-report and compact, with all flags and defaults.",
         keywords=["flakestat cli", "flakestat commands", "flakestat flags"],
         lede="Nine commands. Run <code>flakestat &lt;command&gt; -h</code> for the full flag list of any of them.",
@@ -738,7 +738,7 @@ from any source.</p>
 <h2>Scoring flags</h2>
 <p>Accepted by <code>hunt</code>, <code>report</code>, <code>explain</code>, <code>check</code> and
 <code>quarantine</code>. Defaults are calibrated against a ground-truth corpus, not chosen by
-intuition — see <a href="{BASE}docs/#scoring">how scoring works</a> before changing them.</p>
+intuition. See <a href="{BASE}docs/#scoring">how scoring works</a> before changing them.</p>
 {tbl(["Flag", "Default", "Effect"], [
   ["<code>--threshold</code>", "<code>0.10</code>", "Score at or above which a test is called flaky"],
   ["<code>--suspect-threshold</code>", "<code>0.05</code>", "Score at or above which a test is called suspect"],
@@ -763,7 +763,7 @@ intuition — see <a href="{BASE}docs/#scoring">how scoring works</a> before cha
 {tbl(["Flag", "Effect"], [
   ["<code>--runs N</code>", "How many times to run the command"],
   ["<code>--junit PATH</code>", "Where each run writes its report; supports <code>{run}</code>"],
-  ["<code>--parallel N</code>", "Run N copies concurrently — read the warning in <a href='" + BASE + "docs/hunting/'>hunting</a>"],
+  ["<code>--parallel N</code>", "Run N copies concurrently. Read the warning in <a href='" + BASE + "docs/#hunting'>hunting</a>"],
   ["<code>--history</code>", "Score all recorded history, not just this burst"],
   ["<code>--dimension k=v</code>", "Attach context; repeatable"],
 ])}
@@ -789,7 +789,7 @@ intuition — see <a href="{BASE}docs/#scoring">how scoring works</a> before cha
     P.append(dict(
         slug="docs/config", section="Reference",
         title="Configuration",
-        title_tag="flakestat configuration — .flakestat.json",
+        title_tag="flakestat configuration with .flakestat.json",
         description="Configure flakestat once with .flakestat.json so the day-to-day command is a single word. Flags always override the file.",
         keywords=["flakestat config", "flakestat.json"],
         lede="Write the command and report path once, then run a single word.",
@@ -808,7 +808,7 @@ intuition — see <a href="{BASE}docs/#scoring">how scoring works</a> before cha
 
 <h2>Precedence</h2>
 <p>Flags always win over the file, so a one-off <code>flakestat hunt --runs 50</code> works
-without editing anything. Nothing in the file is required — every key has a default.</p>
+without editing anything. Nothing in the file is required, and every key has a default.</p>
 
 {tbl(["Key", "Meaning"], [
   ["<code>command</code>", "Your test command as an argv array. <code>{junit}</code> is substituted."],
@@ -821,7 +821,7 @@ without editing anything. Nothing in the file is required — every key has a de
 ])}
 
 <div class="callout"><b>Commit it</b>
-The config belongs in the repo. It is how everyone on the team — and CI — runs the same thing.</div>
+The config belongs in the repo. It is how everyone on the team, and CI, runs the same thing.</div>
 
 <h2>What gets written where</h2>
 {tbl(["Path", "What it is", "Commit it?"], [
@@ -835,7 +835,7 @@ The config belongs in the repo. It is how everyone on the team — and CI — ru
     P.append(dict(
         slug="docs/scoring", section="Reference",
         title="How scoring works",
-        title_tag="How flaky test scoring works — flakestat",
+        title_tag="How flaky test scoring works in flakestat",
         description="flakestat scores state transitions rather than failure rate and classifies on a lower bound, so a verdict needs evidence rather than a lucky flip.",
         keywords=["flaky test score", "flaky test algorithm", "flaky test detection algorithm"],
         lede="Five steps, and a live demo you can poke at to see each of them.",
@@ -846,7 +846,7 @@ same rules the binary uses.</p>
 
 <div class="demo" id="demo">
   <div class="demo-top">
-    <p>Outcome history, oldest first — one execution context, one commit.</p>
+    <p>Outcome history, oldest first, in one execution context on one commit.</p>
     <div class="seq"></div>
     <div class="demo-actions">
       <button class="mini" data-demo="add">+ run</button>
@@ -859,24 +859,24 @@ same rules the binary uses.</p>
     </div>
   </div>
   <div class="demo-out">
-    <div class="stat"><span>Verdict</span><b id="d-verdict">—</b></div>
-    <div class="stat"><span>Score</span><b id="d-score">—</b></div>
-    <div class="stat"><span>Lower bound</span><b id="d-lower">—</b></div>
-    <div class="stat"><span>Pass / fail</span><b id="d-runs">—</b></div>
-    <div class="stat"><span>Comparisons</span><b id="d-trans">—</b></div>
+    <div class="stat"><span>Verdict</span><b id="d-verdict">&middot;</b></div>
+    <div class="stat"><span>Score</span><b id="d-score">&middot;</b></div>
+    <div class="stat"><span>Lower bound</span><b id="d-lower">&middot;</b></div>
+    <div class="stat"><span>Pass / fail</span><b id="d-runs">&middot;</b></div>
+    <div class="stat"><span>Comparisons</span><b id="d-trans">&middot;</b></div>
   </div>
   <div class="demo-why" id="d-why"></div>
 </div>
 
 <p><small>The demo covers one execution context on one commit, which is where the interesting
 behaviour is. The binary additionally weights same-commit and cross-branch evidence, and decays by
-age — steps 3 and 4 below.</small></p>
+age, in steps 3 and 4 below.</small></p>
 
 <h2>The five steps</h2>
 <ol>
   <li><strong>Group by execution context.</strong> Two outcomes are only comparable if branch, os,
   arch and runtime were the same. Without this, interleaving platforms makes a test that always
-  fails on Windows and always passes elsewhere read as constant disagreement — a phantom signal
+  fails on Windows and always passes elsewhere read as constant disagreement, a phantom signal
   that has caught this project twice.</li>
   <li><strong>Count transitions.</strong> Every adjacent pair within a context that disagreed is a
   flip. Failure rate is deliberately not used, which is why an always-failing test scores zero.</li>
@@ -917,7 +917,7 @@ any of it holds up against somebody else&rsquo;s bugs.</p>
     P.append(dict(
         slug="docs/runners", section="Reference",
         title="Supported test runners",
-        title_tag="Supported test runners — pytest, Jest, go test, JUnit",
+        title_tag="Supported test runners: pytest, Jest, go test, JUnit",
         description="flakestat works with any runner that writes JUnit XML: pytest, Jest, Vitest, go test, JUnit 5, TestNG, RSpec, PHPUnit, Playwright, Cypress, xUnit, NUnit and more.",
         keywords=["junit xml test runners", "pytest junit xml", "jest junit xml", "gotestsum"],
         lede="Anything that writes JUnit XML, which in practice is everything.",
@@ -949,14 +949,15 @@ any of it holds up against somebody else&rsquo;s bugs.</p>
 <h2>Dialect tolerance</h2>
 <p>JUnit XML has no official schema, so every framework writes it slightly differently. The parser
 handles both root elements, nested suites, locale-formatted durations like <code>4,521</code>,
-bytes that are illegal in XML 1.0, and Surefire's <code>&lt;flakyFailure&gt;</code> markers — which
+bytes that are illegal in XML 1.0, and Surefire's <code>&lt;flakyFailure&gt;</code> markers, which
 are a direct flakiness signal and are read as one.</p>
 <p>Playwright emits <code>&lt;error&gt;</code> for some failures and <code>&lt;failure&gt;</code>
 for others; both count as failures. A <code>&lt;skipped&gt;</code> test counts as neither.</p>
 
 <h2>No JUnit XML?</h2>
-<p>flakestat falls back to exit codes and reports suite-level flakiness. Less precise — you learn
-the suite is flaky, not which test — but it works with anything that returns a status code.</p>
+<p>flakestat falls back to exit codes and reports suite-level flakiness. That is less precise,
+because you learn the suite is flaky rather than which test, but it works with anything that
+returns a status code.</p>
 {cb("flakestat hunt --runs 20 -- ./run-tests.sh")}
 """))
 
@@ -964,7 +965,7 @@ the suite is flaky, not which test — but it works with anything that returns a
     P.append(dict(
         slug="docs/faq", section="Reference",
         title="Frequently asked questions",
-        title_tag="flakestat FAQ — flaky test detection questions answered",
+        title_tag="flakestat FAQ: flaky test detection questions answered",
         description="Answers about flaky test detection with flakestat: data privacy, how many runs you need, monorepos and sharding, re-run double counting, and CI overhead.",
         keywords=["flaky test faq", "flaky test questions", "how many runs flaky test"],
         lede="Short answers. Each links to the longer explanation.",
@@ -972,7 +973,7 @@ the suite is flaky, not which test — but it works with anything that returns a
             ("Does my test data leave my machine?",
              "No. flakestat is a binary that reads local files and writes a local file. There is no network call, no account and no telemetry."),
             ("My test failed 100% of the time. Why is the score zero?",
-             "Because it is not flaky, it is broken. flakestat scores how often a test disagrees with itself, not how often it fails, so a consistently failing test scores zero and is reported as consistently-failing — a different problem with a different fix."),
+             "Because it is not flaky, it is broken. flakestat scores how often a test disagrees with itself, not how often it fails, so a consistently failing test scores zero and is reported as consistently-failing, which is a different problem with a different fix."),
             ("How many runs do I need to detect a flaky test?",
              "It depends on the flake rate. A test failing about 25% of the time is reliably caught within 20 runs. One failing 10% of the time usually needs 50 or more. Below about 5%, a local burst is the wrong instrument and recording CI history is better."),
             ("Can I use flakestat with a monorepo or sharded CI?",
@@ -996,14 +997,14 @@ call, no account and no telemetry.</p>
 <h3>My test failed 100% of the time. Why is the score zero?</h3>
 <p>Because it isn't flaky, it's broken. flakestat scores how often a test <em>disagrees with
 itself</em>, not how often it fails, so a consistently failing test scores zero and appears as
-<code>consistently-failing</code> — a different problem with a different fix. See
+<code>consistently-failing</code>, a different problem with a different fix. See
 <a href="{BASE}docs/#reading-a-report">reading a report</a>.</p>
 
 <h3>How many runs do I need?</h3>
 <p>Depends on the flake rate. ~25% is reliably caught within 20 runs; 10% usually needs 50 or more;
 below about 5% a local burst is the wrong instrument and
 <a href="{BASE}docs/#history">CI history</a> is right. <code>insufficient-data</code> means exactly
-that — not enough evidence yet.</p>
+that. There is not enough evidence yet.</p>
 
 <h3>Can I use it with a monorepo or sharded CI?</h3>
 <p>Yes. Let each shard ingest its own results and concatenate the NDJSON. It is append-only and one
@@ -1011,7 +1012,7 @@ observation per line specifically so that works with <code>cat</code> and no mer
 
 <h3>Does re-running a job double-count?</h3>
 <p>No. Each observation carries the identity of the execution it describes, so the same artifact
-ingested twice counts once — while a genuine retry, which really did run the tests again, counts as
+ingested twice counts once, while a genuine retry, which really did run the tests again, counts as
 the second execution it is.</p>
 
 <h3>Will it slow down my CI?</h3>
@@ -1020,12 +1021,12 @@ runs your suite N times and costs exactly that, which is why it is a local tool 
 something on every build.</p>
 
 <h3>What if my runner doesn't write JUnit XML?</h3>
-<p>Almost all of them can with one flag or one reporter package — see
+<p>Almost all of them can, with one flag or one reporter package. See
 <a href="{BASE}docs/#runners">supported runners</a>. Failing that, exit-code mode still gives
 suite-level results.</p>
 
 <h3>Is it free?</h3>
-<p>Yes. MIT licensed, free at any volume, no per-seat or per-run pricing — it runs on your own
+<p>Yes. MIT licensed, free at any volume, and no per-seat or per-run pricing, because it runs on your own
 machines, so there is nothing to meter.</p>
 
 <h3>How is this different from just retrying failed tests?</h3>
@@ -1034,7 +1035,7 @@ in ways that matter. Retry to keep the pipeline moving, and measure so the list 
 <a href="{BASE}docs/#ci-gate">Gating on regressions</a> is how you stop it growing.</p>
 
 <h3>Why not just use a hosted service?</h3>
-<p>Use one if you want dashboards, org-wide rollups and alerting — they do that well.
+<p>Use one if you want dashboards, org-wide rollups and alerting. They do that well.
 flakestat is for the case where you want detection to be local, free and yours. See
 <a href="{BASE}compare/trunk/">how it compares</a>.</p>
 """))
@@ -1048,7 +1049,7 @@ flakestat is for the case where you want detection to be local, free and yours. 
          ["flaky tests pytest", "pytest flaky test detection", "pytest rerun failures",
           "pytest flaky test plugin", "find flaky tests python"],
          """<p>pytest writes JUnit XML natively, so there is no plugin to install. If you already use
-<code>pytest-rerunfailures</code>, keep it — retries keep the pipeline moving, but they hide the
+<code>pytest-rerunfailures</code>, keep it. Retries keep the pipeline moving, but they hide the
 flakiness rather than measuring it. flakestat measures it so the list actually shrinks.</p>"""),
         ("jest", "JavaScript and TypeScript", "Jest",
          "npx jest --reporters=default --reporters=jest-junit",
@@ -1057,7 +1058,7 @@ flakiness rather than measuring it. flakestat measures it so the list actually s
          ["flaky tests jest", "jest flaky test detection", "jest retry times",
           "find flaky tests javascript", "vitest flaky tests"],
          """<p>Install <code>jest-junit</code> and point it at a per-run path. Jest's
-<code>--retryTimes</code> hides flakiness rather than measuring it — useful to keep CI moving,
+<code>--retryTimes</code> hides flakiness rather than measuring it. Useful to keep CI moving,
 but it is why flaky suites stay flaky for years. Vitest works the same way with
 <code>--reporter=junit</code>.</p>"""),
         ("go", "Go", "go test",
@@ -1094,20 +1095,20 @@ Nothing is modified in your repo, and the whole thing is one binary.</p>
 {cb("""VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST
 flaky                  0.62  high    20       14/6  test_checkout::test_race
 consistently-failing   0.00  high    20       0/20  test_api::test_broken""")}
-<p>A test failing every time scores <code>0.00</code> and is reported separately — it is broken,
+<p>A test failing every time scores <code>0.00</code> and is reported separately, because it is broken,
 not flaky, and mixing the two wastes the time of whoever is hunting nondeterminism.
 <a href="{BASE}docs/#reading-a-report">Full explanation of the columns</a>.</p>
 
 <h2>4. Record CI runs so it keeps working</h2>
 <p>A local burst finds the obvious flakes. Recording the CI runs you already pay for finds the ones
-that only appear on another platform, another runtime, or under load — at no extra compute.</p>
+that only appear on another platform, another runtime, or under load, at no extra compute.</p>
 {cb("flakestat ingest 'reports/**/*.xml'\nflakestat report --top 20")}
 <p>See <a href="{BASE}docs/#github-actions">GitHub Actions</a> or
 <a href="{BASE}docs/#gitlab">GitLab and others</a> for a complete workflow, and
 <a href="{BASE}docs/#ci-gate">gating CI</a> to stop new flaky tests getting in.</p>
 
 <h2>Why not just retry?</h2>
-<p>Retrying keeps the pipeline moving, and you should — but it hides the problem. A test that needs
+<p>Retrying keeps the pipeline moving, and you should. But it hides the problem. A test that needs
 a retry still fails sometimes in ways that matter, and a suite with retries on stays flaky for
 years because nothing ever measures whether it is getting better. Retry to unblock; measure so the
 list shrinks.</p>
@@ -1129,7 +1130,7 @@ list shrinks.</p>
         P.append(dict(
             slug=f"compare/{slug}", section="Alternatives",
             title=f"flakestat vs {name}",
-            title_tag=f"{name} alternative — free and self-hosted",
+            title_tag=f"{name} alternative: free and self-hosted",
             description=f"An honest comparison of flakestat and {name}: what each does well, what flakestat deliberately does not do, and which one fits your situation.",
             keywords=kw,
             lede=f"An honest comparison, including the cases where {name} is the better choice.",
@@ -1139,8 +1140,8 @@ data leaving your machines.</p>
 
 {tbl(["", "flakestat", name], [
   ["Cost", "Free at any volume", "Per seat or per run"],
-  ["Test data leaves your machine", "No", "Yes — results are uploaded"],
-  ["Works before you push", "Yes — <code>hunt</code> runs locally", "No — needs CI results"],
+  ["Test data leaves your machine", "No", "Yes, results are uploaded"],
+  ["Works before you push", "Yes, <code>hunt</code> runs locally", "No, it needs CI results"],
   ["Setup", "One binary", "Account plus CI integration"],
   ["Languages", "Any that writes JUnit XML", "Many"],
   ["Dashboards and history UI", "No", "Yes"],
@@ -1160,7 +1161,7 @@ data leaving your machines.</p>
 
 <h2>When flakestat is the better choice</h2>
 <ul>
-  <li>Test data cannot leave your infrastructure — regulated industry, private code, or policy.</li>
+  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
   <li>You want to find a flake <em>before</em> pushing, not after CI reports it.</li>
   <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
   <li>You want the detection logic to be readable and auditable rather than a black box.</li>
@@ -1173,7 +1174,7 @@ the top of the flaky list wasting the time of whoever is hunting nondeterminism.
 <p><strong>Every verdict carries a confidence level.</strong> A score from three runs and the same
 score from three hundred are different claims, and small samples can never reach high confidence.</p>
 <p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
-cluster on Windows — and when <code>os</code> and <code>arch</code> vary together, it says the
+cluster on Windows, and when <code>os</code> and <code>arch</code> vary together it says the
 observations cannot tell which one matters. <a href="{BASE}docs/#dimensions">More on that</a>.</p>
 
 <h2>Can I use both?</h2>

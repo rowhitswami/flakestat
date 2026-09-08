@@ -17,7 +17,7 @@
 ---
 
 A flaky test passes and fails on the same code. flakestat reads the JUnit XML
-your test runner already writes, and tells you which tests are actually flaky —
+your test runner already writes, and tells you which tests are actually flaky:
 ranked, with a confidence level, and with the evidence behind every verdict.
 
 ```
@@ -76,8 +76,8 @@ counts for less. Every verdict carries a confidence level, and a small sample
 can never reach `high` no matter how flaky the test looks.
 
 **Nothing is compared that isn't comparable.** Two outcomes are evidence of
-nondeterminism only if everything that could legitimately change the result —
-branch, platform, runtime — was held constant.
+nondeterminism only if everything that could legitimately change the result
+was held constant: branch, platform and runtime.
 
 ## Don't take my word for it
 
@@ -97,7 +97,7 @@ TestClient_CacheMiss       flaky 0.66  50/75    stable 0.00  0/75
 TestClient_CacheHit        flaky 0.66  50/75    stable 0.00  0/75
 ```
 
-About two minutes. I did not create the bug, label the bug, or repair the bug —
+About two minutes. I did not create the bug, label the bug, or repair the bug.
 flakestat is handed observations from both sides of a commit it had no part in,
 and separates them. The full methodology, including the protocol arm that found
 nothing and a contaminated run that was discarded, is in
@@ -109,7 +109,7 @@ pytest · Jest · Vitest · go test · JUnit · TestNG · Maven Surefire · RSpe
 PHPUnit · Mocha · Playwright · Cypress · xUnit · NUnit · and anything else that
 writes JUnit XML.
 
-No plugin to install and no framework lock-in — if your runner can emit a JUnit
+No plugin to install and no framework lock-in. If your runner can emit a JUnit
 report, flakestat can read it.
 
 ## Documentation

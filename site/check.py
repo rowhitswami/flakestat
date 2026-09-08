@@ -4,8 +4,8 @@
 Written after three links in the README and one in the site footer pointed at
 pages that had been renamed or never committed. Every one of them was visible
 to anybody who clicked, and none was visible to me. A fragment is the worst
-case: the URL returns 200 and simply lands in the wrong place, so checking the
-page exists is not enough — the anchor has to exist too.
+case: the URL returns 200 and simply lands in the wrong place, so checking
+that the page exists is not enough. The anchor has to exist too.
 
 Usage: python3 check.py <build output dir>
 """
@@ -32,6 +32,8 @@ def main():
 
     for rel, path, text in pages(root):
         docs[rel] = text
+        for m in re.finditer(r"<a\b[^>]*>(?:(?!</a>).)*?<a\b", text, re.S):
+            problems.append(f"{rel}: nested <a> near {m.group(0)[:60]!r}")
         found = re.findall(r'\bid="([^"]+)"', text)
         dupes = {i for i in found if found.count(i) > 1}
         if dupes:
@@ -51,7 +53,10 @@ def main():
         return None
 
     for rel, text in docs.items():
-        refs = re.findall(r'(?:href|src)="([^"]+)"', text)
+        # Both quote styles. A single-quoted href in a table cell had been
+        # pointing at a page that no longer exists, and this missed it.
+        refs = [m.group(1) or m.group(2) for m in
+                re.finditer(r'(?:href|src)=(?:"([^"]*)"|\'([^\']*)\')', text)]
         for raw in refs:
             ref = html.unescape(raw)
             if ref.startswith(("mailto:", "data:", "javascript:")):

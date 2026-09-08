@@ -1,8 +1,8 @@
 # External validation contract
 
 Written **before** any external experiment was run, and committed so its
-timestamp is checkable. Everything below — subjects, stopping rules, frozen
-configuration, and what each outcome is allowed to mean — is fixed in advance.
+timestamp is checkable. Everything below is fixed in advance: subjects,
+stopping rules, frozen configuration, and what each outcome is allowed to mean.
 Deciding what counts as success after seeing results is how a detector gets
 graded on noise.
 
@@ -26,7 +26,7 @@ anywhere. No association was reported from evidence below the thresholds.
 ### What each subject is worth
 
 **C is the load-bearing result.** The defect was documented by Conduit's
-contributors, the tests were named by them, and the repair was written by them —
+contributors, the tests were named by them, and the repair was written by them.
 all before this tool was pointed at the repository. flakestat was handed
 observations from both sides of a commit it had no part in and separated them:
 three of the four in-scope tests `flaky` at 0.67 with high confidence at
@@ -34,13 +34,13 @@ three of the four in-scope tests `flaky` at 0.67 with high confidence at
 both sides and fixed in advance.
 
 **A and B establish that the classifier separates cleanly** when ground truth is
-known — including the distinction that motivates the whole design. Nine tests
+known, including the distinction that motivates the whole design. Nine tests
 failed 100 out of 100 times. A detector ranking by failure rate would put all
 nine at the top of a flaky list; flakestat scored them 0.00 and filed them
 separately as broken.
 
 **The self-measurement is specificity on real data.** 293 tests over 33 runs
-across three platforms, with branch, os, arch and runtime all varying — the exact
+across three platforms, with branch, os, arch and runtime all varying, the exact
 conditions under which earlier versions of the scorer manufactured phantom
 transitions. Zero false positives.
 
@@ -59,15 +59,15 @@ this report should be read as evidence that it can.
 
 **A null arm was published.** The pre-registered `-count=1` protocol found zero
 failures in a hundred executions of a suite its own maintainers had documented as
-flaky. Reporting only the `-count=3` arm — which found everything — would have
+flaky. Reporting only the `-count=3` arm, which found everything, would have
 been exactly the adjustment this contract exists to police. Both are above.
 
 **A contaminated run was discarded rather than reported.** Subject B was first
 run with backup copies of the working tests left inside the project, which Jest
 collected; thirteen identities ended up with two implementations feeding one
 name. That run is void and was re-run clean. flakestat had been right about the
-corrupt input too — one identity genuinely alternated on identical code, which is
-flakiness — but a result obtained from a broken fixture is not a result.
+corrupt input too, since one identity genuinely alternated on identical code,
+which is flakiness, but a result obtained from a broken fixture is not a result.
 
 ## The failure mode this guards against
 
@@ -82,7 +82,7 @@ So the central rule is:
 If a project has a test that fails 2% of the time and our sample contains 200
 passes, the correct output is silence. A detector cannot be graded against an
 event that did not occur in its input. Where that happens, the run is recorded
-as **inconclusive for sensitivity** — not as a pass and not as a failure.
+as **inconclusive for sensitivity**, not as a pass and not as a failure.
 
 ## Frozen configuration
 
@@ -107,8 +107,8 @@ named tests would make the validation no longer external.
       strong_diff          0.15
       max_q                0.01
 
-If a genuine defect is found — as opposed to a threshold one would prefer to be
-different — the fix is recorded here with the reasoning, and every prior
+If a genuine defect is found, as opposed to a threshold one would prefer to be
+different, the fix is recorded here with the reasoning, and every prior
 subject is re-run against the corrected build.
 
 ## Subjects
@@ -116,7 +116,7 @@ subject is re-run against the corrected build.
 Ordered from strongest ground truth to weakest, so that the instrument is
 checked against known answers before it is pointed at unknown ones.
 
-### A. Known positive control — `uppadhyayraj/playwright-flaky-tests`
+### A. Known positive control: `uppadhyayraj/playwright-flaky-tests`
 
 Deliberately contains a stable control alongside random, race,
 network/timing and shared-state flaky tests.
@@ -135,14 +135,14 @@ Expected:
 **Not** expected, and not checked: that a flakestat score equals the repository's
 advertised failure probability. A flake score measures inconsistency between
 consecutive runs; an advertised rate is a marginal failure probability. For a
-Bernoulli process the first is roughly `2p(1-p)` of the second — they are
+Bernoulli process the first is roughly `2p(1-p)` of the second, so they are
 different quantities and agreement between them would be a coincidence.
 
-### B. Realistic controlled positive — `DataDog/techstories-demo-app`
+### B. Realistic controlled positive: `DataDog/techstories-demo-app`
 
 An actual application with Jest and Cypress, with deliberately flaky
-integration scenarios — concurrent registration, database timeout simulation,
-network latency, session-state races — kept separate from the normal suite.
+integration scenarios kept separate from the normal suite: concurrent
+registration, database timeout simulation, network latency, session-state races.
 
 This adds a second ecosystem and application-shaped behaviour.
 
@@ -153,7 +153,7 @@ Expected:
 - differing failure mechanisms need no special handling;
 - JUnit dialect and test identity stay correct across two runners.
 
-### C. Wild documented flakiness — `ConduitIO/conduit`
+### C. Wild documented flakiness: `ConduitIO/conduit`
 
 Ground truth documented by the project's own contributors before flakestat
 touched it: an open issue (July 2026) reporting three consecutive CI reruns
@@ -175,8 +175,8 @@ the repository.
 
 #### Amended before running: a before/after design
 
-Inspecting the repository first — as the contract intends, since the protocol
-must be fixed before results exist — turned up something better than the
+Inspecting the repository first, as the contract intends, since the protocol
+must be fixed before results exist, turned up something better than the
 original plan.
 
 The issue is still open, but the named tests have since been repaired by the
@@ -193,7 +193,7 @@ So subject C is run at two commits instead of one:
                   commit (#2542). Ground truth: documented fixed.
 
 Both use the identical protocol. That converts a one-sided test into a
-controlled comparison whose ground truth — both the defect and the repair —
+controlled comparison whose ground truth, both the defect and the repair,
 was established by the project's own contributors, with no involvement from
 this tool:
 
@@ -211,8 +211,8 @@ seven named tests:
                                                      TestClient_CacheHit
 
 **Executions use `-shuffle=on`, one fresh process each.** These are
-order-dependent failures rooted in process-global state — shared `math/rand`,
-a shared in-memory registry — so Go's default declaration order would produce
+order-dependent failures rooted in process-global state, a shared `math/rand`
+and a shared in-memory registry, so Go's default declaration order would produce
 the same outcome every run and no run-to-run variation to observe. Shuffling
 samples the orderings real CI and real developers actually encounter, and it is
 what the project's own flake-hunt job does. This is sampling the subject's
@@ -223,7 +223,7 @@ This is the only subject where catching a real flake is genuinely attempted. It
 is a bonus result, not a requirement.
 
 
-## Subject A — results
+## Subject A: results
 
 `uppadhyayraj/playwright-flaky-tests @ dd4738a4`, 100 independent executions,
 `--workers=1 --retries=0`, scored with the frozen build.
@@ -232,20 +232,20 @@ is a bonus result, not a requirement.
 | --- | --- | --- | --- | --- |
 | docs sidebar loads before content | 30% | 100/100 | `consistently-failing` | 0.00 |
 | API reference loads all section headings | 15% | 100/100 | `consistently-failing` | 0.00 |
-| cookie-reader: checks consent state | — | 100/100 | `consistently-failing` | 0.00 |
+| cookie-reader: checks consent state | n/a | 100/100 | `consistently-failing` | 0.00 |
 | docs page loads within strict threshold | 25% | 44/100 | `flaky` | 0.35 |
 | homepage CTA renders in time | 40% | 40/100 | `flaky` | 0.45 |
 | concurrent page loads complete without timeout | 20% | 38/100 | `flaky` | 0.34 |
 | version badge matches expected | 25% | 32/100 | `flaky` | 0.38 |
 | docs search index loaded | 30% | 31/100 | `flaky` | 0.44 |
 | back navigation preserves scroll position | 25% | 29/100 | `flaky` | 0.42 |
-| cookie-polluter: sets analytics consent | — | 24/100 | `flaky` | 0.41 |
-| step-2: validate title from shared state | — | 20/100 | `flaky` | 0.32 |
-| step-3: assert visit count | — | 20/100 | `flaky` | 0.32 |
+| cookie-polluter: sets analytics consent | n/a | 24/100 | `flaky` | 0.41 |
+| step-2: validate title from shared state | n/a | 20/100 | `flaky` | 0.32 |
+| step-3: assert visit count | n/a | 20/100 | `flaky` | 0.32 |
 | homepage loads within strict threshold | 30% | 18/100 | `flaky` | 0.20 |
 | navbar renders before JS finishes loading | 35% | 2/100 | `stable` | 0.04 |
 | image assets load before scroll interaction | 20% | 1/100 | `stable` | 0.02 |
-| step-1: capture homepage title | — | 0/100 | `stable` | 0.00 |
+| step-1: capture homepage title | n/a | 0/100 | `stable` | 0.00 |
 | **control** · homepage has correct title | control | 0/100 | `stable` | 0.00 |
 | **control** · homepage has Get Started link | control | 0/100 | `stable` | 0.00 |
 | **control** · docs intro page loads | control | 0/100 | `stable` | 0.00 |
@@ -282,11 +282,11 @@ within ten executions.
 
 Named as flaky, they failed 100/100:
 
-- *docs sidebar loads before content* — `toBeVisible()` fails outright.
+- *docs sidebar loads before content*: `toBeVisible()` fails outright.
   playwright.dev's DOM has changed since the fixture was written.
-- *API reference loads all section headings* — "Expected ≥2 headings, found 1".
+- *API reference loads all section headings*: "Expected ≥2 headings, found 1".
   Same cause.
-- *cookie-reader: checks consent state* — needs a cookie set by an earlier test
+- *cookie-reader: checks consent state*: needs a cookie set by an earlier test
   in the same browser context, which Playwright's per-test isolation prevents.
 
 flakestat called all three `consistently-failing`. That is the contract's
@@ -304,22 +304,22 @@ flakestat scored them 0.04 and 0.02 and left both `stable`. For a Bernoulli
 process at p = 0.02 the expected flip rate is 2p(1-p) ≈ 0.039, so 0.04 is the
 right measurement of what actually happened. The gap is between the fixture's
 advertised rate and its behaviour in this environment, not between the evidence
-and the verdict — which is exactly why the contract forbids grading a score
+and the verdict, which is exactly why the contract forbids grading a score
 against an advertised probability.
 
 The honest reading: these two are **inconclusive for sensitivity**. A detector
 cannot be graded on an event that occurred twice in its input.
 
 
-## Subject C — results
+## Subject C: results
 
 Identical protocol at both commits: 100 independent executions, fresh process
 each, `-shuffle=<seed>` with a distinct recorded seed per execution.
 
 | | `-count=1` | `-count=3` |
 | --- | --- | --- |
-| **C1** `612f5bfb` — documented flaky | 0/100 runs had failures | **100/100 runs had failures** |
-| **C2** `9e00e594` — the repair | 0/100 | **0/100** |
+| **C1** `612f5bfb`, documented flaky | 0/100 runs had failures | **100/100 runs had failures** |
+| **C2** `9e00e594`, the repair | 0/100 | **0/100** |
 
 ### What flakestat said
 
@@ -341,14 +341,14 @@ and stable after it, under a protocol that was identical on both sides and fixed
 before either ran.
 
 The value is in who established what. Conduit's contributors documented the
-defect, named the tests, and wrote the fix — all before this tool was pointed at
+defect, named the tests, and wrote the fix, all before this tool was pointed at
 their repository. flakestat was handed observations from both sides of a commit
 it had no part in, and separated them.
 
 ### Detection latency
 
 `flaky` by **run 2** for all three. With `-count=3` each execution contributes
-three observations, so run 2 is the first point at which six scored runs exist —
+three observations, so run 2 is the first point at which six scored runs exist,
 one above the `min_runs` floor of five. Nothing was classified earlier than the
 evidence allowed.
 
@@ -358,8 +358,8 @@ The pre-registered protocol said `-count=1`. Under it, C1 produced **zero**
 failures in a hundred executions of a suite its own maintainers had documented
 as flaky.
 
-The reason is in the defect: these are process-global-state bugs — a shared
-in-memory registry, shared `math/rand` state — so the pollution has to happen
+The reason is in the defect: these are process-global-state bugs, a shared
+in-memory registry and shared `math/rand` state, so the pollution has to happen
 *within* one process before a later test can trip over it. One repetition per
 process never gets there, however many processes you start. Conduit's own
 `flake-hunt.yml` uses `-count=3 -shuffle=on` for exactly this reason, and the
@@ -380,12 +380,12 @@ something appeared.
 
 Named in the issue and repaired by the same commit, but it fired twice in three
 hundred observations here and flakestat scored it 0.01 and left it `stable`.
-That is the right reading of the evidence in hand — and **inconclusive for
+That is the right reading of the evidence in hand, and **inconclusive for
 sensitivity**, not a miss. The shared `math/rand` dependency it exercises is
 order-sensitive in a way that a hundred shuffles happened to trip only twice.
 
 
-## Subject B — results
+## Subject B: results
 
 `DataDog/techstories-demo-app @ 1ca082de`, 100 independent executions, Jest with
 no retries against PostgreSQL 16, the repository's own `broken-tests/` swapped
@@ -406,12 +406,12 @@ separation was total: every test either fired repeatedly or never.
 | Test | Observed | flakestat | Score |
 | --- | --- | --- | --- |
 | `PostList` expects PostListItem to be called | 49/100 | `flaky` | 0.58 |
-| Post and Comment — can create a post | 54/100 | `flaky` | 0.56 |
-| Database — email uniqueness race | 39/100 | `flaky` | 0.54 |
-| User Registration — concurrent registration | 55/100 | `flaky` | 0.47 |
-| SignUp — registration (flaky variant) | 13/100 | `flaky` | 0.22 |
-| Header — renders the user's name | 100/100 | `consistently-failing` | 0.00 |
-| Quotes API — four cases | 100/100 each | `consistently-failing` | 0.00 |
+| Post and Comment, can create a post | 54/100 | `flaky` | 0.56 |
+| Database, email uniqueness race | 39/100 | `flaky` | 0.54 |
+| User Registration, concurrent registration | 55/100 | `flaky` | 0.47 |
+| SignUp, registration (flaky variant) | 13/100 | `flaky` | 0.22 |
+| Header, renders the user's name | 100/100 | `consistently-failing` | 0.00 |
+| Quotes API, four cases | 100/100 each | `consistently-failing` | 0.00 |
 
 `PostList` is the one fixture with a mechanism visible in the source:
 `Math.random() > 0.5`. It fired 49 times in 100. That is the closest thing to a
@@ -439,7 +439,7 @@ The comparison is worth keeping, because flakestat was right both times:
       clean:         consistently-failing 0.00   (only the broken version runs)
 
 Under contamination, one identity really did alternate between passing and
-failing on identical code — which is flakiness, and reporting it as such was
+failing on identical code, which is flakiness, and reporting it as such was
 correct analysis of a corrupt input. The fault was in the fixture, not the
 tool. It is a fair reminder that a detector can only be as good as the identity
 its inputs give it, and that `-count`-style repetition and accidental
@@ -450,7 +450,7 @@ duplication look alike from the outside.
 Recorded as additions with their reasoning. Earlier entries are left standing,
 because a preregistration that gets edited is not one.
 
-### 2026-09-07 — C2 tightened to the exact repair commit
+### 2026-09-07: C2 tightened to the exact repair commit
 
 Originally C2 was `HEAD`. That answers a weaker question than intended: if C1
 flakes and HEAD does not, the honest conclusion is only *something between
@@ -469,7 +469,7 @@ attributable to it. C1 -> C3 answers a separate and also useful question.
 
 No Conduit execution had been run when this was written.
 
-### 2026-09-07 — Conduit invocation stated explicitly
+### 2026-09-07: Conduit invocation stated explicitly
 
     go test -count=1 -shuffle=on <packages>
 
@@ -484,7 +484,7 @@ so any failure carries
 
 and is reproducible by a third party, rather than being "run 47 failed".
 
-### 2026-09-07 — a defect found before the freeze, and how it was handled
+### 2026-09-07: a defect found before the freeze, and how it was handled
 
 Checking the skip invariant surfaced an unrelated bug: the history strip in
 `explain` grouped transitions by branch while scoring grouped them by execution
@@ -493,7 +493,7 @@ platform boundary. Verdicts were correct; the evidence displayed beneath them
 was not.
 
 It cannot affect any external subject, all of which run on a single machine
-with one platform, one runtime and one branch — branch grouping and execution
+with one platform, one runtime and one branch, so branch grouping and execution
 context coincide there, so the strip and the verdict agree by construction. It
 was fixed before the freeze rather than during the experiments.
 
@@ -504,7 +504,7 @@ subject's XML is **re-ingested and re-scored with the frozen build** before any
 result is reported, so all three subjects are measured by one implementation
 regardless of which build produced the XML.
 
-### 2026-09-07 — a perturbation during subject A, recorded not hidden
+### 2026-09-07: a perturbation during subject A, recorded not hidden
 
 Docker Desktop was started around executions 29-31 of subject A, in preparation
 for subject B, and its startup competed for CPU: execution time rose from ~110s
@@ -524,7 +524,7 @@ Accumulated on the `flakestat-history` branch across every CI run of this
 project: **10,305 observations of 293 distinct tests over 33 runs, on three
 platforms. All 293 stable, no false positives.**
 
-Not a sensitivity result — nothing in that suite is known to be flaky — but it
+Not a sensitivity result, since nothing in that suite is known to be flaky, but it
 is specificity measured on real, unsynthetic data, from a matrix where branch,
 platform and runtime all vary and where earlier versions of the scorer produced
 phantom transitions.
@@ -624,7 +624,7 @@ states an expectation as though it were an observation:
 
 | Subject | State |
 | --- | --- |
-| A. playwright-flaky-tests | **complete** — see results below |
+| A. playwright-flaky-tests | **complete**, see results below |
 | B. techstories-demo-app | **complete** |
 | C1. conduit @ 612f5bfb (pre-fix) | **complete** |
 | C2. conduit @ 9e00e594 (the repair) | **complete** |

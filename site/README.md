@@ -23,14 +23,12 @@ python3 check.py out       # every internal link and #fragment must resolve
 
 ## Two rules worth keeping
 
-**The evidence documents are generated, never retyped.** `/validation/`,
-`/findings/`, `/design/` and `/changelog/` are rendered from the Markdown files
-in the repository root at build time. Those files are the copy of record —
-`VALIDATION.md` is only worth anything because git can prove when it was
-written — and generating the pages from them means the site cannot quietly
-drift from the record. Edit the Markdown; the page follows.
+**The long-form pages are generated, never retyped.** `/validation/`,
+`/findings/`, `/design/` and `/changelog/` come from the Markdown files in the
+repository root at build time. Edit the Markdown; the page follows.
 
 **Nothing ships with a broken link.** `check.py` resolves every internal `href`
-*and* every `#fragment`, because a fragment that points at nothing still returns
-200 and simply lands in the wrong place. It also fails on duplicate element ids,
-which is how a heading called "Results" once collided with the search palette.
+and every `#fragment`, in both quote styles. A fragment that points at nothing
+still returns 200 and lands the reader somewhere else, so checking that the page
+exists is not enough. It also fails on duplicate element ids, which is how a
+heading called "Results" once collided with the search palette.

@@ -38,7 +38,7 @@ no Python dependencies, so it cannot interfere with your project's resolution.
 ## Why the verdicts matter
 
 **Flakiness is inconsistency, not failure.** A test that fails 100% of the time
-scores 1.0 on failure rate but isn't flaky — it's broken. flakestat scores
+scores 1.0 on failure rate but isn't flaky. It's broken. flakestat scores
 *state transitions* (pass→fail→pass), so an always-failing test correctly scores
 zero and is reported separately as `consistently-failing` instead of being mixed
 in with real flakes.
@@ -50,7 +50,7 @@ never manufactures a phantom transition.
 
 `pytest-rerunfailures` and `pytest-flakefinder` retry tests so a run goes green.
 That hides the symptom. flakestat *measures* which tests are unreliable and by
-how much, so they can be fixed — and it works across every suite in a polyglot
+how much, so they can be fixed, and it works across every suite in a polyglot
 repo, not just the Python one.
 
 ## Tracking over time
@@ -64,7 +64,7 @@ flakestat report --top 20
 flakestat report --fail-on-flaky      # exit 1 to gate a pipeline
 ```
 
-History lives in `.flakestat/runs.ndjson` — one JSON object per line. Commit it
+History lives in `.flakestat/runs.ndjson`, one JSON object per line. Commit it
 for shared team history, or keep it as a CI artifact.
 
 ## Working out why a test is flaky
@@ -90,7 +90,7 @@ and `0.41` from three hundred are different claims.
 
 ## Full documentation
 
-<https://flakestat.com/docs/> — install, CI recipes, every command and flag,
+<https://flakestat.com/docs/> covers install, CI recipes, every command and flag,
 and how the scoring works. Source and issues:
 <https://github.com/rowhitswami/flakestat>
 

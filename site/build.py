@@ -43,20 +43,19 @@ def canonical(path: str) -> str:
 # --------------------------------------------------------------- navigation
 NAV = [
     ("Docs", "docs"),
-    ("Validation", "validation"),
+    ("Writing", "writing"),
     ("Changelog", "changelog"),
-    ("Writing", "writing/validating-a-flaky-test-detector"),
     ("Compare", "compare/trunk"),
 ]
 
-# The evidence documents live in the repository as Markdown and are rendered
-# here from those exact files. They get their own sidebar rather than the docs
-# one: somebody reading the validation record is checking a claim, not looking
-# up a flag, and the two sets of links have nothing useful to say to each other.
-EVIDENCE_NAV = [
-    ("Evidence", [
-        ("Validation", "validation"),
-        ("Flake hunt findings", "findings"),
+# Every long-form page shares one sidebar, so a reader who arrives on the
+# validation record can see the rest of the writing without going back up.
+WRITING_NAV = [
+    ("Writing", [
+        ("All writing", "writing"),
+        ("Validating a flaky-test detector", "writing/validating-a-flaky-test-detector"),
+        ("How flakestat was validated", "validation"),
+        ("Hunting flaky tests in open source", "findings"),
         ("Design notes", "design"),
         ("Changelog", "changelog"),
     ]),
@@ -64,9 +63,6 @@ EVIDENCE_NAV = [
         ("Full documentation", "docs"),
         ("Quickstart", "docs#quickstart"),
         ("How scoring works", "docs#scoring"),
-    ]),
-    ("Writing", [
-        ("Validating a flaky-test detector", "writing/validating-a-flaky-test-detector"),
     ]),
 ]
 
@@ -378,7 +374,7 @@ SHELL = """<!doctype html>
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="{base}assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+      <img class="foot-lockup" src="{base}assets/logo-lockup.png" width="247" height="62" alt="flakestat, find flaky tests in any language"
            data-light="{base}assets/logo-lockup.png" data-dark="{base}assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
@@ -397,7 +393,8 @@ SHELL = """<!doctype html>
       <a href="{base}flaky-tests/jest/">Flaky Jest tests</a>
       <a href="{base}flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Evidence</h6>
+    <div class="foot-col"><h6>Writing</h6>
+      <a href="{base}writing/">All writing</a>
       <a href="{base}validation/">Validation record</a>
       <a href="{base}findings/">Flake hunt findings</a>
       <a href="{base}design/">Design notes</a>
@@ -407,7 +404,7 @@ SHELL = """<!doctype html>
       <a href="{repo}">GitHub</a>
       <a href="{repo}/releases">Releases</a>
       <a href="{repo}/issues">Issues</a>
-      <a href="{base}writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="{base}docs/#faq">FAQ</a>
       <a href="{origin}{base}llms.txt">llms.txt</a>
     </div>
   </div>
@@ -435,24 +432,26 @@ CHROME_IDS = ["fs-progress", "fs-menu", "fs-scrim", "fs-q", "fs-results", "fs-th
 
 
 def render(page):
-    # Section ids are the navigation targets, so they are claimed first.
     # Section ids and the shell's own control ids are both navigation targets.
     reserved = re.findall(r'<section id="([^"]+)"', page["body"]) + CHROME_IDS
-    body, toc = heading_ids(page["body"], reserved)
+    if page.get("layout") == "index":
+        body, toc = page["body"], []
+    else:
+        body, toc = heading_ids(page["body"], reserved)
     slug = page["slug"]
 
     two_col = slug == DOCS_SLUG
 
     if page.get("layout") == "post":
         inner = f'<div class="post-wrap">{body}</div>'
-    elif page.get("layout") == "wide":
+    elif page.get("layout") in ("wide", "index"):
         inner = body
     elif page.get("layout") == "doc":
         inner = (
-            f'<div class="shell">{sidebar_html(slug, EVIDENCE_NAV, "Evidence")}'
+            f'<div class="shell">{sidebar_html(slug, WRITING_NAV, "Writing")}'
             f'<article class="content content-doc">'
             f'<nav class="crumbs" aria-label="Breadcrumb"><a href="{url("")}">Home</a>'
-            f'<span>/</span><span>Evidence</span><span>/</span>'
+            f'<span>/</span><a href="{url("writing")}">Writing</a><span>/</span>'
             f'<span>{html.escape(page["title"])}</span></nav>'
             f'<h1>{html.escape(page["title"])}</h1>'
             f'<p class="lede">{page["lede"]}</p>'
@@ -505,10 +504,12 @@ def main():
 
     pages = content.pages(BASE, REPO, ACTION_REF)
     import writing
-    pages.append(writing.post(BASE, REPO))
+    essay = writing.post(BASE, REPO)
     import mddocs
     md_pages = mddocs.pages(BASE, REPO)
-    pages += md_pages
+    long_form = [essay] + md_pages
+    pages += long_form
+    pages.append(writing.index(BASE, REPO, long_form))
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
     os.makedirs(OUT)
@@ -547,7 +548,7 @@ def main():
     docs_page = {
         "slug": DOCS_SLUG, "section": "Docs", "layout": "docs",
         "title": "Documentation",
-        "title_tag": "flakestat documentation — find flaky tests in any language",
+        "title_tag": "flakestat documentation: find flaky tests in any language",
         "description": "Complete flakestat documentation: install, quickstart, CI recipes, "
                        "every command and flag, how scoring works, and supported test runners.",
         "keywords": ["flakestat documentation", "flaky test detection", "flaky test cli"],
@@ -586,7 +587,7 @@ def main():
     for r in routes:
         pri = "1.0" if not r else (
             "0.9" if r == DOCS_SLUG or r.startswith("flaky-tests")
-            else "0.8" if r in ("validation", "findings", "design", "changelog")
+            else "0.8" if r in ("validation", "findings", "design", "changelog", "writing")
             else "0.7")
         urls.append(f"<url><loc>{canonical(r)}</loc><lastmod>{TODAY}</lastmod>"
                     f"<changefreq>weekly</changefreq><priority>{pri}</priority></url>")
@@ -629,10 +630,9 @@ def main():
     for p in others:
         if p["slug"].startswith(("flaky-tests/", "compare/")):
             llms.append(f"- [{p['title']}]({canonical(p['slug'])}): {p['description']}")
-    llms += ["", "## Evidence and reasoning", "",
-             "Every claim below is generated from a Markdown file in the repository, so "
-             "the page and the reviewable source cannot drift apart.", ""]
-    for p in md_pages:
+    llms += ["", "## Writing", "",
+             f"- [Index of everything long-form]({canonical('writing')})"]
+    for p in long_form:
         llms.append(f"- [{p['title']}]({canonical(p['slug'])}): {p['description']}")
     llms += ["", "## Optional", "",
              f"- [Full documentation as one plain-text file]({SITE}/llms-full.txt)",
@@ -640,7 +640,7 @@ def main():
     write(os.path.join(OUT, "llms.txt"), "\n".join(llms))
 
     # -------------------------------------------- llms-full.txt (the corpus)
-    full = ["# flakestat — complete documentation", "",
+    full = ["# flakestat: complete documentation", "",
             f"Source: {SITE}/ · Generated {TODAY} · MIT licensed", "",
             "flakestat finds flaky tests in any language from JUnit XML. It runs locally "
             "as a single static binary with no account and no data egress.", "", "=" * 78, ""]

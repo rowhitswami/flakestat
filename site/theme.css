@@ -1,5 +1,5 @@
 /* ============================================================================
-   flakestat — design system
+   flakestat design system
 
    Palette sampled from the logo:
      #005CFC  electric blue   primary, links, structure
@@ -502,15 +502,67 @@ footer { border-top: 1px solid var(--line); background: var(--bg-alt); margin-to
 .content-doc pre { font-size: .82rem; }
 .content-doc table { font-size: .845rem; }
 
-/* Point at the file this page was generated from. The repository is the copy
-   of record; saying so is the whole reason these pages are trustworthy. */
-.src-note { margin: 1.4rem 0 0; padding: .6rem .85rem; font-size: .82rem;
-  color: var(--fg-3); background: var(--bg-alt); border: 1px solid var(--line);
-  border-radius: var(--r-sm); }
-.src-note code { font-size: .95em; }
-
 blockquote { margin: 1.3rem 0; padding: .1rem 0 .1rem 1.1rem;
   border-left: 3px solid var(--line-2); color: var(--fg-2); }
 blockquote p { margin: .55rem 0; }
 blockquote > :first-child { margin-top: 0; }
 blockquote > :last-child { margin-bottom: 0; }
+
+/* The byline on a generated page: what kind of document it is, when it last
+   changed, and the file it came from. */
+.doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem;
+  margin: 1.5rem 0 0; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line);
+  font-size: .8rem; color: var(--fg-3); }
+.doc-meta span:first-child { font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; font-size: .69rem; color: var(--blue); }
+.doc-meta a { margin-left: auto; font-family: var(--mono); font-size: .78rem;
+  color: var(--fg-3); }
+.doc-meta a:hover { color: var(--blue); }
+
+/* ============================================================================
+   Writing index.
+   ------------------------------------------------------------------------- */
+.wr-wrap { max-width: 940px; margin: 0 auto; padding: 0 1.4rem 7rem; }
+
+.wr-head { padding: 4.6rem 0 3rem; border-bottom: 1px solid var(--line); }
+.wr-eyebrow { margin: 0 0 1rem; font-size: .7rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase; color: var(--orange-ink); }
+.wr-head h1 { margin: 0; font-size: clamp(2rem, 5.2vw, 3.35rem); line-height: 1.1;
+  letter-spacing: -.032em; font-weight: 800; }
+.wr-head > p { margin: 1.3rem 0 0; max-width: 52ch; font-size: 1.06rem;
+  color: var(--fg-2); }
+
+.wr-list { list-style: none; margin: 0; padding: 0; }
+.wr-item { border-bottom: 1px solid var(--line); }
+.wr-item > a { display: block; position: relative; padding: 2.1rem 1.1rem 2rem 1.1rem;
+  margin: 0 -1.1rem; border-radius: var(--r); color: inherit;
+  transition: background .16s ease, transform .16s ease; }
+.wr-item > a:hover { background: var(--bg-alt); text-decoration: none; }
+.wr-item > a:hover h2 { color: var(--blue); }
+
+.wr-kicker { display: flex; gap: .7rem; align-items: center; margin: 0 0 .55rem;
+  font-size: .74rem; color: var(--fg-3); }
+.wr-kicker span:first-child { font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; font-size: .68rem; color: var(--blue); }
+.wr-kicker span + span::before { content: "·"; margin-right: .7rem; color: var(--line-2); }
+
+.wr-item h2 { margin: 0; font-size: 1.52rem; line-height: 1.22; font-weight: 700;
+  letter-spacing: -.018em; transition: color .16s ease; }
+.wr-sum { margin: .6rem 0 0; max-width: 62ch; font-size: .965rem; color: var(--fg-2); }
+
+.wr-go { display: inline-flex; align-items: center; gap: .4rem; margin-top: .95rem;
+  font-size: .83rem; font-weight: 600; color: var(--blue); }
+.wr-go i { width: 15px; height: 1px; background: currentColor; position: relative;
+  transition: width .18s ease; }
+.wr-go i::after { content: ""; position: absolute; right: 0; top: -2.5px;
+  width: 5px; height: 5px; border-top: 1px solid currentColor;
+  border-right: 1px solid currentColor; transform: rotate(45deg); }
+.wr-item > a:hover .wr-go i { width: 26px; }
+
+@media (max-width: 700px) {
+  .wr-head { padding: 3rem 0 2.2rem; }
+  .wr-item > a { padding: 1.6rem 0; margin: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wr-item > a, .wr-item h2, .wr-go i { transition: none; }
+}

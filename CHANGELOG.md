@@ -3,7 +3,7 @@
 Notable changes to flakestat. Versions follow [semantic versioning](https://semver.org),
 with the usual caveat that 0.x makes no compatibility promise.
 
-## [0.2.0] — 2026-09-07
+## [0.2.0] - 2026-09-07
 
 Everything the documentation describes now exists in the binary. v0.1.1 shipped
 six commands; this ships ten, plus the analysis that makes the verdicts worth
@@ -11,18 +11,18 @@ reading.
 
 ### Added
 
-**`flakestat explain <test>`** — the full evidence behind one verdict: outcome
+**`flakestat explain <test>`** shows the full evidence behind one verdict: outcome
 history as a strip, how many disagreements happened on identical code, which
 commits and branches it was seen on, and where its failures concentrate.
 `--json` emits the same evidence for tooling.
 
-**Confidence on every verdict** — `low`, `medium` or `high`, derived from how
+**Confidence on every verdict**, either `low`, `medium` or `high`, derived from how
 much evidence exists. A score of 0.62 from three runs and the same score from
 three hundred are different claims, and a small sample can never reach `high`.
 Classification uses a lower bound on the score rather than the score itself, so
 a verdict needs evidence rather than a lucky flip.
 
-**Dimensions and association analysis** — `--dimension key=value`, repeatable,
+**Dimensions and association analysis**. `--dimension key=value`, repeatable,
 records the platform, runtime and CI context an observation was made in.
 flakestat then reports where failures concentrate:
 
@@ -42,25 +42,25 @@ and the wording stays correlational: failures *cluster* on Windows, not Windows
 tell which one matters.
 
 Only a whitelist of known CI variables is read, and only JUnit properties
-flakestat recognizes — the process environment is never scraped, so secrets
+flakestat recognizes. The process environment is never scraped, so secrets
 cannot reach your history.
 
-**Execution identity** — every observation carries the identity of the execution
+**Execution identity**. Every observation carries the identity of the execution
 it describes, so an artifact uploaded twice, a re-run aggregation step or a shard
 collected by two jobs counts once, while a genuine retry still counts.
 
 This mattered more than it sounds. A duplicate carries its original's timestamp,
 sorts beside it and always agrees with itself, so uncounted duplicates make a
 flaky test look **stable**. Measured on a test failing 4 of 12 runs, ingesting
-the same reports twice moved the score from 0.64 to 0.30 — the error ran towards
+the same reports twice moved the score from 0.64 to 0.30. The error ran towards
 false negatives.
 
-**`flakestat compact`** — removes duplicate executions from the log file itself,
+**`flakestat compact`** removes duplicate executions from the log file itself,
 which matters when the file is the record you keep. Refuses to rewrite a log
 containing unreadable lines, since reading skips those and rewriting would
 discard evidence you might still recover.
 
-**`flakestat ci-report`** — renders job summaries and pull request comments. The
+**`flakestat ci-report`** renders job summaries and pull request comments. The
 GitHub Action gained `comment`, `annotations` and `max-rows` inputs; a re-run
 updates the same comment rather than adding another.
 
@@ -72,14 +72,14 @@ every other machine.
 
 **Outcomes are only compared when they are comparable.** A test that always
 passes on Linux and always fails on Windows is deterministic, but read as one
-chronological series it looked like constant disagreement — it scored 0.45 with
+chronological series it looked like constant disagreement, and it scored 0.45 with
 an explanation asserting direct evidence of nondeterminism. Transitions are now
 counted within one execution context: branch, os, arch and runtime held
 constant.
 
 **The history strip agrees with the verdict.** It grouped by branch while
 scoring grouped by execution context, so it printed "flip on identical code" at
-every platform boundary — at precisely the points the verdict had ruled out as
+every platform boundary, at precisely the points the verdict had ruled out as
 incomparable.
 
 **Execution identity uses the whole recorded context.** GitHub reports the same
@@ -97,20 +97,20 @@ The load-bearing result: at the commit before ConduitIO's own deflaking fix,
 three of the four tests their issue named scored `flaky` at 0.67 with high
 confidence; at the fix itself, all four were `stable` at 0.00, under an identical
 protocol. Their contributors documented the defect, named the tests and wrote the
-repair — flakestat was handed observations from both sides of a commit it had no
+repair. flakestat was handed observations from both sides of a commit it had no
 part in and separated them.
 
 Also recorded there: the protocol arm that found nothing, and a contaminated run
 that was discarded rather than reported.
 
-## [0.1.1] — 2026-09-06
+## [0.1.1] - 2026-09-06
 
 Fixed the Python wrapper reporting `0.0.0` regardless of the installed version,
 which made it build a download URL for a release that does not exist. The
 release workflow now verifies the built wheel reports the tagged version before
 anything is published.
 
-## [0.1.0] — 2026-09-06
+## [0.1.0] - 2026-09-06
 
 First release. `init`, `hunt`, `ingest`, `report`, `check` and `quarantine`,
 distributed via Homebrew, npm, PyPI, a container image, an install script and a

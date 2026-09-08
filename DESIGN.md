@@ -1,4 +1,4 @@
-# flakestat — Design
+# flakestat design
 
 A language-agnostic flaky test detector. Single static Go binary, no SaaS, no account,
 no data leaving your machine.
@@ -9,10 +9,10 @@ no data leaving your machine.
 
 A flaky test passes and fails nondeterministically **on the same code**. Teams need to:
 
-1. **Find** them — which tests are unreliable?
-2. **Quantify** them — how unreliable, and is it getting worse?
-3. **Quarantine** them — stop them blocking merges without deleting coverage.
-4. **Track** them — did that fix actually work?
+1. **Find** them. Which tests are unreliable?
+2. **Quantify** them. How unreliable, and is it getting worse?
+3. **Quarantine** them. Stop them blocking merges without deleting coverage.
+4. **Track** them. Did that fix actually work?
 
 Today the good tooling is all hosted (Trunk, BuildPulse, Mergify, Qualflare). The
 open-source side is fragmented per-language plugins (`pytest-flakefinder`,
@@ -52,7 +52,7 @@ vendor dialects differ. The parser must be deliberately tolerant of:
 - Nested `<testsuite>` elements
 - `classname` present, empty, or duplicated into `name`
 - `<failure>` vs `<error>` vs `<skipped>` vs bare pass
-- Surefire's `<flakyFailure>` / `<flakyError>` rerun markers — these are *already*
+- Surefire's `<flakyFailure>` / `<flakyError>` rerun markers, which are *already*
   flakiness signals and should be ingested as such
 - Missing `time`, `file`, `line` attributes
 - Invalid XML characters in failure messages (common with binary output in stack traces)
@@ -81,14 +81,14 @@ Test renames breaking history is a known v1 limitation.
 
 This split is the core architecture. Both write to the same store.
 
-### Burst mode — `flakestat hunt`
+### Burst mode: `flakestat hunt`
 
 Run the test command N times locally, right now. Code is constant, so *any*
 disagreement between runs is flakiness by definition. This is the strong signal.
 
 Use for: "is this test actually flaky?", pre-merge gates, verifying a fix.
 
-### History mode — `flakestat ingest` + `report`
+### History mode: `flakestat ingest` + `report`
 
 Ingest JUnit XML from CI over time and score by flip rate. This is measurement across
 real-world conditions and catches environment-dependent flakes that a local burst
@@ -99,7 +99,7 @@ Use for: continuous tracking, trend detection, quarantine lists.
 ### Same-commit vs cross-commit weighting
 
 A subtlety most naive tools get wrong: in history mode, a test failing on commit A and
-passing on commit B may be a **genuine regression that got fixed** — not flakiness.
+passing on commit B may be a **genuine regression that got fixed**, not flakiness.
 
 So every observation records its commit SHA, and transitions are weighted:
 
@@ -111,7 +111,7 @@ This is a meaningful accuracy edge over "count the failures."
 ## 6. Scoring
 
 **Failure rate is the wrong metric.** A test that fails 100% of the time scores 1.0 on
-failure rate but is not flaky — it's broken. Flakiness is *inconsistency*.
+failure rate but is not flaky. It's broken. Flakiness is *inconsistency*.
 
 For a test with ordered observations `o_1..o_n` (pass=1, fail=0; skips excluded):
 
@@ -124,7 +124,7 @@ flip_rate = Σ(w_i · t_i) / Σ(w_i)
 
 Then an exponential recency weight with `alpha` (default `0.3`) so recent behavior
 dominates and fixed tests decay back to stable. **Age is counted in commits, not in
-observations** — see the validation section; aging per observation capped effective
+observations**. See the validation section; aging per observation capped effective
 sample size and made extra runs worthless.
 
 **Confidence:** below `min_runs` (default 5) a test is `insufficient-data`, never
@@ -177,7 +177,7 @@ flakestat check  [flags]          # CI gate, meaningful exit codes
 flakestat compact                 # collapse old history
 ```
 
-### `hunt` — capturing output across parallel runs
+### `hunt`: capturing output across parallel runs
 
 Parallel runs need unique report paths. Two mechanisms, both supported:
 
@@ -196,7 +196,7 @@ for fast reproduction), `--timeout`, `--filter`.
 **Fallback:** if no JUnit XML is produced, record the process exit code and report
 suite-level flakiness with a clear warning that per-test granularity is unavailable.
 
-### `check` — the CI gate
+### `check`: the CI gate
 
 ```
 exit 0  clean
@@ -206,7 +206,7 @@ exit 2  existing flakes worsened         (--fail-on-regression)
 
 Also emits GitHub Actions annotations and a markdown summary suitable for a PR comment.
 
-### `quarantine` — framework-native output
+### `quarantine`: framework-native output
 
 Emitting a generic list nobody can consume is a common failure mode. Emit what each
 runner actually accepts:
@@ -218,10 +218,10 @@ runner actually accepts:
 | `jest` | `testPathIgnorePatterns` / name patterns |
 | `yaml` | generic `flakestat.quarantine.yaml` |
 
-## 9. Config — `.flakestat.yaml`
+## 9. Config: `.flakestat.yaml`
 
 > **Superseded.** Shipped as `.flakestat.json`; see §11. The values below are
-> the original spec, not the shipped defaults — `flaky` ships at `0.10`, and
+> the original spec, not the shipped defaults. `flaky` ships at `0.10`, and
 > `quarantine.path` and `ignore` were never implemented. §6 and the
 > documentation are authoritative. This section is left as written so the
 > reasoning behind the change stays legible.
@@ -272,12 +272,12 @@ contributors to land a fix ("my framework's output breaks it, here's the file").
 
 ## 11. Build order
 
-1. ✅ `internal/junit` + the dialect corpus — everything depends on it
-2. ✅ `internal/store` — append/read NDJSON
-3. ✅ `internal/score` — pure functions, heavily unit-tested
-4. ✅ `hunt` + `internal/runner` — first end-to-end user value
-5. ✅ `report` — table / JSON / markdown renderers
-6. ✅ `ingest` + `check` — the CI story
+1. ✅ `internal/junit` + the dialect corpus, which everything depends on
+2. ✅ `internal/store`, append/read NDJSON
+3. ✅ `internal/score`, pure functions, heavily unit-tested
+4. ✅ `hunt` + `internal/runner`, first end-to-end user value
+5. ✅ `report`, table / JSON / markdown renderers
+6. ✅ `ingest` + `check`, the CI story
 7. ✅ `quarantine` emitters
 8. ◐ `init` and the config file done; `compact` outstanding
 9. ✅ Distribution: GoReleaser, Homebrew, ghcr.io, GitHub Action, npm, PyPI
@@ -369,7 +369,7 @@ different levels:
 
 The first two were found only with real data. The third was found by asking
 whether a rule stated in one place was actually obeyed in every place that
-depends on it — a question worth asking of any invariant recorded here, since
+depends on it, a question worth asking of any invariant recorded here, since
 the comment in the offending function claimed agreement that had silently
 stopped being true.
 
@@ -463,7 +463,7 @@ Transitions are computed **within a branch, never across one**. The original
 flat chronological series manufactured flips: a test passing on `main`, failing
 on an in-progress feature branch, then passing on `main` again reads as two
 flips when nothing about `main` changed. Grouping by branch removes that class
-of phantom signal outright — the same structural mistake as the cross-commit
+of phantom signal outright, the same structural mistake as the cross-commit
 problem, one level up.
 
 Layered on top, disagreement off the default branch is scaled by
@@ -479,7 +479,7 @@ security-conscious audience that picks a local tool over a hosted one. The
 command accepts both a list and a plain string, so hand-editing stays pleasant.
 
 `{junit}` in the command expands to the resolved report path, so it is written
-once instead of being kept in sync in two places — the single biggest source of
+once instead of being kept in sync in two places, the single biggest source of
 first-run friction.
 
 ### Revision from implementation
@@ -523,7 +523,7 @@ They now get their own verdict (`always-skipped`); `pallets/click` has 26.
 
 **The CI gate as originally shipped was unusable.** `report --fail-on-flaky`
 fails on *any* flaky test, which turns a repo with existing flakiness red the
-day it adopts flakestat — so the gate gets deleted. Replaced with `check` and a
+day it adopts flakestat, so the gate gets deleted. Replaced with `check` and a
 committed baseline (§8's `--fail-on-new`, which should never have been folded
 away): existing flakiness is grandfathered, and only new or measurably worsened
 tests fail the build. A `--regression-delta` keeps scoring jitter from failing
@@ -533,7 +533,7 @@ builds, and `FIXED` tests are surfaced to prompt tightening the baseline.
 
 - Web UI or hosted dashboard
 - Root-cause analysis (test ordering, shared state, timing)
-- Auto-retry during a test run — that's the framework's job
+- Auto-retry during a test run, which is the framework's job
 - Rename/refactor tracking across history
 - Direct CI-provider API integrations (ingest XML artifacts instead)
 
@@ -541,11 +541,11 @@ builds, and `FIXED` tests are surfaced to prompt tightening the baseline.
 
 Resolved since this section was written, kept because the record is the point:
 
-- ✅ **Name availability** — 13 GitHub repos match "flakestat", all abandoned
+- ✅ **Name availability**. 13 GitHub repos match "flakestat", all abandoned
   (max 4 stars). No established project to collide with.
-- ✅ **Module path** — `github.com/rowhitswami/flakestat` is the real path.
+- ✅ **Module path**. `github.com/rowhitswami/flakestat` is the real path.
   Published: v0.2.0 is on Homebrew, npm, PyPI, ghcr and the GitHub Marketplace.
-- ✅ **Config file** — implemented, and shipped as `.flakestat.json` rather than
+- ✅ **Config file**. Implemented, and shipped as `.flakestat.json` rather than
   the `.flakestat.yaml` §9 specifies. See §11: YAML would have meant taking on
   `gopkg.in/yaml.v3`, and the dependency-free `go.mod` was worth more than the
   syntax. §9 is left as originally written so the change is visible.
@@ -553,8 +553,8 @@ Resolved since this section was written, kept because the record is the point:
 Still open:
 
 - ☐ **Default `same_commit_weight` of 3.0** remains a judgment call rather than
-  an empirical result. There is now data it could be calibrated against —
-  three external subjects and ~13,000 observations of this project's own suite —
+  an empirical result. There is now data it could be calibrated against, in
+  three external subjects and ~13,000 observations of this project's own suite,
   but nobody has done that work, and until someone does, 3.0 is a defensible
   guess and not a finding.
 - ☐ **Sensitivity below ~5%** is unestablished. Several tests during external

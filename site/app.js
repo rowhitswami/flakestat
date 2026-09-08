@@ -1,4 +1,4 @@
-/* flakestat docs — behaviour. No framework, no build step. */
+/* flakestat docs: behaviour. No framework, no build step. */
 (function () {
   'use strict';
   // Derived from this script's own URL rather than a baked-in base path.
@@ -271,12 +271,12 @@
                passes: passes, fails: fails, runs: scored.length };
     }
     function why(r) {
-      if (r.verdict === 'always-skipped') return 'Never ran, so there is nothing to measure. More runs would not help — which is why this is not “insufficient data”.';
+      if (r.verdict === 'always-skipped') return 'Never ran, so there is nothing to measure. More runs would not help, which is why this is not “insufficient data”.';
       if (r.verdict === 'insufficient-data') return 'Only ' + r.runs + ' scored run(s), below the ' + MIN_RUNS + ' needed before any verdict is claimed.';
-      if (r.verdict === 'consistently-failing') return 'Fails every time. That is broken, not flaky — the score is zero because the outcome never disagrees with itself.';
+      if (r.verdict === 'consistently-failing') return 'Fails every time. That is broken, not flaky. The score is zero because the outcome never disagrees with itself.';
       if (r.verdict === 'flaky') return 'Changed answer ' + r.flips + ' time(s) across ' + r.trans + ' comparison(s). Even the lower bound, ' + r.lower.toFixed(2) + ', clears the ' + FLAKY + ' threshold.';
-      if (r.verdict === 'suspect') return 'Disagreed ' + r.flips + ' time(s) in ' + r.trans + ' comparison(s). The point estimate clears ' + SUSPECT + ', but the lower bound (' + r.lower.toFixed(2) + ') does not reach ' + FLAKY + ' — worth watching, not worth a ticket.';
-      return 'Changed answer ' + r.flips + ' time(s) across ' + r.trans + ' comparison(s) — below the ' + SUSPECT + ' threshold once sample size is accounted for.';
+      if (r.verdict === 'suspect') return 'Disagreed ' + r.flips + ' time(s) in ' + r.trans + ' comparison(s). The point estimate clears ' + SUSPECT + ', but the lower bound (' + r.lower.toFixed(2) + ') does not reach ' + FLAKY + '. Worth watching, not worth a ticket.';
+      return 'Changed answer ' + r.flips + ' time(s) across ' + r.trans + ' comparison(s), below the ' + SUSPECT + ' threshold once sample size is accounted for.';
     }
     function draw() {
       seqEl.innerHTML = state.map(function (c, i) {
@@ -382,7 +382,7 @@
         ? 'Twelve real observations: four failures, seven disagreements across eleven comparisons.'
         : 'Every observation now appears ' + copies + ' times. Copies agree with themselves, so the '
           + 'measured disagreement rate falls from 0.64 to ' + score.toFixed(2)
-          + ' though nothing new was run. This test is flaky enough to survive it — one sitting '
+          + ' though nothing new was run. This test is flaky enough to survive it. One sitting '
           + 'near the threshold is the one that would quietly drop below.';
     }
     slider.addEventListener('input', render);

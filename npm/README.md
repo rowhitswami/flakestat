@@ -37,7 +37,7 @@ This package downloads the prebuilt `flakestat` binary for your platform
 ## Why the verdicts matter
 
 **Flakiness is inconsistency, not failure.** A test that fails 100% of the time
-scores 1.0 on failure rate but isn't flaky — it's broken. flakestat scores
+scores 1.0 on failure rate but isn't flaky. It's broken. flakestat scores
 *state transitions* (pass→fail→pass), so an always-failing test correctly scores
 zero and is reported separately as `consistently-failing` instead of being mixed
 in with real flakes.
@@ -46,7 +46,7 @@ in with real flakes.
 
 Both emit the JUnit XML flakestat reads.
 
-**Jest** — `npm i -D jest-junit`:
+**Jest**, with `npm i -D jest-junit`:
 
 ```bash
 npx flakestat hunt --runs 20 --junit 'reports/junit-{run}.xml' \
@@ -99,7 +99,7 @@ and `0.41` from three hundred are different claims.
 
 ## Full documentation
 
-<https://flakestat.com/docs/> — install, CI recipes, every command and flag,
+<https://flakestat.com/docs/> covers install, CI recipes, every command and flag,
 and how the scoring works. Source and issues:
 <https://github.com/rowhitswami/flakestat>
 
