@@ -167,6 +167,28 @@ jobs:
       - name: Every internal link and fragment must resolve
         run: python3 site/check.py out
 
+      # A YAML file can parse cleanly and still be wrong. Inserting a step into
+      # release.yml once split the goreleaser env block, so HOMEBREW_TAP_TOKEN
+      # became a stray key on `with:` and the tap publish failed after the
+      # GitHub release had already gone out.
+      - name: The release workflow still passes the tokens it needs
+        run: |
+          python3 - <<'PY'
+          import sys, yaml
+          d = yaml.safe_load(open(".github/workflows/release.yml"))
+          steps = d["jobs"]["release"]["steps"]
+          gr = next(s for s in steps if "goreleaser" in str(s.get("uses", "")))
+          need = {"GITHUB_TOKEN", "HOMEBREW_TAP_TOKEN"}
+          have = set(gr.get("env") or {})
+          missing = need - have
+          if missing:
+              sys.exit(f"goreleaser step is missing env: {sorted(missing)}")
+          stray = set(gr.get("with") or {}) - {"version", "args", "distribution"}
+          if stray:
+              sys.exit(f"unexpected keys on the goreleaser `with`: {sorted(stray)}")
+          print("release.yml: goreleaser has both tokens and no stray `with` keys")
+          PY
+
   build:
     name: build artifacts
     runs-on: ubuntu-latest
