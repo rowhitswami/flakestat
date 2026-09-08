@@ -69,9 +69,10 @@ failure of the tool, it is what the world looks like.
 Failed on runs 003 and 011 under independent seeds (`758137489003`,
 `837114709011`). A third node appears in a two-node configuration.
 
-Cross-checked against four sources, all clean: issue search, PR search, commit
-search, and raft's own community-collected flaky-test inventory (issue #372,
-whose comments name twenty tests, and this is not among them).
+Cross-checked at the time against four sources, all clean: issue search, PR
+search, commit search, and raft's own community-collected flaky-test inventory
+(issue #372, whose comments name twenty tests, and this was not among them).
+The only issue that mentions it now is #711, which is mine.
 
 **Diagnostic results, and two corrections to my own reasoning.**
 
@@ -108,7 +109,8 @@ The test binary times out at 10 minutes with `TestAntsPool` blocked; the
 goroutine dump shows `testing.(*T).Run` waiting while several pools'
 `purgeStaleWorkers` and `ticktock` janitors remain alive across iterations.
 
-Cross-check clean: no issue, no PR, no commit mentions it.
+Cross-check clean at the time: no issue, no PR and no commit mentioned it.
+The only one that does now is #401, which is mine.
 
 **How to characterise it:** a test-hygiene bug, not a flaky test and not a
 proven pool deadlock. It blocks `go test -count=N`, which is the standard way
