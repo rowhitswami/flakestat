@@ -92,11 +92,27 @@ def _fetch(url: str) -> bytes:
 
 
 def _verify(archive_name: str, blob: bytes, base_url: str) -> None:
+    """Verify the download, or refuse to install it.
+
+    Fails closed. Warning and installing anyway means anyone who can drop the
+    checksums request has silently downgraded this to no verification.
+    FLAKESTAT_SKIP_CHECKSUM=1 opts out deliberately; it is never the default.
+    """
+    if os.environ.get("FLAKESTAT_SKIP_CHECKSUM") == "1":
+        print(
+            "flakestat: FLAKESTAT_SKIP_CHECKSUM=1, installing without verification",
+            file=sys.stderr,
+        )
+        return
+
     try:
         sums = _fetch("{}/checksums.txt".format(base_url)).decode("utf-8")
-    except InstallError:
-        print("flakestat: checksums.txt unavailable, skipping verification", file=sys.stderr)
-        return
+    except InstallError as exc:
+        raise InstallError(
+            "flakestat: could not fetch checksums.txt from {} ({})\n"
+            "  Refusing to install an unverified binary. Retry, or set\n"
+            "  FLAKESTAT_SKIP_CHECKSUM=1 if you accept the risk.".format(base_url, exc)
+        ) from exc
 
     expected = None
     for line in sums.splitlines():
@@ -105,7 +121,10 @@ def _verify(archive_name: str, blob: bytes, base_url: str) -> None:
             break
 
     if expected is None:
-        return
+        raise InstallError(
+            "flakestat: no checksum listed for {} in checksums.txt\n"
+            "  Refusing to install an unverified binary.".format(archive_name)
+        )
 
     actual = hashlib.sha256(blob).hexdigest()
     if expected != actual:

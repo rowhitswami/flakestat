@@ -87,30 +87,41 @@ http_get "${base_url}/${archive}" "${tmp}/${archive}" \
     || fail "download failed: ${base_url}/${archive}"
 
 # --- checksum verification ---------------------------------------------------
-# Best effort: verify when a checksum tool exists, warn when it does not, rather
-# than refusing to install on minimal images.
+# Fails closed. Every path that cannot produce a verified match aborts, because
+# "warn and install anyway" means anyone who can drop the checksums request has
+# silently downgraded this to no verification at all.
+#
+# FLAKESTAT_SKIP_CHECKSUM=1 opts out, for an image with no sha256 tool. It has
+# to be set deliberately; it is never the default.
 
-if http_get "${base_url}/checksums.txt" "${tmp}/checksums.txt" 2>/dev/null; then
+if [ "${FLAKESTAT_SKIP_CHECKSUM:-0}" = "1" ]; then
+    log "warning: FLAKESTAT_SKIP_CHECKSUM=1, installing without verification"
+else
+    http_get "${base_url}/checksums.txt" "${tmp}/checksums.txt" 2>/dev/null \
+        || fail "could not fetch checksums.txt from ${base_url}
+
+  Refusing to install an unverified binary. Retry, or set
+  FLAKESTAT_SKIP_CHECKSUM=1 if you accept the risk."
+
     expected=$(grep " ${archive}\$" "${tmp}/checksums.txt" | awk '{print $1}' || true)
-    if [ -n "$expected" ]; then
-        if command -v sha256sum >/dev/null 2>&1; then
-            actual=$(sha256sum "${tmp}/${archive}" | awk '{print $1}')
-        elif command -v shasum >/dev/null 2>&1; then
-            actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
-        else
-            actual=""
-            log "warning: no sha256sum or shasum available; skipping checksum verification"
-        fi
+    [ -n "$expected" ] || fail "no checksum listed for ${archive} in checksums.txt
 
-        if [ -n "$actual" ] && [ "$actual" != "$expected" ]; then
-            fail "checksum mismatch for ${archive}
+  Refusing to install an unverified binary."
+
+    if command -v sha256sum >/dev/null 2>&1; then
+        actual=$(sha256sum "${tmp}/${archive}" | awk '{print $1}')
+    elif command -v shasum >/dev/null 2>&1; then
+        actual=$(shasum -a 256 "${tmp}/${archive}" | awk '{print $1}')
+    else
+        fail "need sha256sum or shasum to verify the download
+
+  Install one, or set FLAKESTAT_SKIP_CHECKSUM=1 if you accept the risk."
+    fi
+
+    [ "$actual" = "$expected" ] || fail "checksum mismatch for ${archive}
   expected: ${expected}
   actual:   ${actual}"
-        fi
-        [ -n "$actual" ] && log "Checksum verified."
-    fi
-else
-    log "warning: checksums.txt unavailable; skipping verification"
+    log "Checksum verified."
 fi
 
 # --- extract and install -----------------------------------------------------

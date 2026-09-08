@@ -58,17 +58,33 @@ async function fetchBuffer(url) {
   return Buffer.from(await res.arrayBuffer());
 }
 
+// Fails closed. Warning and installing anyway means anyone who can drop the
+// checksums request has silently downgraded this to no verification.
+// FLAKESTAT_SKIP_CHECKSUM=1 opts out deliberately; it is never the default.
 async function verifyChecksum(archiveName, buf, baseUrl) {
-  let sums;
-  try {
-    sums = (await fetchBuffer(`${baseUrl}/checksums.txt`)).toString("utf8");
-  } catch {
-    console.warn("flakestat: checksums.txt unavailable, skipping verification");
+  if (process.env.FLAKESTAT_SKIP_CHECKSUM === "1") {
+    console.warn("flakestat: FLAKESTAT_SKIP_CHECKSUM=1, installing without verification");
     return;
   }
 
+  let sums;
+  try {
+    sums = (await fetchBuffer(`${baseUrl}/checksums.txt`)).toString("utf8");
+  } catch (err) {
+    throw new Error(
+      `flakestat: could not fetch checksums.txt from ${baseUrl} (${err.message})\n` +
+        "  Refusing to install an unverified binary. Retry, or set\n" +
+        "  FLAKESTAT_SKIP_CHECKSUM=1 if you accept the risk."
+    );
+  }
+
   const line = sums.split("\n").find((l) => l.trim().endsWith(archiveName));
-  if (!line) return;
+  if (!line) {
+    throw new Error(
+      `flakestat: no checksum listed for ${archiveName} in checksums.txt\n` +
+        "  Refusing to install an unverified binary."
+    );
+  }
 
   const expected = line.trim().split(/\s+/)[0];
   const actual = createHash("sha256").update(buf).digest("hex");
