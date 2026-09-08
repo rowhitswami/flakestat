@@ -58,48 +58,77 @@
   </div>
 </header>
 
-<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/docs/#install" data-anchor="install">Install</a><a href="/docs/#quickstart" data-anchor="quickstart">Quickstart</a><a href="/docs/#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/docs/#hunting" data-anchor="hunting">Hunting locally</a><a href="/docs/#history" data-anchor="history">History over time</a><a href="/docs/#dimensions" data-anchor="dimensions">Recording context</a><a href="/docs/#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="/docs/#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="/docs/#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/docs/#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="/docs/#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/docs/#commands" data-anchor="commands">Commands</a><a href="/docs/#config" data-anchor="config">Configuration</a><a href="/docs/#scoring" data-anchor="scoring">How scoring works</a><a href="/docs/#runners" data-anchor="runners">Supported runners</a><a href="/docs/#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/compare/trunk/" aria-current="page">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Compare</span><span>/</span><span>flakestat vs Trunk Flaky Tests</span></nav><h1>flakestat vs Trunk Flaky Tests</h1><p class="lede">An honest comparison, including the cases where Trunk Flaky Tests is the better choice.</p>
-<p>Trunk is a hosted service with dashboards, org-wide rollups and alerting. It does same-commit detection too, and does the hosted part well. flakestat is a local binary that does the detection part, for free, without your test
-data leaving your machines.</p>
+<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/docs/#install" data-anchor="install">Install</a><a href="/docs/#quickstart" data-anchor="quickstart">Quickstart</a><a href="/docs/#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/docs/#hunting" data-anchor="hunting">Hunting locally</a><a href="/docs/#history" data-anchor="history">History over time</a><a href="/docs/#dimensions" data-anchor="dimensions">Recording context</a><a href="/docs/#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="/docs/#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="/docs/#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/docs/#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="/docs/#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/docs/#commands" data-anchor="commands">Commands</a><a href="/docs/#config" data-anchor="config">Configuration</a><a href="/docs/#scoring" data-anchor="scoring">How scoring works</a><a href="/docs/#runners" data-anchor="runners">Supported runners</a><a href="/docs/#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/compare/trunk/" aria-current="page">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Compare</span><span>/</span><span>flakestat vs Trunk Flaky Tests</span></nav><h1>flakestat vs Trunk Flaky Tests</h1><p class="lede">What each one is for, what flakestat does differently, and the cases where Trunk Flaky Tests is the better choice.</p>
+<p>Trunk is a hosted service with dashboards, org-wide rollups and alerting. It does same-commit detection too, and does the hosted part well. flakestat is a single binary that does the detection part locally, for free, with your
+test data never leaving your machines.</p>
 
-<div class="tablewrap"><table><thead><tr><th></th><th>flakestat</th><th>Trunk Flaky Tests</th></tr></thead><tbody><tr><td>Cost</td><td>Free at any volume</td><td>Per seat or per run</td></tr><tr><td>Test data leaves your machine</td><td>No</td><td>Yes, results are uploaded</td></tr><tr><td>Works before you push</td><td>Yes, <code>hunt</code> runs locally</td><td>No, it needs CI results</td></tr><tr><td>Setup</td><td>One binary</td><td>Account plus CI integration</td></tr><tr><td>Languages</td><td>Any that writes JUnit XML</td><td>Many</td></tr><tr><td>Dashboards and history UI</td><td>No</td><td>Yes</td></tr><tr><td>Org-wide rollups, alerting</td><td>No</td><td>Yes</td></tr><tr><td>Auto-quarantine in the platform</td><td>Emits a skip list you apply</td><td>Yes, managed</td></tr><tr><td>Source available</td><td>MIT licensed</td><td>Proprietary</td></tr></tbody></table></div>
+<p>Both read the JUnit XML your runner already writes. The difference is where the analysis
+happens, what it is allowed to claim, and whether you can check that it works.</p>
+
+<h2 id="what-flakestat-does-differently">What flakestat does differently<a class="anchor" href="#what-flakestat-does-differently" aria-label="Link to this section">#</a></h2>
+
+<p><strong>It ranks by inconsistency, not failure rate.</strong> A test that fails every single time
+is not flaky, it is broken, and the two need completely different fixes. flakestat scores how often
+a test disagrees with <em>itself</em> between runs, so an always-failing test scores <code>0.00</code>
+and is reported separately as <code>consistently-failing</code> instead of topping the list and
+costing somebody an afternoon.</p>
+
+<p><strong>Every verdict carries a confidence level.</strong> A score of 0.62 from three runs and
+0.62 from three hundred are different claims. Classification uses a lower bound on the score rather
+than the score itself, so a small sample can never reach a confident verdict no matter how dramatic
+the failures look.</p>
+
+<p><strong>You can verify the detection works.</strong> Two commands reproduce a before and after
+against somebody else&rsquo;s bug: ConduitIO&rsquo;s repository at the commit before their own
+deflaking fix, and at the fix. Three tests come back flaky on one side and stable on the other.
+No hosted service lets you audit its scoring this way, because the scoring is the product.</p>
+
+<div class="cblock"><button class="copy" type="button">Copy</button><pre><code>git clone https://github.com/rowhitswami/flakestat &amp;&amp; cd flakestat
+./scripts/reproduce-validation.sh</code></pre></div>
+
+<p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
+cluster on Windows. When <code>os</code> and <code>arch</code> vary together, as they do on most CI
+matrices, it says the observations cannot tell which one matters rather than picking one.
+<a href="/docs/#dimensions">More on that</a>.</p>
+
+<p><strong>The history is a file you own.</strong> Append-only NDJSON in your repository or your
+artifact store. You can read it, diff it, merge shards with <code>cat</code>, and take it with you.
+There is no export step because there is nothing to export from.</p>
+
+<h2 id="side-by-side">Side by side<a class="anchor" href="#side-by-side" aria-label="Link to this section">#</a></h2>
+
+<div class="tablewrap"><table><thead><tr><th></th><th>flakestat</th><th>Trunk Flaky Tests</th></tr></thead><tbody><tr><td>Cost</td><td>Free at any volume, MIT licensed</td><td>Per seat or per run</td></tr><tr><td>Where analysis runs</td><td>Your machine or your CI runner</td><td>Their service</td></tr><tr><td>Test data leaves your machine</td><td>No</td><td>Yes, results are uploaded</td></tr><tr><td>Works before you push</td><td>Yes, <code>hunt</code> reruns locally</td><td>No, it needs CI results</td></tr><tr><td>Scoring you can audit</td><td>Yes, readable source plus a reproduction script</td><td>Proprietary</td></tr><tr><td>Broken separated from flaky</td><td>Yes, <code>consistently-failing</code> scores 0.00</td><td>Varies</td></tr><tr><td>Confidence on each verdict</td><td>Yes, and thin evidence is refused</td><td>Varies</td></tr><tr><td>History format</td><td>NDJSON you own</td><td>Their database</td></tr><tr><td>Setup</td><td>One binary, no account</td><td>Account plus CI integration</td></tr><tr><td>Languages</td><td>Any that writes JUnit XML</td><td>Many</td></tr><tr><td>Dashboards and history UI</td><td>No, terminal and CI job summary</td><td>Yes</td></tr><tr><td>Org-wide rollups, alerting, ownership</td><td>No</td><td>Yes</td></tr><tr><td>Auto-quarantine in the platform</td><td>Emits a skip list you apply</td><td>Yes, managed</td></tr></tbody></table></div>
+
+<h2 id="when-flakestat-is-the-better-choice">When flakestat is the better choice<a class="anchor" href="#when-flakestat-is-the-better-choice" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
+  <li>You want to catch a flake <em>before</em> pushing, not after CI reports it.</li>
+  <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
+  <li>You want to read the scoring and check it yourself rather than trust a number.</li>
+  <li>You want one tool across a polyglot monorepo, because the input is JUnit XML rather than a
+      language integration.</li>
+</ul>
 
 <h2 id="when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice<a class="anchor" href="#when-trunk-flaky-tests-is-the-better-choice" aria-label="Link to this section">#</a></h2>
+<p>Worth saying plainly, because a comparison that finds no case for the alternative is an
+advertisement.</p>
 <ul>
   <li>You want a dashboard non-engineers can read.</li>
   <li>You need rollups across many repositories and teams.</li>
   <li>You want alerting, ownership routing and SLA tracking.</li>
   <li>You would rather buy the whole workflow than assemble it.</li>
 </ul>
-<p>flakestat does not try to do any of that, and pretending otherwise would waste your time.</p>
-
-<h2 id="when-flakestat-is-the-better-choice">When flakestat is the better choice<a class="anchor" href="#when-flakestat-is-the-better-choice" aria-label="Link to this section">#</a></h2>
-<ul>
-  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
-  <li>You want to find a flake <em>before</em> pushing, not after CI reports it.</li>
-  <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
-  <li>You want the detection logic to be readable and auditable rather than a black box.</li>
-</ul>
-
-<h2 id="what-flakestat-does-differently">What flakestat does differently<a class="anchor" href="#what-flakestat-does-differently" aria-label="Link to this section">#</a></h2>
-<p><strong>It ranks by inconsistency, not failure rate.</strong> A test that fails every time scores
-zero and is reported as <code>consistently-failing</code>, so your most broken test does not sit at
-the top of the flaky list wasting the time of whoever is hunting nondeterminism.</p>
-<p><strong>Every verdict carries a confidence level.</strong> A score from three runs and the same
-score from three hundred are different claims, and small samples can never reach high confidence.</p>
-<p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
-cluster on Windows, and when <code>os</code> and <code>arch</code> vary together it says the
-observations cannot tell which one matters. <a href="/docs/#dimensions">More on that</a>.</p>
+<p>flakestat does not try to do any of that.</p>
 
 <h2 id="can-i-use-both">Can I use both?<a class="anchor" href="#can-i-use-both" aria-label="Link to this section">#</a></h2>
 <p>Yes, and it is a reasonable setup: the hosted service for org-wide visibility, flakestat locally
-so engineers can reproduce and confirm a flake in ten minutes without pushing. They read the same
+so an engineer can reproduce and confirm a flake in ten minutes without pushing. They read the same
 JUnit XML and neither interferes with the other.</p>
 
 <div class="callout"><b>Try it in two minutes</b>
 <code>brew install rowhitswami/tap/flakestat</code>, then
 <a href="/docs/#quickstart">the quickstart</a>. Nothing to sign up for.</div>
-<nav class="pager"><a href="/docs/"><span>Reference</span><b>Full documentation</b></a><a class="next" href="/docs/#quickstart"><span>Get going</span><b>Quickstart</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice</a><a class="lvl2" href="#when-flakestat-is-the-better-choice">When flakestat is the better choice</a><a class="lvl2" href="#what-flakestat-does-differently">What flakestat does differently</a><a class="lvl2" href="#can-i-use-both">Can I use both?</a></div></div>
+<nav class="pager"><a href="/docs/"><span>Reference</span><b>Full documentation</b></a><a class="next" href="/docs/#quickstart"><span>Get going</span><b>Quickstart</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#what-flakestat-does-differently">What flakestat does differently</a><a class="lvl2" href="#side-by-side">Side by side</a><a class="lvl2" href="#when-flakestat-is-the-better-choice">When flakestat is the better choice</a><a class="lvl2" href="#when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice</a><a class="lvl2" href="#can-i-use-both">Can I use both?</a></div></div>
 
 <footer>
   <div class="foot-in">
