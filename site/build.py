@@ -358,10 +358,8 @@ SHELL = """<!doctype html>
 <link rel="icon" href="{base}assets/favicon.png">
 <link rel="apple-touch-icon" href="{base}assets/logo-mark.png">
 <link rel="alternate" type="text/plain" href="{origin}{base}llms.txt" title="llms.txt">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{base}assets/fonts/plus-jakarta-sans-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="{base}assets/fonts/jetbrains-mono-latin.woff2">
 <link rel="stylesheet" href="{base}theme.css">
 <script>(function(){{try{{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}}})();</script>
 <script type="application/ld+json">{jsonld}</script>

@@ -1,6 +1,8 @@
 # Flake hunt across third-party repositories
 
-**Complete. Nothing here has been filed on anyone's tracker.**
+**Complete. Both unreported findings have since been filed with their
+maintainers: [hashicorp/raft#711](https://github.com/hashicorp/raft/issues/711)
+and [panjf2000/ants#401](https://github.com/panjf2000/ants/issues/401).**
 
 Ran flakestat's validation protocol against active open-source Go projects to
 answer one question the validation report leaves open: *can it surface a flaky
@@ -173,10 +175,18 @@ The honest claim for a launch post is the speed and the restraint, not
 discovery. Anyone writing "found bugs in real projects" from this data would be
 overstating it, and the third sentence of the FAQ would have to walk it back.
 
-### Still worth telling the maintainers
+### Told the maintainers
 
-Both `-count>1` findings are real and unreported, and both have the same
-practical consequence: **the project cannot use `go test -count=N`**, which is
-the standard way to find genuine flakes. That is worth a friendly issue, worded
-as what it is, a test-hygiene limitation rather than a product bug, with the
-reproduction attached and no claim about their CI.
+Both `-count>1` findings are real, and both have the same practical
+consequence: **the project cannot use `go test -count=N`**, which is the
+standard way to find genuine flakes. Each was filed as what it is, a
+test-hygiene limitation rather than a product bug, with the reproduction
+attached and no claim about their CI.
+
+| Finding | Filed as |
+| --- | --- |
+| raft `TestRaft_HasExistingState` under `-count>1` | [hashicorp/raft#711](https://github.com/hashicorp/raft/issues/711) |
+| ants `TestAntsPool` hangs under `-count>1` | [panjf2000/ants#401](https://github.com/panjf2000/ants/issues/401) |
+
+Neither changes the count above. They were unreported when found, and they
+are still not flaky tests either project's CI can encounter.
