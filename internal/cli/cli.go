@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
+	"runtime/debug"
 	"strings"
 
 	"github.com/rowhitswami/flakestat/internal/config"
@@ -15,7 +16,56 @@ import (
 )
 
 // Version is the build version, overridden at release time via -ldflags.
-var Version = "dev"
+//
+// Releases are stamped by GoReleaser. `go install` applies no ldflags, so
+// that path used to report "dev" and left people unable to say which build
+// they had in a bug report. buildVersion falls back to the module version the
+// go command recorded, which is exactly the tag they asked for.
+var Version = ""
+
+// buildVersion resolves the version to report, preferring the release stamp.
+func buildVersion() string {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return resolveVersion(Version, "", nil)
+	}
+	settings := make(map[string]string, len(bi.Settings))
+	for _, kv := range bi.Settings {
+		settings[kv.Key] = kv.Value
+	}
+	return resolveVersion(Version, bi.Main.Version, settings)
+}
+
+// resolveVersion picks what `flakestat version` prints.
+//
+// Three cases. A release carries the ldflags stamp. `go install ...@v0.2.0`
+// builds from the module cache, so it has the tag in its build info and no VCS
+// settings. Anything else is a working-tree build, where the module version is
+// a pseudo-version like v0.2.1-0.20260908070508-07d5a03287cb: reporting that
+// would name a release that does not exist, so report the commit instead.
+//
+// Split out from buildVersion because debug.ReadBuildInfo cannot be faked.
+func resolveVersion(stamp, modVersion string, settings map[string]string) string {
+	if stamp != "" {
+		return stamp
+	}
+
+	rev := settings["vcs.revision"]
+	if rev == "" {
+		if modVersion != "" && modVersion != "(devel)" {
+			return strings.TrimPrefix(modVersion, "v")
+		}
+		return "dev"
+	}
+
+	if len(rev) > 12 {
+		rev = rev[:12]
+	}
+	if settings["vcs.modified"] == "true" {
+		return "dev (" + rev + ", dirty)"
+	}
+	return "dev (" + rev + ")"
+}
 
 const usage = `flakestat - find flaky tests, without a SaaS account
 
@@ -87,7 +137,7 @@ func Main(args []string, stdout, stderr io.Writer) int {
 	case "compact":
 		err = runCompact(rest, stdout, stderr)
 	case "version", "--version", "-v":
-		fmt.Fprintf(stdout, "flakestat %s\n", Version)
+		fmt.Fprintf(stdout, "flakestat %s\n", buildVersion())
 		return 0
 	case "help", "--help", "-h":
 		fmt.Fprint(stdout, usage)
