@@ -62,21 +62,21 @@
 
 <div class="shell"><nav class="sidebar" aria-label="Writing"><div class="sb-group"><h5>Writing</h5><a href="/writing/">All writing</a><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a><a href="/validation/">How flakestat was validated</a><a href="/findings/">Hunting flaky tests in open source</a><a href="/design/">Design notes</a><a href="/changelog/" aria-current="page">Changelog</a></div><div class="sb-group"><h5>Documentation</h5><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/writing/">Writing</a><span>/</span><span>Changelog</span></nav><h1>Changelog</h1><p class="lede">What changed in each release, and which changes move existing scores.</p><p class="doc-meta"><span>Releases</span><span>Updated 7 September 2026</span><a href="https://github.com/rowhitswami/flakestat/blob/main/CHANGELOG.md">CHANGELOG.md</a></p><p>Notable changes to flakestat. Versions follow <a href="https://semver.org">semantic versioning</a>,
 with the usual caveat that 0.x makes no compatibility promise.</p>
-<h2 id="v0-2-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.2.0">0.2.0</a> — 2026-09-07<a class="anchor" href="#v0-2-0" aria-label="Link to this section">#</a></h2>
+<h2 id="v0-2-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.2.0">0.2.0</a> - 2026-09-07<a class="anchor" href="#v0-2-0" aria-label="Link to this section">#</a></h2>
 <p>Everything the documentation describes now exists in the binary. v0.1.1 shipped
 six commands; this ships ten, plus the analysis that makes the verdicts worth
 reading.</p>
 <h3 id="added">Added<a class="anchor" href="#added" aria-label="Link to this section">#</a></h3>
-<p><strong><code>flakestat explain &lt;test&gt;</code></strong> — the full evidence behind one verdict: outcome
+<p><strong><code>flakestat explain &lt;test&gt;</code></strong> shows the full evidence behind one verdict: outcome
 history as a strip, how many disagreements happened on identical code, which
 commits and branches it was seen on, and where its failures concentrate.
 <code>--json</code> emits the same evidence for tooling.</p>
-<p><strong>Confidence on every verdict</strong> — <code>low</code>, <code>medium</code> or <code>high</code>, derived from how
+<p><strong>Confidence on every verdict</strong>, either <code>low</code>, <code>medium</code> or <code>high</code>, derived from how
 much evidence exists. A score of 0.62 from three runs and the same score from
 three hundred are different claims, and a small sample can never reach <code>high</code>.
 Classification uses a lower bound on the score rather than the score itself, so
 a verdict needs evidence rather than a lucky flip.</p>
-<p><strong>Dimensions and association analysis</strong> — <code>--dimension key=value</code>, repeatable,
+<p><strong>Dimensions and association analysis</strong>. <code>--dimension key=value</code>, repeatable,
 records the platform, runtime and CI context an observation was made in.
 flakestat then reports where failures concentrate:</p>
 <pre><code>Where the failures concentrate
@@ -92,21 +92,21 @@ and the wording stays correlational: failures <em>cluster</em> on Windows, not W
 <em>causes</em> them. Where dimensions vary together, it says the observations cannot
 tell which one matters.</p>
 <p>Only a whitelist of known CI variables is read, and only JUnit properties
-flakestat recognizes — the process environment is never scraped, so secrets
+flakestat recognizes. The process environment is never scraped, so secrets
 cannot reach your history.</p>
-<p><strong>Execution identity</strong> — every observation carries the identity of the execution
+<p><strong>Execution identity</strong>. Every observation carries the identity of the execution
 it describes, so an artifact uploaded twice, a re-run aggregation step or a shard
 collected by two jobs counts once, while a genuine retry still counts.</p>
 <p>This mattered more than it sounds. A duplicate carries its original's timestamp,
 sorts beside it and always agrees with itself, so uncounted duplicates make a
 flaky test look <strong>stable</strong>. Measured on a test failing 4 of 12 runs, ingesting
-the same reports twice moved the score from 0.64 to 0.30 — the error ran towards
+the same reports twice moved the score from 0.64 to 0.30. The error ran towards
 false negatives.</p>
-<p><strong><code>flakestat compact</code></strong> — removes duplicate executions from the log file itself,
+<p><strong><code>flakestat compact</code></strong> removes duplicate executions from the log file itself,
 which matters when the file is the record you keep. Refuses to rewrite a log
 containing unreadable lines, since reading skips those and rewriting would
 discard evidence you might still recover.</p>
-<p><strong><code>flakestat ci-report</code></strong> — renders job summaries and pull request comments. The
+<p><strong><code>flakestat ci-report</code></strong> renders job summaries and pull request comments. The
 GitHub Action gained <code>comment</code>, <code>annotations</code> and <code>max-rows</code> inputs; a re-run
 updates the same comment rather than adding another.</p>
 <p><strong><code>--no-host</code></strong> on <code>ingest</code>, for jobs that aggregate artifacts produced
@@ -115,13 +115,13 @@ every other machine.</p>
 <h3 id="fixed">Fixed<a class="anchor" href="#fixed" aria-label="Link to this section">#</a></h3>
 <p><strong>Outcomes are only compared when they are comparable.</strong> A test that always
 passes on Linux and always fails on Windows is deterministic, but read as one
-chronological series it looked like constant disagreement — it scored 0.45 with
+chronological series it looked like constant disagreement, and it scored 0.45 with
 an explanation asserting direct evidence of nondeterminism. Transitions are now
 counted within one execution context: branch, os, arch and runtime held
 constant.</p>
 <p><strong>The history strip agrees with the verdict.</strong> It grouped by branch while
 scoring grouped by execution context, so it printed "flip on identical code" at
-every platform boundary — at precisely the points the verdict had ruled out as
+every platform boundary, at precisely the points the verdict had ruled out as
 incomparable.</p>
 <p><strong>Execution identity uses the whole recorded context.</strong> GitHub reports the same
 <code>GITHUB_JOB</code> for every leg of a matrix, so three platforms can ingest under one
@@ -135,21 +135,21 @@ experiment ran, and scored with a single frozen build. Full report in
 three of the four tests their issue named scored <code>flaky</code> at 0.67 with high
 confidence; at the fix itself, all four were <code>stable</code> at 0.00, under an identical
 protocol. Their contributors documented the defect, named the tests and wrote the
-repair — flakestat was handed observations from both sides of a commit it had no
+repair. flakestat was handed observations from both sides of a commit it had no
 part in and separated them.</p>
 <p>Also recorded there: the protocol arm that found nothing, and a contaminated run
 that was discarded rather than reported.</p>
-<h2 id="v0-1-1"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.1">0.1.1</a> — 2026-09-06<a class="anchor" href="#v0-1-1" aria-label="Link to this section">#</a></h2>
+<h2 id="v0-1-1"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.1">0.1.1</a> - 2026-09-06<a class="anchor" href="#v0-1-1" aria-label="Link to this section">#</a></h2>
 <p>Fixed the Python wrapper reporting <code>0.0.0</code> regardless of the installed version,
 which made it build a download URL for a release that does not exist. The
 release workflow now verifies the built wheel reports the tagged version before
 anything is published.</p>
-<h2 id="v0-1-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.0">0.1.0</a> — 2026-09-06<a class="anchor" href="#v0-1-0" aria-label="Link to this section">#</a></h2>
+<h2 id="v0-1-0"><a href="https://github.com/rowhitswami/flakestat/releases/tag/v0.1.0">0.1.0</a> - 2026-09-06<a class="anchor" href="#v0-1-0" aria-label="Link to this section">#</a></h2>
 <p>First release. <code>init</code>, <code>hunt</code>, <code>ingest</code>, <code>report</code>, <code>check</code> and <code>quarantine</code>,
 distributed via Homebrew, npm, PyPI, a container image, an install script and a
 GitHub Action.</p>
 <p>Yanked from PyPI: the wrapper shipped with a hardcoded <code>0.0.0</code> version and could
-not download its binary. Superseded by 0.1.1.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#v0-2-0">0.2.0 — 2026-09-07</a><a class="lvl3" href="#added">Added</a><a class="lvl3" href="#fixed">Fixed</a><a class="lvl3" href="#validation">Validation</a><a class="lvl2" href="#v0-1-1">0.1.1 — 2026-09-06</a><a class="lvl2" href="#v0-1-0">0.1.0 — 2026-09-06</a></div></div>
+not download its binary. Superseded by 0.1.1.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#v0-2-0">0.2.0 - 2026-09-07</a><a class="lvl3" href="#added">Added</a><a class="lvl3" href="#fixed">Fixed</a><a class="lvl3" href="#validation">Validation</a><a class="lvl2" href="#v0-1-1">0.1.1 - 2026-09-06</a><a class="lvl2" href="#v0-1-0">0.1.0 - 2026-09-06</a></div></div>
 
 <footer>
   <div class="foot-in">

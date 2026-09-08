@@ -66,10 +66,10 @@ no data leaving your machine.</p>
 <h2 id="1-problem">1. Problem<a class="anchor" href="#1-problem" aria-label="Link to this section">#</a></h2>
 <p>A flaky test passes and fails nondeterministically <strong>on the same code</strong>. Teams need to:</p>
 <ol>
-<li><strong>Find</strong> them — which tests are unreliable?</li>
-<li><strong>Quantify</strong> them — how unreliable, and is it getting worse?</li>
-<li><strong>Quarantine</strong> them — stop them blocking merges without deleting coverage.</li>
-<li><strong>Track</strong> them — did that fix actually work?</li>
+<li><strong>Find</strong> them. Which tests are unreliable?</li>
+<li><strong>Quantify</strong> them. How unreliable, and is it getting worse?</li>
+<li><strong>Quarantine</strong> them. Stop them blocking merges without deleting coverage.</li>
+<li><strong>Track</strong> them. Did that fix actually work?</li>
 </ol>
 <p>Today the good tooling is all hosted (Trunk, BuildPulse, Mergify, Qualflare). The
 open-source side is fragmented per-language plugins (<code>pytest-flakefinder</code>,
@@ -137,7 +137,7 @@ vendor dialects differ. The parser must be deliberately tolerant of:</p>
 <li>Nested <code>&lt;testsuite&gt;</code> elements</li>
 <li><code>classname</code> present, empty, or duplicated into <code>name</code></li>
 <li><code>&lt;failure&gt;</code> vs <code>&lt;error&gt;</code> vs <code>&lt;skipped&gt;</code> vs bare pass</li>
-<li>Surefire's <code>&lt;flakyFailure&gt;</code> / <code>&lt;flakyError&gt;</code> rerun markers — these are <em>already</em>
+<li>Surefire's <code>&lt;flakyFailure&gt;</code> / <code>&lt;flakyError&gt;</code> rerun markers, which are <em>already</em>
   flakiness signals and should be ingested as such</li>
 <li>Missing <code>time</code>, <code>file</code>, <code>line</code> attributes</li>
 <li>Invalid XML characters in failure messages (common with binary output in stack traces)</li>
@@ -156,18 +156,18 @@ which are different bugs.</p>
 <p>Test renames breaking history is a known v1 limitation.</p>
 <h2 id="5-two-operating-modes">5. Two operating modes<a class="anchor" href="#5-two-operating-modes" aria-label="Link to this section">#</a></h2>
 <p>This split is the core architecture. Both write to the same store.</p>
-<h3 id="burst-mode-flakestat-hunt">Burst mode — <code>flakestat hunt</code><a class="anchor" href="#burst-mode-flakestat-hunt" aria-label="Link to this section">#</a></h3>
+<h3 id="burst-mode-flakestat-hunt">Burst mode: <code>flakestat hunt</code><a class="anchor" href="#burst-mode-flakestat-hunt" aria-label="Link to this section">#</a></h3>
 <p>Run the test command N times locally, right now. Code is constant, so <em>any</em>
 disagreement between runs is flakiness by definition. This is the strong signal.</p>
 <p>Use for: "is this test actually flaky?", pre-merge gates, verifying a fix.</p>
-<h3 id="history-mode-flakestat-ingest-report">History mode — <code>flakestat ingest</code> + <code>report</code><a class="anchor" href="#history-mode-flakestat-ingest-report" aria-label="Link to this section">#</a></h3>
+<h3 id="history-mode-flakestat-ingest-report">History mode: <code>flakestat ingest</code> + <code>report</code><a class="anchor" href="#history-mode-flakestat-ingest-report" aria-label="Link to this section">#</a></h3>
 <p>Ingest JUnit XML from CI over time and score by flip rate. This is measurement across
 real-world conditions and catches environment-dependent flakes that a local burst
 never will.</p>
 <p>Use for: continuous tracking, trend detection, quarantine lists.</p>
 <h3 id="same-commit-vs-cross-commit-weighting">Same-commit vs cross-commit weighting<a class="anchor" href="#same-commit-vs-cross-commit-weighting" aria-label="Link to this section">#</a></h3>
 <p>A subtlety most naive tools get wrong: in history mode, a test failing on commit A and
-passing on commit B may be a <strong>genuine regression that got fixed</strong> — not flakiness.</p>
+passing on commit B may be a <strong>genuine regression that got fixed</strong>, not flakiness.</p>
 <p>So every observation records its commit SHA, and transitions are weighted:</p>
 <ul>
 <li><strong>Same SHA, different result</strong> → definitive flakiness. Weight high (default <code>3.0</code>).</li>
@@ -176,7 +176,7 @@ passing on commit B may be a <strong>genuine regression that got fixed</strong> 
 <p>This is a meaningful accuracy edge over "count the failures."</p>
 <h2 id="6-scoring">6. Scoring<a class="anchor" href="#6-scoring" aria-label="Link to this section">#</a></h2>
 <p><strong>Failure rate is the wrong metric.</strong> A test that fails 100% of the time scores 1.0 on
-failure rate but is not flaky — it's broken. Flakiness is <em>inconsistency</em>.</p>
+failure rate but is not flaky. It's broken. Flakiness is <em>inconsistency</em>.</p>
 <p>For a test with ordered observations <code>o_1..o_n</code> (pass=1, fail=0; skips excluded):</p>
 <pre><code>t_i = 1 if o_i != o_{i+1} else 0          # state transition
 w_i = same_commit_weight if sha_i == sha_{i+1} else 1.0
@@ -185,7 +185,7 @@ flip_rate = Σ(w_i · t_i) / Σ(w_i)
 </code></pre>
 <p>Then an exponential recency weight with <code>alpha</code> (default <code>0.3</code>) so recent behavior
 dominates and fixed tests decay back to stable. <strong>Age is counted in commits, not in
-observations</strong> — see the validation section; aging per observation capped effective
+observations</strong>. See the validation section; aging per observation capped effective
 sample size and made extra runs worthless.</p>
 <p><strong>Confidence:</strong> below <code>min_runs</code> (default 5) a test is <code>insufficient-data</code>, never
 scored. Above it, classification uses a <strong>Wilson lower bound</strong> on the score rather
@@ -241,7 +241,7 @@ flakestat quarantine [flags]      # emit framework-native skip list
 flakestat check  [flags]          # CI gate, meaningful exit codes
 flakestat compact                 # collapse old history
 </code></pre>
-<h3 id="hunt-capturing-output-across-parallel-runs"><code>hunt</code> — capturing output across parallel runs<a class="anchor" href="#hunt-capturing-output-across-parallel-runs" aria-label="Link to this section">#</a></h3>
+<h3 id="hunt-capturing-output-across-parallel-runs"><code>hunt</code>: capturing output across parallel runs<a class="anchor" href="#hunt-capturing-output-across-parallel-runs" aria-label="Link to this section">#</a></h3>
 <p>Parallel runs need unique report paths. Two mechanisms, both supported:</p>
 <ul>
 <li>A <code>{run}</code> placeholder in <code>--junit</code></li>
@@ -255,13 +255,13 @@ flakestat compact                 # collapse old history
 for fast reproduction), <code>--timeout</code>, <code>--filter</code>.</p>
 <p><strong>Fallback:</strong> if no JUnit XML is produced, record the process exit code and report
 suite-level flakiness with a clear warning that per-test granularity is unavailable.</p>
-<h3 id="check-the-ci-gate"><code>check</code> — the CI gate<a class="anchor" href="#check-the-ci-gate" aria-label="Link to this section">#</a></h3>
+<h3 id="check-the-ci-gate"><code>check</code>: the CI gate<a class="anchor" href="#check-the-ci-gate" aria-label="Link to this section">#</a></h3>
 <pre><code>exit 0  clean
 exit 1  new flaky tests above threshold  (--fail-on-new)
 exit 2  existing flakes worsened         (--fail-on-regression)
 </code></pre>
 <p>Also emits GitHub Actions annotations and a markdown summary suitable for a PR comment.</p>
-<h3 id="quarantine-framework-native-output"><code>quarantine</code> — framework-native output<a class="anchor" href="#quarantine-framework-native-output" aria-label="Link to this section">#</a></h3>
+<h3 id="quarantine-framework-native-output"><code>quarantine</code>: framework-native output<a class="anchor" href="#quarantine-framework-native-output" aria-label="Link to this section">#</a></h3>
 <p>Emitting a generic list nobody can consume is a common failure mode. Emit what each
 runner actually accepts:</p>
 <div class="tablewrap"><table>
@@ -290,10 +290,10 @@ runner actually accepts:</p>
 </tr>
 </tbody>
 </table></div>
-<h2 id="9-config-flakestatyaml">9. Config — <code>.flakestat.yaml</code><a class="anchor" href="#9-config-flakestatyaml" aria-label="Link to this section">#</a></h2>
+<h2 id="9-config-flakestatyaml">9. Config: <code>.flakestat.yaml</code><a class="anchor" href="#9-config-flakestatyaml" aria-label="Link to this section">#</a></h2>
 <blockquote>
 <p><strong>Superseded.</strong> Shipped as <code>.flakestat.json</code>; see §11. The values below are
-the original spec, not the shipped defaults — <code>flaky</code> ships at <code>0.10</code>, and
+the original spec, not the shipped defaults. <code>flaky</code> ships at <code>0.10</code>, and
 <code>quarantine.path</code> and <code>ignore</code> were never implemented. §6 and the
 documentation are authoritative. This section is left as written so the
 reasoning behind the change stays legible.</p>
@@ -337,12 +337,12 @@ framework is what keeps the parser honest, and it's the natural place for outsid
 contributors to land a fix ("my framework's output breaks it, here's the file").</p>
 <h2 id="11-build-order">11. Build order<a class="anchor" href="#11-build-order" aria-label="Link to this section">#</a></h2>
 <ol>
-<li>✅ <code>internal/junit</code> + the dialect corpus — everything depends on it</li>
-<li>✅ <code>internal/store</code> — append/read NDJSON</li>
-<li>✅ <code>internal/score</code> — pure functions, heavily unit-tested</li>
-<li>✅ <code>hunt</code> + <code>internal/runner</code> — first end-to-end user value</li>
-<li>✅ <code>report</code> — table / JSON / markdown renderers</li>
-<li>✅ <code>ingest</code> + <code>check</code> — the CI story</li>
+<li>✅ <code>internal/junit</code> + the dialect corpus, which everything depends on</li>
+<li>✅ <code>internal/store</code>, append/read NDJSON</li>
+<li>✅ <code>internal/score</code>, pure functions, heavily unit-tested</li>
+<li>✅ <code>hunt</code> + <code>internal/runner</code>, first end-to-end user value</li>
+<li>✅ <code>report</code>, table / JSON / markdown renderers</li>
+<li>✅ <code>ingest</code> + <code>check</code>, the CI story</li>
 <li>✅ <code>quarantine</code> emitters</li>
 <li>◐ <code>init</code> and the config file done; <code>compact</code> outstanding</li>
 <li>✅ Distribution: GoReleaser, Homebrew, ghcr.io, GitHub Action, npm, PyPI</li>
@@ -418,7 +418,7 @@ different levels:</p>
 </ul>
 <p>The first two were found only with real data. The third was found by asking
 whether a rule stated in one place was actually obeyed in every place that
-depends on it — a question worth asking of any invariant recorded here, since
+depends on it, a question worth asking of any invariant recorded here, since
 the comment in the offending function claimed agreement that had silently
 stopped being true.</p>
 <p>The structural fix is that there is now exactly one definition,
@@ -494,7 +494,7 @@ dimensions are perfectly confounded and the data cannot separate them.</p>
 flat chronological series manufactured flips: a test passing on <code>main</code>, failing
 on an in-progress feature branch, then passing on <code>main</code> again reads as two
 flips when nothing about <code>main</code> changed. Grouping by branch removes that class
-of phantom signal outright — the same structural mistake as the cross-commit
+of phantom signal outright, the same structural mistake as the cross-commit
 problem, one level up.</p>
 <p>Layered on top, disagreement off the default branch is scaled by
 <code>branch_weight</code> (0.5), since failures on a feature branch are frequently just
@@ -506,7 +506,7 @@ a third-party parser, and a dependency-free binary is worth more to the
 security-conscious audience that picks a local tool over a hosted one. The
 command accepts both a list and a plain string, so hand-editing stays pleasant.</p>
 <p><code>{junit}</code> in the command expands to the resolved report path, so it is written
-once instead of being kept in sync in two places — the single biggest source of
+once instead of being kept in sync in two places, the single biggest source of
 first-run friction.</p>
 <h3 id="revision-from-implementation">Revision from implementation<a class="anchor" href="#revision-from-implementation" aria-label="Link to this section">#</a></h3>
 <p><strong>The commit weighting was wrong as originally specified.</strong> The design called
@@ -541,7 +541,7 @@ runs would help. For a platform-gated test that is false at any number of runs.
 They now get their own verdict (<code>always-skipped</code>); <code>pallets/click</code> has 26.</p>
 <p><strong>The CI gate as originally shipped was unusable.</strong> <code>report --fail-on-flaky</code>
 fails on <em>any</em> flaky test, which turns a repo with existing flakiness red the
-day it adopts flakestat — so the gate gets deleted. Replaced with <code>check</code> and a
+day it adopts flakestat, so the gate gets deleted. Replaced with <code>check</code> and a
 committed baseline (§8's <code>--fail-on-new</code>, which should never have been folded
 away): existing flakiness is grandfathered, and only new or measurably worsened
 tests fail the build. A <code>--regression-delta</code> keeps scoring jitter from failing
@@ -550,18 +550,18 @@ builds, and <code>FIXED</code> tests are surfaced to prompt tightening the basel
 <ul>
 <li>Web UI or hosted dashboard</li>
 <li>Root-cause analysis (test ordering, shared state, timing)</li>
-<li>Auto-retry during a test run — that's the framework's job</li>
+<li>Auto-retry during a test run, which is the framework's job</li>
 <li>Rename/refactor tracking across history</li>
 <li>Direct CI-provider API integrations (ingest XML artifacts instead)</li>
 </ul>
 <h2 id="13-open-questions">13. Open questions<a class="anchor" href="#13-open-questions" aria-label="Link to this section">#</a></h2>
 <p>Resolved since this section was written, kept because the record is the point:</p>
 <ul>
-<li>✅ <strong>Name availability</strong> — 13 GitHub repos match "flakestat", all abandoned
+<li>✅ <strong>Name availability</strong>. 13 GitHub repos match "flakestat", all abandoned
   (max 4 stars). No established project to collide with.</li>
-<li>✅ <strong>Module path</strong> — <code>github.com/rowhitswami/flakestat</code> is the real path.
+<li>✅ <strong>Module path</strong>. <code>github.com/rowhitswami/flakestat</code> is the real path.
   Published: v0.2.0 is on Homebrew, npm, PyPI, ghcr and the GitHub Marketplace.</li>
-<li>✅ <strong>Config file</strong> — implemented, and shipped as <code>.flakestat.json</code> rather than
+<li>✅ <strong>Config file</strong>. Implemented, and shipped as <code>.flakestat.json</code> rather than
   the <code>.flakestat.yaml</code> §9 specifies. See §11: YAML would have meant taking on
   <code>gopkg.in/yaml.v3</code>, and the dependency-free <code>go.mod</code> was worth more than the
   syntax. §9 is left as originally written so the change is visible.</li>
@@ -569,8 +569,8 @@ builds, and <code>FIXED</code> tests are surfaced to prompt tightening the basel
 <p>Still open:</p>
 <ul>
 <li>☐ <strong>Default <code>same_commit_weight</code> of 3.0</strong> remains a judgment call rather than
-  an empirical result. There is now data it could be calibrated against —
-  three external subjects and ~13,000 observations of this project's own suite —
+  an empirical result. There is now data it could be calibrated against, in
+  three external subjects and ~13,000 observations of this project's own suite,
   but nobody has done that work, and until someone does, 3.0 is a defensible
   guess and not a finding.</li>
 <li>☐ <strong>Sensitivity below ~5%</strong> is unestablished. Several tests during external
@@ -582,7 +582,7 @@ builds, and <code>FIXED</code> tests are surfaced to prompt tightening the basel
   <a href="/findings/">HUNT-FINDINGS.md</a> for the attempt that failed to change
   this, including a candidate that looked novel until four follow-up experiments
   showed it only failed under conditions the harness itself imposed.</li>
-</ul></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#1-problem">1. Problem</a><a class="lvl2" href="#2-design-principles">2. Design principles</a><a class="lvl2" href="#3-why-junit-xml">3. Why JUnit XML</a><a class="lvl2" href="#4-test-identity">4. Test identity</a><a class="lvl2" href="#5-two-operating-modes">5. Two operating modes</a><a class="lvl3" href="#burst-mode-flakestat-hunt">Burst mode — flakestat hunt</a><a class="lvl3" href="#history-mode-flakestat-ingest-report">History mode — flakestat ingest + report</a><a class="lvl3" href="#same-commit-vs-cross-commit-weighting">Same-commit vs cross-commit weighting</a><a class="lvl2" href="#6-scoring">6. Scoring</a><a class="lvl2" href="#7-storage">7. Storage</a><a class="lvl2" href="#8-cli-surface">8. CLI surface</a><a class="lvl3" href="#hunt-capturing-output-across-parallel-runs">hunt — capturing output across parallel runs</a><a class="lvl3" href="#check-the-ci-gate">check — the CI gate</a><a class="lvl3" href="#quarantine-framework-native-output">quarantine — framework-native output</a><a class="lvl2" href="#9-config-flakestatyaml">9. Config — .flakestat.yaml</a><a class="lvl2" href="#10-package-layout">10. Package layout</a><a class="lvl2" href="#11-build-order">11. Build order</a><a class="lvl3" href="#measured-validation">Measured validation</a><a class="lvl3" href="#two-orthogonal-questions">Two orthogonal questions</a><a class="lvl3" href="#comparability-the-transition-invariant">Comparability: the transition invariant</a><a class="lvl3" href="#counting-the-execution-identity-invariant">Counting: the execution identity invariant</a><a class="lvl3" href="#diagnosis-is-deliberately-deferred">Diagnosis is deliberately deferred</a><a class="lvl3" href="#branch-awareness">Branch awareness</a><a class="lvl3" href="#config-file-json-not-yaml">Config file: JSON, not YAML</a><a class="lvl3" href="#revision-from-implementation">Revision from implementation</a><a class="lvl2" href="#12-deliberately-out-of-scope-for-v1">12. Deliberately out of scope for v1</a><a class="lvl2" href="#13-open-questions">13. Open questions</a></div></div>
+</ul></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#1-problem">1. Problem</a><a class="lvl2" href="#2-design-principles">2. Design principles</a><a class="lvl2" href="#3-why-junit-xml">3. Why JUnit XML</a><a class="lvl2" href="#4-test-identity">4. Test identity</a><a class="lvl2" href="#5-two-operating-modes">5. Two operating modes</a><a class="lvl3" href="#burst-mode-flakestat-hunt">Burst mode: flakestat hunt</a><a class="lvl3" href="#history-mode-flakestat-ingest-report">History mode: flakestat ingest + report</a><a class="lvl3" href="#same-commit-vs-cross-commit-weighting">Same-commit vs cross-commit weighting</a><a class="lvl2" href="#6-scoring">6. Scoring</a><a class="lvl2" href="#7-storage">7. Storage</a><a class="lvl2" href="#8-cli-surface">8. CLI surface</a><a class="lvl3" href="#hunt-capturing-output-across-parallel-runs">hunt: capturing output across parallel runs</a><a class="lvl3" href="#check-the-ci-gate">check: the CI gate</a><a class="lvl3" href="#quarantine-framework-native-output">quarantine: framework-native output</a><a class="lvl2" href="#9-config-flakestatyaml">9. Config: .flakestat.yaml</a><a class="lvl2" href="#10-package-layout">10. Package layout</a><a class="lvl2" href="#11-build-order">11. Build order</a><a class="lvl3" href="#measured-validation">Measured validation</a><a class="lvl3" href="#two-orthogonal-questions">Two orthogonal questions</a><a class="lvl3" href="#comparability-the-transition-invariant">Comparability: the transition invariant</a><a class="lvl3" href="#counting-the-execution-identity-invariant">Counting: the execution identity invariant</a><a class="lvl3" href="#diagnosis-is-deliberately-deferred">Diagnosis is deliberately deferred</a><a class="lvl3" href="#branch-awareness">Branch awareness</a><a class="lvl3" href="#config-file-json-not-yaml">Config file: JSON, not YAML</a><a class="lvl3" href="#revision-from-implementation">Revision from implementation</a><a class="lvl2" href="#12-deliberately-out-of-scope-for-v1">12. Deliberately out of scope for v1</a><a class="lvl2" href="#13-open-questions">13. Open questions</a></div></div>
 
 <footer>
   <div class="foot-in">

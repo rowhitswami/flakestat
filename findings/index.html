@@ -69,7 +69,7 @@ test nobody has already filed?</em></p>
 <pre><code>go test -count=3 -shuffle=&lt;recorded seed&gt;    fresh process per execution
 </code></pre>
 <p><code>-count=3</code> because process-global-state flakes only surface with in-process
-repetition — that is what Conduit's own flake-hunt job uses. <code>-shuffle</code> with a
+repetition, which is what Conduit's own flake-hunt job uses. <code>-shuffle</code> with a
 seed chosen and recorded by the harness, so any failure handed to a maintainer
 is reproducible rather than "run 47 failed". Scored with the frozen build
 <code>a4672ece</code>. No repository was modified.</p>
@@ -126,16 +126,16 @@ test jobs and flake-named jobs.</p>
 <tr>
 <td><code>etcd-io/bbolt</code></td>
 <td>not run</td>
-<td>—</td>
-<td>—</td>
+<td>n/a</td>
+<td>n/a</td>
 <td>606s baseline; the protocol would cost ~50h</td>
 </tr>
 </tbody>
 </table></div>
 <p>* reduced from 100: baseline 131s, so <code>-count=3</code> costs ~6.5min per execution
 and 100 would have consumed the whole window and starved the other repos.
-† full-suite run abandoned at 2 executions — each hang costs the 10-minute Go
-test timeout — and replaced with a targeted diagnostic.</p>
+† full-suite run abandoned at 2 executions, because each hang costs the
+10-minute Go test timeout, and replaced with a targeted diagnostic.</p>
 <h2 id="every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known<a class="anchor" href="#every-real-flake-found-and-whether-it-was-already-known" aria-label="Link to this section">#</a></h2>
 <div class="tablewrap"><table>
 <thead>
@@ -149,47 +149,47 @@ test timeout — and replaced with a targeted diagnostic.</p>
 <tr>
 <td>raft <code>TestRaft_HasExistingState</code></td>
 <td>2/31 runs</td>
-<td><strong>no — clean on four checks</strong></td>
+<td><strong>no, clean on four checks</strong></td>
 </tr>
 <tr>
 <td>ants <code>TestAntsPool</code> hangs under <code>-count&gt;1</code></td>
 <td>15/15</td>
-<td><strong>no — clean on three checks</strong></td>
+<td><strong>no, clean on three checks</strong></td>
 </tr>
 <tr>
 <td>raft <code>TestRaft_FollowerRemovalNoElection</code></td>
 <td>4/31</td>
-<td>yes — open PR #669, unmerged since 2026-03-19</td>
+<td>yes, open PR #669, unmerged since 2026-03-19</td>
 </tr>
 <tr>
 <td>raft <code>TestRaft_SendSnapshotFollower</code></td>
 <td>2/31</td>
-<td>yes — issue #311, and listed in #372</td>
+<td>yes, issue #311, and listed in #372</td>
 </tr>
 <tr>
 <td>raft <code>TestRaft_ProtocolVersion_Upgrade_2_3</code></td>
 <td>2/31</td>
-<td>yes — listed in #372</td>
+<td>yes, listed in #372</td>
 </tr>
 <tr>
 <td>raft <code>TestRaft_RecoverCluster</code></td>
 <td>2/31</td>
-<td>yes — listed in #372</td>
+<td>yes, listed in #372</td>
 </tr>
 <tr>
 <td>raft <code>TestRaft_ProtocolVersion_Upgrade_1_2</code></td>
 <td>1/31</td>
-<td>yes — listed in #372</td>
+<td>yes, listed in #372</td>
 </tr>
 <tr>
 <td>raft <code>TestNetworkTransport_AppendEntriesPipeline_CloseStreams</code></td>
 <td>1/31</td>
-<td>yes — has prior issues</td>
+<td>yes, has prior issues</td>
 </tr>
 <tr>
 <td>litestream <code>TestResumableReader_ContextCancelAbortsBackoff</code></td>
 <td>2/301</td>
-<td>yes — open issue #1502</td>
+<td>yes, open issue #1502</td>
 </tr>
 </tbody>
 </table></div>
@@ -197,7 +197,7 @@ test timeout — and replaced with a targeted diagnostic.</p>
 exercise: projects with active maintainers usually already know. It is not a
 failure of the tool, it is what the world looks like.</p>
 <h2 id="the-two-unreported-candidates">The two unreported candidates<a class="anchor" href="#the-two-unreported-candidates" aria-label="Link to this section">#</a></h2>
-<h3 id="hashicorpraft-testraft-hasexistingstate"><code>hashicorp/raft</code> — <code>TestRaft_HasExistingState</code><a class="anchor" href="#hashicorpraft-testraft-hasexistingstate" aria-label="Link to this section">#</a></h3>
+<h3 id="hashicorpraft-testraft-hasexistingstate"><code>hashicorp/raft</code>: <code>TestRaft_HasExistingState</code><a class="anchor" href="#hashicorpraft-testraft-hasexistingstate" aria-label="Link to this section">#</a></h3>
 <pre><code>testing.go:705: peer mismatch
   expected  2 servers  [b3bfde62, c21909b3]
   observed  3 servers  [b3bfde62, c21909b3, 1a02a2fe]
@@ -206,8 +206,8 @@ failure of the tool, it is what the world looks like.</p>
 <code>837114709011</code>). A third node appears in a two-node configuration.</p>
 <p>Cross-checked against four sources, all clean: issue search, PR search, commit
 search, and raft's own community-collected flaky-test inventory (issue #372,
-whose comments name twenty tests — this is not among them).</p>
-<p><strong>Diagnostic results — and two corrections to my own reasoning.</strong></p>
+whose comments name twenty tests, and this is not among them).</p>
+<p><strong>Diagnostic results, and two corrections to my own reasoning.</strong></p>
 <pre><code>test alone,  -count=1                  25/25 pass
 test alone,  -count=3                  25/25 pass
 full suite,  -count=1, no shuffle      12/12 pass
@@ -218,12 +218,12 @@ full suite,  ./... -count=3, shuffled   2/31 FAIL
 <p>The failure needs the full suite <strong>and</strong> <code>-count=3</code>. Neither alone reproduces
 it in 74 attempts.</p>
 <p>I was wrong twice getting here. First I assumed repetition of the test itself
-was leaking state, and tested it in isolation — where it is clean. Then I
+was leaking state, and tested it in isolation, where it is clean. Then I
 assumed the trigger might be shuffle ordering, which arm B rules out.</p>
 <p><strong>hashicorp/raft runs <code>-count=1</code> in CI, so their CI cannot hit this.</strong> It is not
 a flaky test they experience. It is the same category as the ants finding: the
 package does not survive in-process repetition of the whole suite.</p>
-<h3 id="panjf2000ants-testantspool"><code>panjf2000/ants</code> — <code>TestAntsPool</code><a class="anchor" href="#panjf2000ants-testantspool" aria-label="Link to this section">#</a></h3>
+<h3 id="panjf2000ants-testantspool"><code>panjf2000/ants</code>: <code>TestAntsPool</code><a class="anchor" href="#panjf2000ants-testantspool" aria-label="Link to this section">#</a></h3>
 <pre><code>-count=1    15 passed,  0 hung
 -count=2     0 passed,  5 hung   (all rc=124)
 -count=3     0 passed, 15 hung   (all rc=124)
@@ -237,13 +237,13 @@ goroutine dump shows <code>testing.(*T).Run</code> waiting while several pools'
 <p>Cross-check clean: no issue, no PR, no commit mentions it.</p>
 <p><strong>How to characterise it:</strong> a test-hygiene bug, not a flaky test and not a
 proven pool deadlock. It blocks <code>go test -count=N</code>, which is the standard way
-to hunt real flakes — so the practical impact is that this project cannot use
+to hunt real flakes, so the practical impact is that this project cannot use
 the technique that finds genuine flakes. Same class as Conduit's <em>"make
 entrypoint SIGTERM handling testable under <code>-count&gt;1</code>"</em> fix.</p>
 <h2 id="what-flakestat-itself-did-precisely">What flakestat itself did, precisely<a class="anchor" href="#what-flakestat-itself-did-precisely" aria-label="Link to this section">#</a></h2>
 <p>Worth separating, because it is easy to overclaim:</p>
 <ol>
-<li>Its <strong>protocol</strong> — repeated fresh processes, <code>-count=3</code>, shuffled — surfaced
+<li>Its <strong>protocol</strong> of repeated fresh processes, <code>-count=3</code>, shuffled, surfaced
    every finding here.</li>
 <li>Its <strong>scoring</strong> correctly declined to classify the ants hang on two captured
    runs (<code>insufficient-data</code>, not <code>flaky</code>), which is the right answer on that
@@ -256,7 +256,7 @@ its own, diagnose anything.</p>
 <h2 id="does-this-close-the-gap">Does this close the gap?<a class="anchor" href="#does-this-close-the-gap" aria-label="Link to this section">#</a></h2>
 <p><strong>No.</strong> And the way it fails to is worth more than a weak yes.</p>
 <p>Nine real flaky tests were found. Seven were already filed by their maintainers. The
-two that were not — ants <code>TestAntsPool</code> and raft <code>TestRaft_HasExistingState</code> —
+two that were not, ants <code>TestAntsPool</code> and raft <code>TestRaft_HasExistingState</code>,
 are <strong>both</strong> artefacts of running a suite with <code>-count&gt;1</code>. Neither is a flaky
 test that the project's own CI can encounter.</p>
 <p>So the count of previously-unknown flaky tests found in the wild is <strong>zero</strong>.</p>
@@ -270,8 +270,8 @@ consequence of how the hunt was run.</p>
 which is precisely the failure this project exists to prevent.</p>
 </blockquote>
 <p>It happened again, in the hunt rather than the tool. Had I stopped after the
-first cross-check came back clean — unreported test, real intermittent failure,
-9.1k-star library — I would have filed a bug report that misattributed the
+first cross-check came back clean, with an unreported test, a real intermittent
+failure and a 9.1k-star library, I would have filed a bug report that misattributed the
 cause, and told you the gap was closed.</p>
 <p>The four experiments that prevented that cost about an hour.</p>
 <h3 id="what-can-be-said">What can be said<a class="anchor" href="#what-can-be-said" aria-label="Link to this section">#</a></h3>
@@ -292,8 +292,8 @@ overstating it, and the third sentence of the FAQ would have to walk it back.</p
 <p>Both <code>-count&gt;1</code> findings are real and unreported, and both have the same
 practical consequence: <strong>the project cannot use <code>go test -count=N</code></strong>, which is
 the standard way to find genuine flakes. That is worth a friendly issue, worded
-as what it is — a test-hygiene limitation, not a product bug, with the
-reproduction attached and no claim about their CI.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#protocol">Protocol</a><a class="lvl2" href="#results">Results</a><a class="lvl2" href="#every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known</a><a class="lvl2" href="#the-two-unreported-candidates">The two unreported candidates</a><a class="lvl3" href="#hashicorpraft-testraft-hasexistingstate">hashicorp/raft — TestRaft_HasExistingState</a><a class="lvl3" href="#panjf2000ants-testantspool">panjf2000/ants — TestAntsPool</a><a class="lvl2" href="#what-flakestat-itself-did-precisely">What flakestat itself did, precisely</a><a class="lvl2" href="#does-this-close-the-gap">Does this close the gap?</a><a class="lvl3" href="#the-protocol-produced-its-own-signal">The protocol produced its own signal</a><a class="lvl3" href="#what-can-be-said">What can be said</a><a class="lvl3" href="#still-worth-telling-the-maintainers">Still worth telling the maintainers</a></div></div>
+as what it is, a test-hygiene limitation rather than a product bug, with the
+reproduction attached and no claim about their CI.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#protocol">Protocol</a><a class="lvl2" href="#results">Results</a><a class="lvl2" href="#every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known</a><a class="lvl2" href="#the-two-unreported-candidates">The two unreported candidates</a><a class="lvl3" href="#hashicorpraft-testraft-hasexistingstate">hashicorp/raft: TestRaft_HasExistingState</a><a class="lvl3" href="#panjf2000ants-testantspool">panjf2000/ants: TestAntsPool</a><a class="lvl2" href="#what-flakestat-itself-did-precisely">What flakestat itself did, precisely</a><a class="lvl2" href="#does-this-close-the-gap">Does this close the gap?</a><a class="lvl3" href="#the-protocol-produced-its-own-signal">The protocol produced its own signal</a><a class="lvl3" href="#what-can-be-said">What can be said</a><a class="lvl3" href="#still-worth-telling-the-maintainers">Still worth telling the maintainers</a></div></div>
 
 <footer>
   <div class="foot-in">
