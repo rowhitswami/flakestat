@@ -9,8 +9,8 @@
 
 <p align="center">
   <a href="https://flakestat.com/"><b>Documentation</b></a> ·
-  <a href="https://flakestat.com/docs/quickstart/">Quickstart</a> ·
-  <a href="https://flakestat.com/docs/commands/">Commands</a> ·
+  <a href="https://flakestat.com/docs/#quickstart">Quickstart</a> ·
+  <a href="https://flakestat.com/docs/#commands">Commands</a> ·
   <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
 </p>
 
@@ -38,7 +38,7 @@ go install github.com/rowhitswami/flakestat/cmd/flakestat@latest
 ```
 
 Also available as a [container](https://github.com/rowhitswami/flakestat/pkgs/container/flakestat),
-a [GitHub Action](https://flakestat.com/docs/ci/github-actions/), and
+a [GitHub Action](https://flakestat.com/docs/#github-actions), and
 [prebuilt binaries](https://github.com/rowhitswami/flakestat/releases) for macOS,
 Linux and Windows.
 
