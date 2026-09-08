@@ -220,6 +220,9 @@ runner actually accepts:
 
 ## 9. Config — `.flakestat.yaml`
 
+> **Superseded.** Shipped as `.flakestat.json`; see §11. This section is
+> left as written so the reasoning behind the change stays legible.
+
 ```yaml
 version: 1
 
@@ -533,12 +536,30 @@ builds, and `FIXED` tests are surfaced to prompt tightening the baseline.
 
 ## 13. Open questions
 
-- ✅ **Name availability** — 13 GitHub repos match "flakestat", all abandoned (max 4
-  stars). No established project to collide with.
-- ☐ **Module path** — currently `github.com/rowhitswami/flakestat`, a placeholder.
-  Needs the real GitHub username before publishing.
-- ☐ **Default `same_commit_weight` of 3.0** is a judgment call, not an empirical
-  result. Worth revisiting once we have real corpus data.
-- ☐ **Config file** — `.flakestat.yaml` (§9) is designed but not implemented; the CLI
-  is flags-only so far, which keeps `go.mod` dependency-free. Adding YAML means taking
-  on `gopkg.in/yaml.v3`.
+Resolved since this section was written, kept because the record is the point:
+
+- ✅ **Name availability** — 13 GitHub repos match "flakestat", all abandoned
+  (max 4 stars). No established project to collide with.
+- ✅ **Module path** — `github.com/rowhitswami/flakestat` is the real path.
+  Published: v0.2.0 is on Homebrew, npm, PyPI, ghcr and the GitHub Marketplace.
+- ✅ **Config file** — implemented, and shipped as `.flakestat.json` rather than
+  the `.flakestat.yaml` §9 specifies. See §11: YAML would have meant taking on
+  `gopkg.in/yaml.v3`, and the dependency-free `go.mod` was worth more than the
+  syntax. §9 is left as originally written so the change is visible.
+
+Still open:
+
+- ☐ **Default `same_commit_weight` of 3.0** remains a judgment call rather than
+  an empirical result. There is now data it could be calibrated against —
+  three external subjects and ~13,000 observations of this project's own suite —
+  but nobody has done that work, and until someone does, 3.0 is a defensible
+  guess and not a finding.
+- ☐ **Sensitivity below ~5%** is unestablished. Several tests during external
+  validation fired once or twice in a hundred runs and were correctly left
+  `stable`; that is the right call on the evidence and also the boundary where
+  this sampling approach stops being the right instrument.
+- ☐ **No previously-unknown flaky test has been found.** Every real flake the
+  tool has surfaced in the wild was already filed by its maintainers. See
+  [HUNT-FINDINGS.md](HUNT-FINDINGS.md) for the attempt that failed to change
+  this, including a candidate that looked novel until four follow-up experiments
+  showed it only failed under conditions the harness itself imposed.

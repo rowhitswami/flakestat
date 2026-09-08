@@ -21,3 +21,6 @@ reports/
 .DS_Store
 .idea/
 .vscode/
+
+# Working drafts of issues and posts that have not been published
+/drafts/
