@@ -52,7 +52,7 @@ HUNT_TABS = tabs([
 ], title="hunt for flaky tests")
 
 
-def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.0'):
+def pages(BASE, REPO, ACTION_REF='rowhitswami/flakestat@v0.2.1'):
     P = []
 
     # ══════════════════════════════════════════════════════════════ landing
@@ -618,7 +618,7 @@ flakiness.</div>
 <h2>Inputs</h2>
 {tbl(["Input", "Default", "Description"], [
   ["<code>args</code>", "None", "Arguments passed to flakestat"],
-  ["<code>version</code>", "latest", "Release tag to install, e.g. <code>v0.2.0</code>"],
+  ["<code>version</code>", "latest", "Release tag to install, e.g. <code>v0.2.1</code>"],
   ["<code>install-only</code>", "<code>false</code>", "Put the binary on PATH without running it"],
   ["<code>summary</code>", "<code>true</code>", "Append the report to the job summary"],
   ["<code>comment</code>", "<code>false</code>", "Post/update a PR comment (needs <code>pull-requests: write</code>)"],

@@ -25,7 +25,7 @@ REPO = "https://github.com/rowhitswami/flakestat"
 # The action is pinned explicitly rather than to a floating major tag.
 # Pre-1.0 means no compatibility promise, and this runs inside other
 # people's CI - they should choose when to move.
-ACTION_REF = "rowhitswami/flakestat@v0.2.0"
+ACTION_REF = "rowhitswami/flakestat@v0.2.1"
 TODAY = date.today().isoformat()
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "out"
@@ -204,7 +204,7 @@ def jsonld(page) -> str:
         "description": "Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.",
         "url": SITE + "/",
         "downloadUrl": REPO + "/releases",
-        "softwareVersion": "0.2.0",
+        "softwareVersion": "0.2.1",
         "license": "https://opensource.org/licenses/MIT",
         "isAccessibleForFree": True,
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"},
