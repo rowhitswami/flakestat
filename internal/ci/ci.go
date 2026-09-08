@@ -154,7 +154,7 @@ func (r Report) Markdown(maxRows int) string {
 
 	b.WriteString("\n")
 	if r.GateFailed {
-		fmt.Fprintf(&b, "`flakestat check`: **FAILED** — %s\n", r.GateReason)
+		fmt.Fprintf(&b, "`flakestat check`: **FAILED**. %s\n", r.GateReason)
 	} else {
 		b.WriteString("`flakestat check`: **passed**\n")
 	}

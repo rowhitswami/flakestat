@@ -56,7 +56,7 @@ trap cleanup EXIT
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 
-say "flakestat — reproducing the ConduitIO before/after result"
+say "flakestat: reproducing the ConduitIO before/after result"
 note "runs per side : $RUNS  (each is a fresh process, -count=3 -shuffle=<seed>)"
 note "work directory: $WORK"
 
@@ -128,9 +128,9 @@ arm() {
 }
 
 say "4/4  Running the protocol at each commit"
-note "before the fix — ${BEFORE:0:8}"
+note "before the fix, ${BEFORE:0:8}"
 arm "$BEFORE" before
-note "at the fix     — ${AFTER:0:8}  (identical protocol)"
+note "at the fix,     ${AFTER:0:8}  (identical protocol)"
 arm "$AFTER" after
 
 # ------------------------------------------------------------------ verdict
@@ -188,4 +188,4 @@ say "Notes"
 note "conduit issue #2534 reported these tests; PR #2537 fixed them."
 note "Full methodology and the protocol amendments: VALIDATION.md"
 note "TestRandOld fired only twice in 300 observations for us and is expected"
-note "to read 'stable' — that is the detector declining on thin evidence."
+note "to read 'stable'. That is the detector declining on thin evidence."
