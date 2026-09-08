@@ -113,6 +113,28 @@ jobs:
           path: .flakestat/runs.ndjson
           retention-days: 7
 
+  reproduce:
+    name: reproduce the validation result
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: true
+
+      # The claim in the README is that anyone can reproduce the ConduitIO
+      # before/after in a couple of minutes. If that stops being true - their
+      # commits move, the packages are renamed, the script rots - it should
+      # fail here rather than in front of the first person who tries it.
+      - name: Reproduce, and require the documented flip
+        run: |
+          set -euo pipefail
+          out=$(./scripts/reproduce-validation.sh --runs=12 2>&1)
+          echo "$out"
+          echo "$out" | grep -q "3 of 4 tests were flagged" \
+            || { echo "::error::the documented before/after no longer reproduces"; exit 1; }
+
   build:
     name: build artifacts
     runs-on: ubuntu-latest

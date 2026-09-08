@@ -79,6 +79,30 @@ can never reach `high` no matter how flaky the test looks.
 nondeterminism only if everything that could legitimately change the result —
 branch, platform, runtime — was held constant.
 
+## Don't take my word for it
+
+flakestat's strongest validation isn't a fixture I wrote. ConduitIO's own
+contributors reported four flaky tests, named them, and later fixed them.
+This runs the identical protocol either side of *their* fix:
+
+```bash
+git clone https://github.com/rowhitswami/flakestat && cd flakestat
+./scripts/reproduce-validation.sh
+```
+
+```
+test                       before their fix     at their fix
+TestClient_NotFound        flaky 0.66  50/75    stable 0.00  0/75
+TestClient_CacheMiss       flaky 0.66  50/75    stable 0.00  0/75
+TestClient_CacheHit        flaky 0.66  50/75    stable 0.00  0/75
+```
+
+About two minutes. I did not create the bug, label the bug, or repair the bug —
+flakestat is handed observations from both sides of a commit it had no part in,
+and separates them. The full methodology, including the protocol arm that found
+nothing and a contaminated run that was discarded, is in
+[VALIDATION.md](VALIDATION.md).
+
 ## Works with
 
 pytest · Jest · Vitest · go test · JUnit · TestNG · Maven Surefire · RSpec ·
