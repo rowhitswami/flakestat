@@ -1,0 +1,3 @@
+# The generator's only dependency: the evidence pages are rendered from the
+# repository's Markdown rather than retyped, so something has to parse it.
+Markdown==3.10.2

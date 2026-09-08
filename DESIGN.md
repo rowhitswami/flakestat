@@ -220,8 +220,11 @@ runner actually accepts:
 
 ## 9. Config — `.flakestat.yaml`
 
-> **Superseded.** Shipped as `.flakestat.json`; see §11. This section is
-> left as written so the reasoning behind the change stays legible.
+> **Superseded.** Shipped as `.flakestat.json`; see §11. The values below are
+> the original spec, not the shipped defaults — `flaky` ships at `0.10`, and
+> `quarantine.path` and `ignore` were never implemented. §6 and the
+> documentation are authoritative. This section is left as written so the
+> reasoning behind the change stays legible.
 
 ```yaml
 version: 1

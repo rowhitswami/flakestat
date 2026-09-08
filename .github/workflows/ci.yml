@@ -135,6 +135,29 @@ jobs:
           echo "$out" | grep -q "3 of 4 tests were flagged" \
             || { echo "::error::the documented before/after no longer reproduces"; exit 1; }
 
+  site:
+    name: build the site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # /validation/, /findings/, /design/ and /changelog/ are generated from
+      # the Markdown in this repository, so a broken build here means the site
+      # and the record have come apart.
+      - name: Build
+        run: |
+          pip install -q -r site/requirements.txt
+          python3 site/build.py out
+
+      # A fragment that points at nothing still returns 200 and lands the
+      # reader in the wrong place, so checking the page exists is not enough.
+      # Three README links and one footer link had already shipped broken.
+      - name: Every internal link and fragment must resolve
+        run: python3 site/check.py out
+
   build:
     name: build artifacts
     runs-on: ubuntu-latest
