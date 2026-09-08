@@ -90,6 +90,8 @@ and `0.41` from three hundred are different claims.
 
 ## Full documentation
 
+<https://flakestat.com/docs/> — install, CI recipes, every command and flag,
+and how the scoring works. Source and issues:
 <https://github.com/rowhitswami/flakestat>
 
 MIT
