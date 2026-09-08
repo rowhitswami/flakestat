@@ -46,7 +46,7 @@
       <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
            data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/writing/">Writing</a><a href="/changelog/">Changelog</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -64,7 +64,7 @@
 <h2 id="1-emit-junit-xml">1. Emit JUnit XML<a class="anchor" href="#1-emit-junit-xml" aria-label="Link to this section">#</a></h2>
 <div class="cblock"><div class="cblock-head"><span class="cblock-title">pytest</span><button class="copy" type="button">Copy</button></div><pre><code>pytest --junitxml=reports/junit.xml</code></pre></div>
 <p>pytest writes JUnit XML natively, so there is no plugin to install. If you already use
-<code>pytest-rerunfailures</code>, keep it — retries keep the pipeline moving, but they hide the
+<code>pytest-rerunfailures</code>, keep it. Retries keep the pipeline moving, but they hide the
 flakiness rather than measuring it. flakestat measures it so the list actually shrinks.</p>
 
 <h2 id="2-hunt-for-disagreement">2. Hunt for disagreement<a class="anchor" href="#2-hunt-for-disagreement" aria-label="Link to this section">#</a></h2>
@@ -77,13 +77,13 @@ Nothing is modified in your repo, and the whole thing is one binary.</p>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>VERDICT               SCORE  CONF  RUNS  PASS/FAIL  TEST
 flaky                  0.62  high    20       14/6  test_checkout::test_race
 consistently-failing   0.00  high    20       0/20  test_api::test_broken</code></pre></div>
-<p>A test failing every time scores <code>0.00</code> and is reported separately — it is broken,
+<p>A test failing every time scores <code>0.00</code> and is reported separately, because it is broken,
 not flaky, and mixing the two wastes the time of whoever is hunting nondeterminism.
 <a href="/docs/#reading-a-report">Full explanation of the columns</a>.</p>
 
 <h2 id="4-record-ci-runs-so-it-keeps-working">4. Record CI runs so it keeps working<a class="anchor" href="#4-record-ci-runs-so-it-keeps-working" aria-label="Link to this section">#</a></h2>
 <p>A local burst finds the obvious flakes. Recording the CI runs you already pay for finds the ones
-that only appear on another platform, another runtime, or under load — at no extra compute.</p>
+that only appear on another platform, another runtime, or under load, at no extra compute.</p>
 <div class="cblock"><button class="copy" type="button">Copy</button><pre><code>flakestat ingest &#x27;reports/**/*.xml&#x27;
 flakestat report --top 20</code></pre></div>
 <p>See <a href="/docs/#github-actions">GitHub Actions</a> or
@@ -91,7 +91,7 @@ flakestat report --top 20</code></pre></div>
 <a href="/docs/#ci-gate">gating CI</a> to stop new flaky tests getting in.</p>
 
 <h2 id="why-not-just-retry">Why not just retry?<a class="anchor" href="#why-not-just-retry" aria-label="Link to this section">#</a></h2>
-<p>Retrying keeps the pipeline moving, and you should — but it hides the problem. A test that needs
+<p>Retrying keeps the pipeline moving, and you should. But it hides the problem. A test that needs
 a retry still fails sometimes in ways that matter, and a suite with retries on stays flaky for
 years because nothing ever measures whether it is getting better. Retry to unblock; measure so the
 list shrinks.</p>
@@ -107,7 +107,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat, find flaky tests in any language"
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
@@ -126,7 +126,8 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Evidence</h6>
+    <div class="foot-col"><h6>Writing</h6>
+      <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
@@ -136,7 +137,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
-      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="/docs/#faq">FAQ</a>
       <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>

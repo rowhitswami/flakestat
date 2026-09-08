@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Trunk Flaky Tests alternative — free and self-hosted</title>
+<title>Trunk Flaky Tests alternative: free and self-hosted</title>
 <meta name="description" content="An honest comparison of flakestat and Trunk Flaky Tests: what each does well, what flakestat deliberately does not do, and which one fits your situation.">
 <link rel="canonical" href="https://flakestat.com/compare/trunk/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
@@ -46,7 +46,7 @@
       <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
            data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/writing/">Writing</a><a href="/changelog/">Changelog</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -64,7 +64,7 @@
 <p>Trunk is a hosted service with dashboards, org-wide rollups and alerting. It does same-commit detection too, and does the hosted part well. flakestat is a local binary that does the detection part, for free, without your test
 data leaving your machines.</p>
 
-<div class="tablewrap"><table><thead><tr><th></th><th>flakestat</th><th>Trunk Flaky Tests</th></tr></thead><tbody><tr><td>Cost</td><td>Free at any volume</td><td>Per seat or per run</td></tr><tr><td>Test data leaves your machine</td><td>No</td><td>Yes — results are uploaded</td></tr><tr><td>Works before you push</td><td>Yes — <code>hunt</code> runs locally</td><td>No — needs CI results</td></tr><tr><td>Setup</td><td>One binary</td><td>Account plus CI integration</td></tr><tr><td>Languages</td><td>Any that writes JUnit XML</td><td>Many</td></tr><tr><td>Dashboards and history UI</td><td>No</td><td>Yes</td></tr><tr><td>Org-wide rollups, alerting</td><td>No</td><td>Yes</td></tr><tr><td>Auto-quarantine in the platform</td><td>Emits a skip list you apply</td><td>Yes, managed</td></tr><tr><td>Source available</td><td>MIT licensed</td><td>Proprietary</td></tr></tbody></table></div>
+<div class="tablewrap"><table><thead><tr><th></th><th>flakestat</th><th>Trunk Flaky Tests</th></tr></thead><tbody><tr><td>Cost</td><td>Free at any volume</td><td>Per seat or per run</td></tr><tr><td>Test data leaves your machine</td><td>No</td><td>Yes, results are uploaded</td></tr><tr><td>Works before you push</td><td>Yes, <code>hunt</code> runs locally</td><td>No, it needs CI results</td></tr><tr><td>Setup</td><td>One binary</td><td>Account plus CI integration</td></tr><tr><td>Languages</td><td>Any that writes JUnit XML</td><td>Many</td></tr><tr><td>Dashboards and history UI</td><td>No</td><td>Yes</td></tr><tr><td>Org-wide rollups, alerting</td><td>No</td><td>Yes</td></tr><tr><td>Auto-quarantine in the platform</td><td>Emits a skip list you apply</td><td>Yes, managed</td></tr><tr><td>Source available</td><td>MIT licensed</td><td>Proprietary</td></tr></tbody></table></div>
 
 <h2 id="when-trunk-flaky-tests-is-the-better-choice">When Trunk Flaky Tests is the better choice<a class="anchor" href="#when-trunk-flaky-tests-is-the-better-choice" aria-label="Link to this section">#</a></h2>
 <ul>
@@ -77,7 +77,7 @@ data leaving your machines.</p>
 
 <h2 id="when-flakestat-is-the-better-choice">When flakestat is the better choice<a class="anchor" href="#when-flakestat-is-the-better-choice" aria-label="Link to this section">#</a></h2>
 <ul>
-  <li>Test data cannot leave your infrastructure — regulated industry, private code, or policy.</li>
+  <li>Test data cannot leave your infrastructure, whether from regulation, private code, or policy.</li>
   <li>You want to find a flake <em>before</em> pushing, not after CI reports it.</li>
   <li>The budget for this is zero, or the volume makes per-run pricing awkward.</li>
   <li>You want the detection logic to be readable and auditable rather than a black box.</li>
@@ -90,7 +90,7 @@ the top of the flaky list wasting the time of whoever is hunting nondeterminism.
 <p><strong>Every verdict carries a confidence level.</strong> A score from three runs and the same
 score from three hundred are different claims, and small samples can never reach high confidence.</p>
 <p><strong>It refuses to claim causation.</strong> When failures cluster on Windows it says they
-cluster on Windows — and when <code>os</code> and <code>arch</code> vary together, it says the
+cluster on Windows, and when <code>os</code> and <code>arch</code> vary together it says the
 observations cannot tell which one matters. <a href="/docs/#dimensions">More on that</a>.</p>
 
 <h2 id="can-i-use-both">Can I use both?<a class="anchor" href="#can-i-use-both" aria-label="Link to this section">#</a></h2>
@@ -106,7 +106,7 @@ JUnit XML and neither interferes with the other.</p>
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat, find flaky tests in any language"
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
@@ -125,7 +125,8 @@ JUnit XML and neither interferes with the other.</p>
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Evidence</h6>
+    <div class="foot-col"><h6>Writing</h6>
+      <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
@@ -135,7 +136,7 @@ JUnit XML and neither interferes with the other.</p>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
-      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="/docs/#faq">FAQ</a>
       <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>

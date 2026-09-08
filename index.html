@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>flakestat — find flaky tests in any language</title>
+<title>flakestat: find flaky tests in any language</title>
 <meta name="description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
 <link rel="canonical" href="https://flakestat.com/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
@@ -11,14 +11,14 @@
 <meta name="keywords" content="flaky test detector, find flaky tests, flaky test detection, open source flaky tests, pytest flaky tests, jest flaky tests, go test flaky, junit xml flaky tests, ci flaky tests">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="flakestat">
-<meta property="og:title" content="flakestat — find flaky tests in any language">
+<meta property="og:title" content="flakestat, a flaky test detector">
 <meta property="og:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
 <meta property="og:url" content="https://flakestat.com/">
 <meta property="og:image" content="https://flakestat.com/assets/social-card.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="flakestat — find flaky tests in any language">
+<meta name="twitter:title" content="flakestat, a flaky test detector">
 <meta name="twitter:description" content="Open-source flaky test detector for pytest, Jest, go test, JUnit and anything that writes JUnit XML. One static binary, no SaaS, no account, no data egress.">
 <meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
 <meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
@@ -46,7 +46,7 @@
       <img src="/assets/logo-text.png" alt="flakestat" width="186" height="30"
            data-light="/assets/logo-text.png" data-dark="/assets/logo-text-dark.png">
     </a>
-    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/validation/">Validation</a><a href="/changelog/">Changelog</a><a href="/writing/validating-a-flaky-test-detector/">Writing</a><a href="/compare/trunk/">Compare</a></nav>
+    <nav class="nav-links" aria-label="Main"><a href="/docs/">Docs</a><a href="/writing/">Writing</a><a href="/changelog/">Changelog</a><a href="/compare/trunk/">Compare</a></nav>
     <div class="nav-right">
       <button class="searchbtn" data-search aria-label="Search documentation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -72,7 +72,7 @@
       <img class="hero-lockup" src="/assets/logo-lockup-dark.png" alt="flakestat" width="400" height="126">
       <h1>Some tests disagree<br>with <span class="odd">themselves</span>.</h1>
       <p class="sub">flakestat reads the JUnit XML your test runner already writes and tells you
-      which tests are actually flaky — ranked, with a confidence level, and with the evidence
+      which tests are actually flaky, ranked, with a confidence level, and with the evidence
       behind every verdict.</p>
       <div class="hero-cta">
         <a class="btn btn-pri" href="/docs/#quickstart">Get started</a>
@@ -94,7 +94,7 @@
 
 <div class="band"><div class="band-in">
   <div><b>Local first</b><p>One static binary. No account, no server, no test data leaving your machine.</p></div>
-  <div><b>Any language</b><p>If your runner writes JUnit XML — and they all do — flakestat reads it.</p></div>
+  <div><b>Any language</b><p>If your runner writes JUnit XML, and they all do, flakestat reads it.</p></div>
   <div><b>Free at any volume</b><p>Recording CI runs costs no extra compute. No per-seat or per-run pricing.</p></div>
   <div><b>Zero dependencies</b><p>The Go module has no <code>require</code> block. Nothing to audit but the tool.</p></div>
 </div></div>
@@ -111,7 +111,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
   -- gotestsum --junitfile=&#x27;{junit}&#x27; -- ./...</code></pre></div><div class="cpane" hidden><pre><code>flakestat hunt --runs 20 --junit &#x27;target/surefire-reports/*.xml&#x27; \
   -- mvn -q test</code></pre></div></div>
   <p>That runs your suite 20 times on unchanged code and reports what disagreed.
-  Already have CI? <a href="/docs/#history">Record the runs you already pay for</a> instead —
+  Already have CI? <a href="/docs/#history">Record the runs you already pay for</a> instead:
   it catches environment-dependent flakes a local burst never will, at no extra compute.</p>
 
   <h2 id="why-the-verdicts-can-be-trusted">Why the verdicts can be trusted<a class="anchor" href="#why-the-verdicts-can-be-trusted" aria-label="Link to this section">#</a></h2>
@@ -145,7 +145,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
 <footer>
   <div class="foot-in">
     <div>
-      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat — find flaky tests in any language"
+      <img class="foot-lockup" src="/assets/logo-lockup.png" width="247" height="62" alt="flakestat, find flaky tests in any language"
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
@@ -164,7 +164,8 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Evidence</h6>
+    <div class="foot-col"><h6>Writing</h6>
+      <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
@@ -174,7 +175,7 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>
-      <a href="/writing/validating-a-flaky-test-detector/">Writing</a>
+      <a href="/docs/#faq">FAQ</a>
       <a href="https://flakestat.com/llms.txt">llms.txt</a>
     </div>
   </div>

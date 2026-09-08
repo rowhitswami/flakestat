@@ -34,14 +34,14 @@ Install: `brew install rowhitswami/tap/flakestat`, `npm install --save-dev flake
 - [flakestat vs Trunk Flaky Tests](https://flakestat.com/compare/trunk/): An honest comparison of flakestat and Trunk Flaky Tests: what each does well, what flakestat deliberately does not do, and which one fits your situation.
 - [flakestat vs BuildPulse](https://flakestat.com/compare/buildpulse/): An honest comparison of flakestat and BuildPulse: what each does well, what flakestat deliberately does not do, and which one fits your situation.
 
-## Evidence and reasoning
+## Writing
 
-Every claim below is generated from a Markdown file in the repository, so the page and the reviewable source cannot drift apart.
-
-- [Validation](https://flakestat.com/validation/): The complete validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, every outcome including the arm that found nothing and a contaminated run that was thrown away.
-- [Flake hunt findings](https://flakestat.com/findings/): What happened when flakestat was pointed at five active open-source Go projects overnight: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.
-- [Design notes](https://flakestat.com/design/): Why flakestat scores inconsistency rather than failure rate, how execution context is compared, what the confidence level is derived from, and the questions still open.
-- [Changelog](https://flakestat.com/changelog/): Every flakestat release and what changed in it, including behaviour changes that affect existing scores.
+- [Index of everything long-form](https://flakestat.com/writing/)
+- [Validating a flaky-test detector](https://flakestat.com/writing/validating-a-flaky-test-detector/): Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.
+- [How flakestat was validated](https://flakestat.com/validation/): The full validation record for flakestat. A protocol registered before any experiment ran, three third-party subjects, and every outcome, including the arm that found nothing and a contaminated run that was thrown away.
+- [Hunting flaky tests in open source](https://flakestat.com/findings/): What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.
+- [Design notes](https://flakestat.com/design/): Why flakestat scores inconsistency rather than failure rate, how execution context is compared, what the confidence level is derived from, and which questions are still open.
+- [Changelog](https://flakestat.com/changelog/): Every flakestat release and what changed in it, including the behaviour changes that move existing scores.
 
 ## Optional
 
