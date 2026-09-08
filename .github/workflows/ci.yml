@@ -280,7 +280,7 @@ jobs:
           cache: true
 
       - name: Download every matrix job's observations
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: observations-*
           path: incoming
