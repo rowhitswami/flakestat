@@ -173,6 +173,7 @@ jobs:
       # GitHub release had already gone out.
       - name: The release workflow still passes the tokens it needs
         run: |
+          pip install -q pyyaml
           python3 - <<'PY'
           import sys, yaml
           d = yaml.safe_load(open(".github/workflows/release.yml"))
