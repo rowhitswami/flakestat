@@ -204,9 +204,10 @@ failure of the tool, it is what the world looks like.</p>
 </code></pre>
 <p>Failed on runs 003 and 011 under independent seeds (<code>758137489003</code>,
 <code>837114709011</code>). A third node appears in a two-node configuration.</p>
-<p>Cross-checked against four sources, all clean: issue search, PR search, commit
-search, and raft's own community-collected flaky-test inventory (issue #372,
-whose comments name twenty tests, and this is not among them).</p>
+<p>Cross-checked at the time against four sources, all clean: issue search, PR
+search, commit search, and raft's own community-collected flaky-test inventory
+(issue #372, whose comments name twenty tests, and this was not among them).
+The only issue that mentions it now is #711, which is mine.</p>
 <p><strong>Diagnostic results, and two corrections to my own reasoning.</strong></p>
 <pre><code>test alone,  -count=1                  25/25 pass
 test alone,  -count=3                  25/25 pass
@@ -234,7 +235,8 @@ process is enough. Thirty-five attempts, no ambiguity.</p>
 <p>The test binary times out at 10 minutes with <code>TestAntsPool</code> blocked; the
 goroutine dump shows <code>testing.(*T).Run</code> waiting while several pools'
 <code>purgeStaleWorkers</code> and <code>ticktock</code> janitors remain alive across iterations.</p>
-<p>Cross-check clean: no issue, no PR, no commit mentions it.</p>
+<p>Cross-check clean at the time: no issue, no PR and no commit mentioned it.
+The only one that does now is #401, which is mine.</p>
 <p><strong>How to characterise it:</strong> a test-hygiene bug, not a flaky test and not a
 proven pool deadlock. It blocks <code>go test -count=N</code>, which is the standard way
 to hunt real flakes, so the practical impact is that this project cannot use
