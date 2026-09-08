@@ -86,7 +86,7 @@ detector that works should say different things about them.</p>
       </div>
     </div>
   </div>
-  <div class="fig-note"><p>One commit apart. 50 of 75 observations failing on the
+  <div class="fig-note"><p>One commit apart. 60 of 90 observations failing on the
   left, none on the right.</p></div>
 </div>
 
