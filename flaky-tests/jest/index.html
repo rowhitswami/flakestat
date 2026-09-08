@@ -58,7 +58,7 @@
   </div>
 </header>
 
-<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="/docs/#install" data-anchor="install">Install</a><a href="/docs/#quickstart" data-anchor="quickstart">Quickstart</a><a href="/docs/#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="/docs/#hunting" data-anchor="hunting">Hunting locally</a><a href="/docs/#history" data-anchor="history">History over time</a><a href="/docs/#dimensions" data-anchor="dimensions">Recording context</a><a href="/docs/#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="/docs/#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="/docs/#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="/docs/#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="/docs/#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="/docs/#commands" data-anchor="commands">Commands</a><a href="/docs/#config" data-anchor="config">Configuration</a><a href="/docs/#scoring" data-anchor="scoring">How scoring works</a><a href="/docs/#runners" data-anchor="runners">Supported runners</a><a href="/docs/#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/" aria-current="page">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/compare/trunk/">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Flaky Tests</span><span>/</span><span>Find flaky tests in Jest</span></nav><h1>Find flaky tests in Jest</h1><p class="lede">Jest already writes everything flakestat needs. Here is the shortest path from “CI is flaky” to a ranked list.</p>
+<div class="shell"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><p class="sb-h">Getting started</p><a href="/docs/#install" data-anchor="install">Install</a><a href="/docs/#quickstart" data-anchor="quickstart">Quickstart</a><a href="/docs/#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><p class="sb-h">Guides</p><a href="/docs/#hunting" data-anchor="hunting">Hunting locally</a><a href="/docs/#history" data-anchor="history">History over time</a><a href="/docs/#dimensions" data-anchor="dimensions">Recording context</a><a href="/docs/#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="/docs/#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="/docs/#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><p class="sb-h">Continuous integration</p><a href="/docs/#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="/docs/#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><p class="sb-h">Reference</p><a href="/docs/#commands" data-anchor="commands">Commands</a><a href="/docs/#config" data-anchor="config">Configuration</a><a href="/docs/#scoring" data-anchor="scoring">How scoring works</a><a href="/docs/#runners" data-anchor="runners">Supported runners</a><a href="/docs/#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><p class="sb-h">By framework</p><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/" aria-current="page">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><p class="sb-h">Alternatives</p><a href="/compare/trunk/">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Flaky Tests</span><span>/</span><span>Find flaky tests in Jest</span></nav><h1>Find flaky tests in Jest</h1><p class="lede">Jest already writes everything flakestat needs. Here is the shortest path from “CI is flaky” to a ranked list.</p>
 <h2 id="1-emit-junit-xml">1. Emit JUnit XML<a class="anchor" href="#1-emit-junit-xml" aria-label="Link to this section">#</a></h2>
 <div class="cblock"><div class="cblock-head"><span class="cblock-title">Jest</span><button class="copy" type="button">Copy</button></div><pre><code>npx jest --reporters=default --reporters=jest-junit</code></pre></div>
 <p>Install <code>jest-junit</code> and point it at a per-run path. Jest's
@@ -101,7 +101,7 @@ list shrinks.</p>
 npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip install flakestat</code></pre></div><div class="cpane" hidden><pre><code>go install github.com/rowhitswami/flakestat/cmd/flakestat@latest</code></pre></div><div class="cpane" hidden><pre><code>curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh \
   | sh -s -- -b /usr/local/bin</code></pre></div><div class="cpane" hidden><pre><code>docker run --rm -v &quot;$PWD:/workspace&quot; ghcr.io/rowhitswami/flakestat report</code></pre></div></div>
 <p>Then <a href="/docs/#quickstart">the quickstart</a> takes about two minutes.</p>
-<nav class="pager"><a href="/docs/"><span>Reference</span><b>Full documentation</b></a><a class="next" href="/docs/#quickstart"><span>Get going</span><b>Quickstart</b></a></nav></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#1-emit-junit-xml">1. Emit JUnit XML</a><a class="lvl2" href="#2-hunt-for-disagreement">2. Hunt for disagreement</a><a class="lvl2" href="#3-read-the-result">3. Read the result</a><a class="lvl2" href="#4-record-ci-runs-so-it-keeps-working">4. Record CI runs so it keeps working</a><a class="lvl2" href="#why-not-just-retry">Why not just retry?</a><a class="lvl2" href="#install">Install</a></div></div>
+<nav class="pager"><a href="/docs/"><span>Reference</span><b>Full documentation</b></a><a class="next" href="/docs/#quickstart"><span>Get going</span><b>Quickstart</b></a></nav></article><div class="toc"><p class="toc-h">On this page</p><a class="lvl2" href="#1-emit-junit-xml">1. Emit JUnit XML</a><a class="lvl2" href="#2-hunt-for-disagreement">2. Hunt for disagreement</a><a class="lvl2" href="#3-read-the-result">3. Read the result</a><a class="lvl2" href="#4-record-ci-runs-so-it-keeps-working">4. Record CI runs so it keeps working</a><a class="lvl2" href="#why-not-just-retry">Why not just retry?</a><a class="lvl2" href="#install">Install</a></div></div>
 
 <footer>
   <div class="foot-in">
@@ -110,14 +110,14 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="foot-col"><h6>Docs</h6>
+    <div class="foot-col"><p class="foot-h">Docs</p>
       <a href="/docs/#install">Install</a>
       <a href="/docs/#quickstart">Quickstart</a>
       <a href="/docs/#commands">Commands</a>
       <a href="/docs/#scoring">How scoring works</a>
       <a href="/docs/#runners">Supported runners</a>
     </div>
-    <div class="foot-col"><h6>Guides</h6>
+    <div class="foot-col"><p class="foot-h">Guides</p>
       <a href="/docs/#github-actions">GitHub Actions</a>
       <a href="/docs/#history">Tracking over time</a>
       <a href="/docs/#ci-gate">Gating CI</a>
@@ -125,14 +125,14 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Writing</h6>
+    <div class="foot-col"><p class="foot-h">Writing</p>
       <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
       <a href="/changelog/">Changelog</a>
     </div>
-    <div class="foot-col"><h6>Project</h6>
+    <div class="foot-col"><p class="foot-h">Project</p>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>

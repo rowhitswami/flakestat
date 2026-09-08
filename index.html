@@ -114,16 +114,16 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
 
   <h2 id="why-the-verdicts-can-be-trusted">Why the verdicts can be trusted<a class="anchor" href="#why-the-verdicts-can-be-trusted" aria-label="Link to this section">#</a></h2>
   <div class="cards">
-    <div class="card"><h4>Inconsistency, not failure</h4>
+    <div class="card"><h3 class="card-h">Inconsistency, not failure</h3>
       <p>A test failing 100% of the time isn't flaky, it's broken. flakestat scores
       pass→fail→pass transitions, so a broken test scores zero and is reported separately.</p></div>
-    <div class="card"><h4>Evidence is weighed</h4>
+    <div class="card"><h3 class="card-h">Evidence is weighed</h3>
       <p>Disagreement on the same commit is proof; across commits it may be a regression
       someone already fixed, so it counts for less.</p></div>
-    <div class="card"><h4>Confidence, not just a number</h4>
+    <div class="card"><h3 class="card-h">Confidence, not just a number</h3>
       <p>A score of 0.62 from three runs and from three hundred are different claims. A small
       sample can never reach <code>high</code>.</p></div>
-    <div class="card"><h4>Only comparable things compared</h4>
+    <div class="card"><h3 class="card-h">Only comparable things compared</h3>
       <p>Two outcomes are evidence of nondeterminism only if branch, platform and runtime were
       held constant.</p></div>
   </div>
@@ -132,10 +132,10 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
 
   <h2 id="start-where-you-are">Start where you are<a class="anchor" href="#start-where-you-are" aria-label="Link to this section">#</a></h2>
   <div class="cards">
-    <a class="card" href="/flaky-tests/pytest/"><h4>pytest →</h4><p>Find flaky tests in a Python suite.</p></a>
-    <a class="card" href="/flaky-tests/jest/"><h4>Jest →</h4><p>Find flaky tests in a JS or TS suite.</p></a>
-    <a class="card" href="/flaky-tests/go/"><h4>go test →</h4><p>Find flaky tests in a Go suite.</p></a>
-    <a class="card" href="/docs/#github-actions"><h4>GitHub Actions →</h4><p>Record every CI run and gate on regressions.</p></a>
+    <a class="card" href="/flaky-tests/pytest/"><h3 class="card-h">pytest →</h3><p>Find flaky tests in a Python suite.</p></a>
+    <a class="card" href="/flaky-tests/jest/"><h3 class="card-h">Jest →</h3><p>Find flaky tests in a JS or TS suite.</p></a>
+    <a class="card" href="/flaky-tests/go/"><h3 class="card-h">go test →</h3><p>Find flaky tests in a Go suite.</p></a>
+    <a class="card" href="/docs/#github-actions"><h3 class="card-h">GitHub Actions →</h3><p>Record every CI run and gate on regressions.</p></a>
   </div>
 </div>
 
@@ -147,14 +147,14 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="foot-col"><h6>Docs</h6>
+    <div class="foot-col"><p class="foot-h">Docs</p>
       <a href="/docs/#install">Install</a>
       <a href="/docs/#quickstart">Quickstart</a>
       <a href="/docs/#commands">Commands</a>
       <a href="/docs/#scoring">How scoring works</a>
       <a href="/docs/#runners">Supported runners</a>
     </div>
-    <div class="foot-col"><h6>Guides</h6>
+    <div class="foot-col"><p class="foot-h">Guides</p>
       <a href="/docs/#github-actions">GitHub Actions</a>
       <a href="/docs/#history">Tracking over time</a>
       <a href="/docs/#ci-gate">Gating CI</a>
@@ -162,14 +162,14 @@ npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip 
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Writing</h6>
+    <div class="foot-col"><p class="foot-h">Writing</p>
       <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
       <a href="/changelog/">Changelog</a>
     </div>
-    <div class="foot-col"><h6>Project</h6>
+    <div class="foot-col"><p class="foot-h">Project</p>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>

@@ -38,9 +38,9 @@ Install: `brew install rowhitswami/tap/flakestat`, `npm install --save-dev flake
 
 - [Index of everything long-form](https://flakestat.com/writing/)
 - [Validating a flaky-test detector](https://flakestat.com/writing/validating-a-flaky-test-detector/): Building a flaky-test detector took a week. Working out whether it actually worked took considerably longer, and produced better material.
-- [How flakestat was validated](https://flakestat.com/validation/): The full validation record for flakestat. A protocol registered before any experiment ran, three third-party subjects, and every outcome, including the arm that found nothing and a contaminated run that was thrown away.
-- [Hunting flaky tests in open source](https://flakestat.com/findings/): What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.
-- [Design notes](https://flakestat.com/design/): Why flakestat scores inconsistency rather than failure rate, how execution context is compared, what the confidence level is derived from, and which questions are still open.
+- [How flakestat was validated](https://flakestat.com/validation/): The full validation record for flakestat: a protocol registered before any experiment ran, three third-party subjects, and every outcome it produced.
+- [Hunting flaky tests in open source](https://flakestat.com/findings/): flakestat ran overnight against five active open-source Go projects. Nine real flaky tests, seven already filed, and zero previously-unknown flakes.
+- [Design notes](https://flakestat.com/design/): Why flakestat scores inconsistency rather than failure rate, how execution context is compared, and which questions are still open.
 - [Changelog](https://flakestat.com/changelog/): Every flakestat release and what changed in it, including the behaviour changes that move existing scores.
 
 ## Optional

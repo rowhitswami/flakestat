@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hunting flaky tests in five open-source Go projects</title>
-<meta name="description" content="What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<meta name="description" content="flakestat ran overnight against five active open-source Go projects. Nine real flaky tests, seven already filed, and zero previously-unknown flakes.">
 <link rel="canonical" href="https://flakestat.com/findings/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Rohit Swami">
@@ -12,14 +12,14 @@
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="flakestat">
 <meta property="og:title" content="Hunting flaky tests in five open-source projects">
-<meta property="og:description" content="What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<meta property="og:description" content="flakestat ran overnight against five active open-source Go projects. Nine real flaky tests, seven already filed, and zero previously-unknown flakes.">
 <meta property="og:url" content="https://flakestat.com/findings/">
 <meta property="og:image" content="https://flakestat.com/assets/social-card.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Hunting flaky tests in five open-source projects">
-<meta name="twitter:description" content="What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.">
+<meta name="twitter:description" content="flakestat ran overnight against five active open-source Go projects. Nine real flaky tests, seven already filed, and zero previously-unknown flakes.">
 <meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
 <meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/jetbrains-mono-latin.woff2">
 <link rel="stylesheet" href="/theme.css">
 <script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/findings/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Hunting flaky tests in open source","item":"https://flakestat.com/findings/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/findings/#article","headline":"Hunting flaky tests in open source","description":"What happened when flakestat ran overnight against five active open-source Go projects: nine real flaky tests, seven already filed by their maintainers, and zero previously-unknown flakes.","url":"https://flakestat.com/findings/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/findings/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Hunting flaky tests in open source","item":"https://flakestat.com/findings/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/findings/#article","headline":"Hunting flaky tests in open source","description":"flakestat ran overnight against five active open-source Go projects. Nine real flaky tests, seven already filed, and zero previously-unknown flakes.","url":"https://flakestat.com/findings/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
 </head>
 <body>
 <div class="progress" id="fs-progress"></div>
@@ -58,7 +58,7 @@
   </div>
 </header>
 
-<div class="shell"><nav class="sidebar" aria-label="Writing"><div class="sb-group"><h5>Writing</h5><a href="/writing/">All writing</a><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a><a href="/validation/">How flakestat was validated</a><a href="/findings/" aria-current="page">Hunting flaky tests in open source</a><a href="/design/">Design notes</a><a href="/changelog/">Changelog</a></div><div class="sb-group"><h5>Documentation</h5><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/writing/">Writing</a><span>/</span><span>Hunting flaky tests in open source</span></nav><h1>Hunting flaky tests in open source</h1><p class="lede">Nine real flaky tests across five projects. Seven were already filed, and the two that were not turned out not to be flaky tests.</p><p class="doc-meta"><span>Field notes</span><span>Updated 8 September 2026</span><a href="https://github.com/rowhitswami/flakestat/blob/main/HUNT-FINDINGS.md">HUNT-FINDINGS.md</a></p><p><strong>Complete. Both unreported findings have since been filed with their
+<div class="shell"><nav class="sidebar" aria-label="Writing"><div class="sb-group"><p class="sb-h">Writing</p><a href="/writing/">All writing</a><a href="/writing/validating-a-flaky-test-detector/">Validating a flaky-test detector</a><a href="/validation/">How flakestat was validated</a><a href="/findings/" aria-current="page">Hunting flaky tests in open source</a><a href="/design/">Design notes</a><a href="/changelog/">Changelog</a></div><div class="sb-group"><p class="sb-h">Documentation</p><a href="/docs/">Full documentation</a><a href="/docs/#quickstart">Quickstart</a><a href="/docs/#scoring">How scoring works</a></div></nav><article class="content content-doc"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><a href="/writing/">Writing</a><span>/</span><span>Hunting flaky tests in open source</span></nav><h1>Hunting flaky tests in open source</h1><p class="lede">Nine real flaky tests across five projects. Seven were already filed, and the two that were not turned out not to be flaky tests.</p><p class="doc-meta"><span>Field notes</span><span>Updated 8 September 2026</span><a href="https://github.com/rowhitswami/flakestat/blob/main/HUNT-FINDINGS.md">HUNT-FINDINGS.md</a></p><p><strong>Complete. Both unreported findings have since been filed with their
 maintainers: <a href="https://github.com/hashicorp/raft/issues/711">hashicorp/raft#711</a>
 and <a href="https://github.com/panjf2000/ants/issues/401">panjf2000/ants#401</a>.</strong></p>
 <p>Ran flakestat's validation protocol against active open-source Go projects to
@@ -315,7 +315,7 @@ attached and no claim about their CI.</p>
 </tbody>
 </table></div>
 <p>Neither changes the count above. They were unreported when found, and they
-are still not flaky tests either project's CI can encounter.</p></article><div class="toc"><h6>On this page</h6><a class="lvl2" href="#protocol">Protocol</a><a class="lvl2" href="#results">Results</a><a class="lvl2" href="#every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known</a><a class="lvl2" href="#the-two-unreported-candidates">The two unreported candidates</a><a class="lvl3" href="#hashicorpraft-testraft-hasexistingstate">hashicorp/raft: TestRaft_HasExistingState</a><a class="lvl3" href="#panjf2000ants-testantspool">panjf2000/ants: TestAntsPool</a><a class="lvl2" href="#what-flakestat-itself-did-precisely">What flakestat itself did, precisely</a><a class="lvl2" href="#does-this-close-the-gap">Does this close the gap?</a><a class="lvl3" href="#the-protocol-produced-its-own-signal">The protocol produced its own signal</a><a class="lvl3" href="#what-can-be-said">What can be said</a><a class="lvl3" href="#told-the-maintainers">Told the maintainers</a></div></div>
+are still not flaky tests either project's CI can encounter.</p></article><div class="toc"><p class="toc-h">On this page</p><a class="lvl2" href="#protocol">Protocol</a><a class="lvl2" href="#results">Results</a><a class="lvl2" href="#every-real-flake-found-and-whether-it-was-already-known">Every real flake found, and whether it was already known</a><a class="lvl2" href="#the-two-unreported-candidates">The two unreported candidates</a><a class="lvl3" href="#hashicorpraft-testraft-hasexistingstate">hashicorp/raft: TestRaft_HasExistingState</a><a class="lvl3" href="#panjf2000ants-testantspool">panjf2000/ants: TestAntsPool</a><a class="lvl2" href="#what-flakestat-itself-did-precisely">What flakestat itself did, precisely</a><a class="lvl2" href="#does-this-close-the-gap">Does this close the gap?</a><a class="lvl3" href="#the-protocol-produced-its-own-signal">The protocol produced its own signal</a><a class="lvl3" href="#what-can-be-said">What can be said</a><a class="lvl3" href="#told-the-maintainers">Told the maintainers</a></div></div>
 
 <footer>
   <div class="foot-in">
@@ -324,14 +324,14 @@ are still not flaky tests either project's CI can encounter.</p></article><div c
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="foot-col"><h6>Docs</h6>
+    <div class="foot-col"><p class="foot-h">Docs</p>
       <a href="/docs/#install">Install</a>
       <a href="/docs/#quickstart">Quickstart</a>
       <a href="/docs/#commands">Commands</a>
       <a href="/docs/#scoring">How scoring works</a>
       <a href="/docs/#runners">Supported runners</a>
     </div>
-    <div class="foot-col"><h6>Guides</h6>
+    <div class="foot-col"><p class="foot-h">Guides</p>
       <a href="/docs/#github-actions">GitHub Actions</a>
       <a href="/docs/#history">Tracking over time</a>
       <a href="/docs/#ci-gate">Gating CI</a>
@@ -339,14 +339,14 @@ are still not flaky tests either project's CI can encounter.</p></article><div c
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Writing</h6>
+    <div class="foot-col"><p class="foot-h">Writing</p>
       <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
       <a href="/changelog/">Changelog</a>
     </div>
-    <div class="foot-col"><h6>Project</h6>
+    <div class="foot-col"><p class="foot-h">Project</p>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>

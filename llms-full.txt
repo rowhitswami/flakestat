@@ -194,3 +194,17 @@ URL: https://flakestat.com/writing/
 Writing How it was built, and what it failed to find. Essays and records from building flakestat. Essay 8 September 2026 Validating a flaky-test detector A week to build it. Rather longer to work out whether it did anything, and three bugs that all had the same shape. Read Validation record 8 September 2026 How flakestat was validated Three third-party subjects, one frozen build, and a set of rules fixed in advance about what each result would be allowed to mean. Read Field notes 8 September 2026 Hunting flaky tests in open source An overnight run against five active Go repositories, and why it closed nothing. Read Design 8 September 2026 Design notes Why flakiness is scored as inconsistency, and the three times that principle was implemented wrong. Read Releases 8 September 2026 Changelog Every release, and which changes move scores you have already recorded. Read
 
 ------------------------------------------------------------------------------
+
+## Flaky tests by framework
+URL: https://flakestat.com/flaky-tests/
+
+By framework Find flaky tests in your suite. One tool, whichever runner you use. Each guide covers the reporter flag, the command, and how to read what comes back. Python Flaky tests in pytest Using the JUnit XML pytest already writes, with no plugin to install. Read JavaScript and TypeScript Flaky tests in Jest With jest-junit, locally or from the runs your CI already does. Read Go Flaky tests in go test With gotestsum, scored properly rather than eyeballed across reruns. Read
+
+------------------------------------------------------------------------------
+
+## Alternatives
+URL: https://flakestat.com/compare/
+
+Alternatives How it compares. Hosted services do dashboards, rollups and alerting well. flakestat does the detection locally, for free, with the scoring open to inspection. Both comparisons say where the other one wins. Hosted flakestat vs Trunk Flaky Tests Local and auditable against hosted and managed, and when each is right. Read Hosted flakestat vs BuildPulse Same comparison for BuildPulse, including what flakestat deliberately will not do. Read
+
+------------------------------------------------------------------------------

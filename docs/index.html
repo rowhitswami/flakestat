@@ -58,7 +58,7 @@
   </div>
 </header>
 
-<div class="shell shell-2col"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><h5>Getting started</h5><a href="#install" data-anchor="install">Install</a><a href="#quickstart" data-anchor="quickstart">Quickstart</a><a href="#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><h5>Guides</h5><a href="#hunting" data-anchor="hunting">Hunting locally</a><a href="#history" data-anchor="history">History over time</a><a href="#dimensions" data-anchor="dimensions">Recording context</a><a href="#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><h5>Continuous integration</h5><a href="#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><h5>Reference</h5><a href="#commands" data-anchor="commands">Commands</a><a href="#config" data-anchor="config">Configuration</a><a href="#scoring" data-anchor="scoring">How scoring works</a><a href="#runners" data-anchor="runners">Supported runners</a><a href="#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><h5>By framework</h5><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><h5>Alternatives</h5><a href="/compare/trunk/">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content content-wide"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Documentation</span></nav><h1>Documentation</h1><p class="lede">Everything on one page. Use <kbd>⌘K</kbd> to search, or the contents on the left.</p><section id="install"><h2 id="install-flakestat">Install flakestat<a class="anchor" href="#install-flakestat" aria-label="Link to this section">#</a></h2><p class="lede">Same binary whichever route you pick. No runtime to install alongside it.</p>
+<div class="shell shell-2col"><nav class="sidebar" aria-label="Documentation"><div class="sb-group"><p class="sb-h">Getting started</p><a href="#install" data-anchor="install">Install</a><a href="#quickstart" data-anchor="quickstart">Quickstart</a><a href="#reading-a-report" data-anchor="reading-a-report">Reading a report</a></div><div class="sb-group"><p class="sb-h">Guides</p><a href="#hunting" data-anchor="hunting">Hunting locally</a><a href="#history" data-anchor="history">History over time</a><a href="#dimensions" data-anchor="dimensions">Recording context</a><a href="#ci-gate" data-anchor="ci-gate">Gating CI</a><a href="#quarantine" data-anchor="quarantine">Unblocking the pipeline</a><a href="#explain" data-anchor="explain">Explaining a verdict</a></div><div class="sb-group"><p class="sb-h">Continuous integration</p><a href="#github-actions" data-anchor="github-actions">GitHub Actions</a><a href="#gitlab" data-anchor="gitlab">GitLab and others</a></div><div class="sb-group"><p class="sb-h">Reference</p><a href="#commands" data-anchor="commands">Commands</a><a href="#config" data-anchor="config">Configuration</a><a href="#scoring" data-anchor="scoring">How scoring works</a><a href="#runners" data-anchor="runners">Supported runners</a><a href="#faq" data-anchor="faq">FAQ</a></div><div class="sb-group"><p class="sb-h">By framework</p><a href="/flaky-tests/pytest/">pytest</a><a href="/flaky-tests/jest/">Jest</a><a href="/flaky-tests/go/">go test</a></div><div class="sb-group"><p class="sb-h">Alternatives</p><a href="/compare/trunk/">vs Trunk</a><a href="/compare/buildpulse/">vs BuildPulse</a></div></nav><article class="content content-wide"><nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span>/</span><span>Documentation</span></nav><h1>Documentation</h1><p class="lede">Everything on one page. Use <kbd>⌘K</kbd> to search, or the contents on the left.</p><section id="install"><h2 id="install-flakestat">Install flakestat<a class="anchor" href="#install-flakestat" aria-label="Link to this section">#</a></h2><p class="lede">Same binary whichever route you pick. No runtime to install alongside it.</p>
 <div class="cblock" data-tabs><div class="cblock-head"><span class="cblock-title">install</span><div role="tablist"><button class="tab" role="tab" aria-selected="true" data-lang="brew">Homebrew</button><button class="tab" role="tab" aria-selected="false" data-lang="npm">npm</button><button class="tab" role="tab" aria-selected="false" data-lang="pip">pip</button><button class="tab" role="tab" aria-selected="false" data-lang="go">Go</button><button class="tab" role="tab" aria-selected="false" data-lang="sh">Script</button><button class="tab" role="tab" aria-selected="false" data-lang="docker">Docker</button></div><button class="copy" type="button">Copy</button></div><div class="cpane"><pre><code>brew install rowhitswami/tap/flakestat</code></pre></div><div class="cpane" hidden><pre><code>npm install --save-dev flakestat
 # or, without installing:
 npx flakestat report</code></pre></div><div class="cpane" hidden><pre><code>pip install flakestat</code></pre></div><div class="cpane" hidden><pre><code>go install github.com/rowhitswami/flakestat/cmd/flakestat@latest</code></pre></div><div class="cpane" hidden><pre><code>curl -sSfL https://raw.githubusercontent.com/rowhitswami/flakestat/main/scripts/install.sh \
@@ -236,12 +236,12 @@ file is the record you keep.</p>
 
 <h2 id="where-to-keep-the-history">Where to keep the history<a class="anchor" href="#where-to-keep-the-history" aria-label="Link to this section">#</a></h2>
 <div class="cards">
-  <div class="card"><h4>Commit it</h4><p>Simplest. The file goes in the repo and everyone shares
+  <div class="card"><h3 class="card-h">Commit it</h3><p>Simplest. The file goes in the repo and everyone shares
   one history. Downside: every CI run wants to write to it, so telemetry lands in your development
   history.</p></div>
-  <div class="card"><h4>A CI artifact</h4><p>Zero setup, but nothing accumulates. Each run sees
+  <div class="card"><h3 class="card-h">A CI artifact</h3><p>Zero setup, but nothing accumulates. Each run sees
   only itself, so you never build the long history that makes the tool accurate.</p></div>
-  <div class="card pick"><span class="tag">Recommended</span><h4>A dedicated branch</h4>
+  <div class="card pick"><span class="tag">Recommended</span><h3 class="card-h">A dedicated branch</h3>
   <p>What flakestat uses for itself. Keeps telemetry out of development history, avoids a bot
   commit retriggering your workflow, and gives one place to serialize writers.</p></div>
 </div>
@@ -698,14 +698,14 @@ flakestat is for the case where you want detection to be local, free and yours. 
            data-light="/assets/logo-lockup.png" data-dark="/assets/logo-lockup-dark.png">
       <p>An open-source flaky test detector. One static binary, no SaaS, no account, and your test results never leave your machine.</p>
     </div>
-    <div class="foot-col"><h6>Docs</h6>
+    <div class="foot-col"><p class="foot-h">Docs</p>
       <a href="/docs/#install">Install</a>
       <a href="/docs/#quickstart">Quickstart</a>
       <a href="/docs/#commands">Commands</a>
       <a href="/docs/#scoring">How scoring works</a>
       <a href="/docs/#runners">Supported runners</a>
     </div>
-    <div class="foot-col"><h6>Guides</h6>
+    <div class="foot-col"><p class="foot-h">Guides</p>
       <a href="/docs/#github-actions">GitHub Actions</a>
       <a href="/docs/#history">Tracking over time</a>
       <a href="/docs/#ci-gate">Gating CI</a>
@@ -713,14 +713,14 @@ flakestat is for the case where you want detection to be local, free and yours. 
       <a href="/flaky-tests/jest/">Flaky Jest tests</a>
       <a href="/flaky-tests/go/">Flaky Go tests</a>
     </div>
-    <div class="foot-col"><h6>Writing</h6>
+    <div class="foot-col"><p class="foot-h">Writing</p>
       <a href="/writing/">All writing</a>
       <a href="/validation/">Validation record</a>
       <a href="/findings/">Flake hunt findings</a>
       <a href="/design/">Design notes</a>
       <a href="/changelog/">Changelog</a>
     </div>
-    <div class="foot-col"><h6>Project</h6>
+    <div class="foot-col"><p class="foot-h">Project</p>
       <a href="https://github.com/rowhitswami/flakestat">GitHub</a>
       <a href="https://github.com/rowhitswami/flakestat/releases">Releases</a>
       <a href="https://github.com/rowhitswami/flakestat/issues">Issues</a>

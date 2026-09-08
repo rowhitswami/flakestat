@@ -3,23 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Writing about flaky tests and flakestat</title>
-<meta name="description" content="Essays, validation records and design notes from building flakestat, an open-source flaky test detector.">
-<link rel="canonical" href="https://flakestat.com/writing/">
+<title>How to find flaky tests in pytest, Jest and go test</title>
+<meta name="description" content="Framework-specific guides to detecting flaky tests, using the JUnit XML your test runner already writes. Free, open source, and local.">
+<link rel="canonical" href="https://flakestat.com/flaky-tests/">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
 <meta name="author" content="Rohit Swami">
-<meta name="keywords" content="flaky test blog, flaky test detection writing, flakestat validation, flakestat design notes">
+<meta name="keywords" content="flaky tests pytest, flaky tests jest, flaky tests go test, how to find flaky tests">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="flakestat">
-<meta property="og:title" content="Writing">
-<meta property="og:description" content="Essays, validation records and design notes from building flakestat, an open-source flaky test detector.">
-<meta property="og:url" content="https://flakestat.com/writing/">
+<meta property="og:title" content="Flaky tests by framework">
+<meta property="og:description" content="Framework-specific guides to detecting flaky tests, using the JUnit XML your test runner already writes. Free, open source, and local.">
+<meta property="og:url" content="https://flakestat.com/flaky-tests/">
 <meta property="og:image" content="https://flakestat.com/assets/social-card.png">
 <meta property="og:image:width" content="1280">
 <meta property="og:image:height" content="640">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Writing">
-<meta name="twitter:description" content="Essays, validation records and design notes from building flakestat, an open-source flaky test detector.">
+<meta name="twitter:title" content="Flaky tests by framework">
+<meta name="twitter:description" content="Framework-specific guides to detecting flaky tests, using the JUnit XML your test runner already writes. Free, open source, and local.">
 <meta name="twitter:image" content="https://flakestat.com/assets/social-card.png">
 <meta name="theme-color" content="#08142A" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
@@ -30,7 +30,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/jetbrains-mono-latin.woff2">
 <link rel="stylesheet" href="/theme.css">
 <script>(function(){try{var t=localStorage.getItem('flakestat-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/writing/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Writing","item":"https://flakestat.com/writing/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/writing/#article","headline":"Writing","description":"Essays, validation records and design notes from building flakestat, an open-source flaky test detector.","url":"https://flakestat.com/writing/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","@id":"https://flakestat.com/#software","name":"flakestat","applicationCategory":"DeveloperApplication","applicationSubCategory":"Test automation","operatingSystem":"macOS, Linux, Windows","description":"Open-source CLI that detects flaky tests from JUnit XML in any language. Runs locally with no account and no data leaving your machine.","url":"https://flakestat.com/","downloadUrl":"https://github.com/rowhitswami/flakestat/releases","softwareVersion":"0.2.0","license":"https://opensource.org/licenses/MIT","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},"programmingLanguage":"Go","featureList":["Detects flaky tests from JUnit XML produced by any test runner","Scores state transitions rather than failure rate, so broken tests are not mistaken for flaky ones","Reports a confidence level with every verdict","Runs entirely locally with no account and no data egress","Fails CI only when flakiness gets worse, via a committed baseline","Emits quarantine skip lists for pytest, Jest and go test"]},{"@type":"WebSite","@id":"https://flakestat.com/#website","url":"https://flakestat.com/","name":"flakestat","description":"Documentation for flakestat, an open-source flaky test detector.","publisher":{"@id":"https://flakestat.com/#person"}},{"@type":"Person","@id":"https://flakestat.com/#person","name":"Rohit Swami","url":"https://github.com/rowhitswami"},{"@type":"BreadcrumbList","@id":"https://flakestat.com/flaky-tests/#crumbs","itemListElement":[{"@type":"ListItem","position":1,"name":"flakestat","item":"https://flakestat.com/"},{"@type":"ListItem","position":2,"name":"Flaky tests by framework","item":"https://flakestat.com/flaky-tests/"}]},{"@type":"TechArticle","@id":"https://flakestat.com/flaky-tests/#article","headline":"Flaky tests by framework","description":"Framework-specific guides to detecting flaky tests, using the JUnit XML your test runner already writes. Free, open source, and local.","url":"https://flakestat.com/flaky-tests/","datePublished":"2026-09-06","dateModified":"2026-09-08","author":{"@id":"https://flakestat.com/#person"},"about":{"@id":"https://flakestat.com/#software"},"inLanguage":"en"}]}</script>
 </head>
 <body>
 <div class="progress" id="fs-progress"></div>
@@ -61,11 +61,11 @@
 
 <div class="wr-wrap">
   <header class="wr-head">
-    <p class="wr-eyebrow">Writing</p>
-    <h1>How it was built,<br>and what it failed to find.</h1>
-    <p>Essays and records from building flakestat.</p>
+    <p class="wr-eyebrow">By framework</p>
+    <h1>Find flaky tests in your suite.</h1>
+    <p>One tool, whichever runner you use. Each guide covers the reporter flag, the command, and how to read what comes back.</p>
   </header>
-  <ol class="wr-list"><li class="wr-item"><a href="/writing/validating-a-flaky-test-detector/"><p class="wr-kicker"><span>Essay</span><span>8 September 2026</span></p><h2>Validating a flaky-test detector</h2><p class="wr-sum">A week to build it. Rather longer to work out whether it did anything, and three bugs that all had the same shape.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/validation/"><p class="wr-kicker"><span>Validation record</span><span>8 September 2026</span></p><h2>How flakestat was validated</h2><p class="wr-sum">Three third-party subjects, one frozen build, and a set of rules fixed in advance about what each result would be allowed to mean.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/findings/"><p class="wr-kicker"><span>Field notes</span><span>8 September 2026</span></p><h2>Hunting flaky tests in open source</h2><p class="wr-sum">An overnight run against five active Go repositories, and why it closed nothing.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/design/"><p class="wr-kicker"><span>Design</span><span>8 September 2026</span></p><h2>Design notes</h2><p class="wr-sum">Why flakiness is scored as inconsistency, and the three times that principle was implemented wrong.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/changelog/"><p class="wr-kicker"><span>Releases</span><span>8 September 2026</span></p><h2>Changelog</h2><p class="wr-sum">Every release, and which changes move scores you have already recorded.</p><span class="wr-go">Read<i></i></span></a></li></ol>
+  <ol class="wr-list"><li class="wr-item"><a href="/flaky-tests/pytest/"><p class="wr-kicker"><span>Python</span></p><h2>Flaky tests in pytest</h2><p class="wr-sum">Using the JUnit XML pytest already writes, with no plugin to install.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/flaky-tests/jest/"><p class="wr-kicker"><span>JavaScript and TypeScript</span></p><h2>Flaky tests in Jest</h2><p class="wr-sum">With jest-junit, locally or from the runs your CI already does.</p><span class="wr-go">Read<i></i></span></a></li><li class="wr-item"><a href="/flaky-tests/go/"><p class="wr-kicker"><span>Go</span></p><h2>Flaky tests in go test</h2><p class="wr-sum">With gotestsum, scored properly rather than eyeballed across reruns.</p><span class="wr-go">Read<i></i></span></a></li></ol>
 </div>
 
 
