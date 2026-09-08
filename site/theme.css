@@ -58,7 +58,7 @@
   --surface-2: #E9EFF7;
   --fg:        #08142A;
   --fg-2:      #45536D;
-  --fg-3:      #75839B;
+  --fg-3:      #64728A;
   --line:      #E3E9F2;
   --line-2:    #CBD5E5;
   --green:     #00875A;
@@ -66,7 +66,7 @@
 
   --code-bg:   #08142A;
   --code-fg:   #D9E2F2;
-  --code-dim:  #64769B;
+  --code-dim:  #6D7EA1;
 
   --sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -83,7 +83,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) { color-scheme: dark;
     --bg: #08142A; --bg-alt: #0B1930; --surface: #101F3C; --surface-2: #182B4E;
-    --fg: #E8EEF8; --fg-2: #A2B2CC; --fg-3: #7486A6;
+    --fg: #E8EEF8; --fg-2: #A2B2CC; --fg-3: #8393B0;
     --line: #1B2C4C; --line-2: #2A3E64;
     --blue: #5A96FF; --blue-ink: #93BAFF; --blue-soft: #10254B; --blue-line: #24427A;
     --orange: #FF7C2E; --orange-ink: #FFA268; --orange-soft: #2B1A0F;
@@ -96,7 +96,7 @@
 }
 :root[data-theme="dark"] { color-scheme: dark;
   --bg: #08142A; --bg-alt: #0B1930; --surface: #101F3C; --surface-2: #182B4E;
-  --fg: #E8EEF8; --fg-2: #A2B2CC; --fg-3: #7486A6;
+  --fg: #E8EEF8; --fg-2: #A2B2CC; --fg-3: #8393B0;
   --line: #1B2C4C; --line-2: #2A3E64;
   --blue: #5A96FF; --blue-ink: #93BAFF; --blue-soft: #10254B; --blue-line: #24427A;
   --orange: #FF7C2E; --orange-ink: #FFA268; --orange-soft: #2B1A0F;
@@ -365,7 +365,7 @@ a.card .card-h { color: var(--fg); }
 .seq button:hover { border-color: var(--blue); }
 .seq button.p { background: color-mix(in srgb, var(--green) 14%, var(--bg)); color: var(--green); border-color: color-mix(in srgb, var(--green) 34%, var(--line-2)); }
 .seq button.f { background: var(--orange-soft); color: var(--orange-ink); border-color: color-mix(in srgb, var(--orange) 42%, var(--line-2)); }
-.seq button.s { background: var(--surface-2); color: var(--fg-3); }
+.seq button.s { background: var(--surface-2); color: var(--fg-2); }  /* fg-3 on surface-2 is 4.21:1, under AA for this size */
 .demo-actions { display: flex; gap: .45rem; flex-wrap: wrap; margin-top: .8rem; }
 .mini { border: 1px solid var(--line-2); background: var(--bg); color: var(--fg-2);
   border-radius: var(--r-sm); font-family: var(--sans); font-size: .78rem; font-weight: 600;
