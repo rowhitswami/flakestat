@@ -16,6 +16,7 @@ def post(BASE, REPO):
                   "junit xml", "go testing"],
         lede="",
         updated="8 September 2026",
+        lastmod="2026-09-08",
         summary="A week to build it. Rather longer to work out whether it did "
                 "anything, and three bugs that all had the same shape.",
         body=f"""
@@ -301,6 +302,8 @@ def index(BASE, REPO, entries):
         slug="writing",
         section="Writing",
         layout="index",
+        # The index is only as fresh as the newest thing on it.
+        lastmod=max((e.get("lastmod") or "") for e in entries),
         title="Writing",
         title_tag="Writing about flaky tests and flakestat",
         og_title="Writing",

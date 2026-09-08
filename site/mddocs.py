@@ -82,16 +82,16 @@ MONTHS = ("January February March April May June July August September October "
           "November December").split()
 
 
-def _updated(src: str) -> str:
-    """Date of the last commit that touched the file."""
+def _updated(src: str):
+    """Date of the last commit that touched the file, ISO and readable."""
     try:
-        out = subprocess.run(
+        iso = subprocess.run(
             ["git", "-C", ROOT, "log", "-1", "--format=%cs", "--", src],
             capture_output=True, text=True, timeout=10).stdout.strip()
-        y, m, d = out.split("-")
-        return f"{int(d)} {MONTHS[int(m) - 1]} {y}"
+        y, m, d = iso.split("-")
+        return iso, f"{int(d)} {MONTHS[int(m) - 1]} {y}"
     except Exception:
-        return ""
+        return "", ""
 
 
 def _rewrite_links(body: str, base: str, repo: str) -> str:
@@ -157,7 +157,7 @@ def pages(base: str, repo: str):
             body = _version_anchors(body)
         body = _wrap_tables(body)
 
-        updated = _updated(src)
+        iso, updated = _updated(src)
         byline = (
             f'<p class="doc-meta"><span>{meta["kicker"]}</span>'
             + (f"<span>Updated {updated}</span>" if updated else "")
@@ -165,6 +165,6 @@ def pages(base: str, repo: str):
         )
         page = dict(meta)
         page.update(slug=slug, section="Writing", layout="doc",
-                    body=byline + body, source=src, updated=updated)
+                    body=byline + body, source=src, updated=updated, lastmod=iso)
         out.append(page)
     return out

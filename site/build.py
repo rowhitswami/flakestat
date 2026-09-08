@@ -14,6 +14,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from datetime import date
 
@@ -29,6 +30,28 @@ TODAY = date.today().isoformat()
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else "out"
 HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+
+
+def git_date(*paths) -> str:
+    """Most recent commit date touching any of these files, as YYYY-MM-DD.
+
+    lastmod stamped with today's date on every build is worse than no lastmod:
+    it says all thirteen pages changed today, every day, and a crawler that
+    notices stops believing the field. Empty when git cannot say, which is the
+    case in a shallow checkout.
+    """
+    best = ""
+    for p in paths:
+        try:
+            d = subprocess.run(
+                ["git", "-C", ROOT, "log", "-1", "--format=%cs", "--", p],
+                capture_output=True, text=True, timeout=10).stdout.strip()
+        except Exception:
+            d = ""
+        if len(d) == 10 and d > best:
+            best = d
+    return best
 
 
 def url(path: str) -> str:
@@ -222,7 +245,7 @@ def jsonld(page) -> str:
             "description": page["description"],
             "url": canonical(page["slug"]),
             "datePublished": "2026-09-06",
-            "dateModified": TODAY,
+            "dateModified": page.get("lastmod") or TODAY,
             "author": {"@id": SITE + "/#person"},
             "about": {"@id": SITE + "/#software"},
             "inLanguage": "en",
@@ -505,6 +528,7 @@ def main():
     pages = content.pages(BASE, REPO, ACTION_REF)
     import writing
     essay = writing.post(BASE, REPO)
+    essay["lastmod"] = git_date("site/writing.py")
     import mddocs
     md_pages = mddocs.pages(BASE, REPO)
     long_form = [essay] + md_pages
@@ -582,15 +606,23 @@ def main():
     write(os.path.join(OUT, "search-index.json"), json.dumps(index_rows, separators=(",", ":")))
 
     # ------------------------------------------------------------- sitemap
+    # Content pages come from content.py; the long-form ones carry the date of
+    # the file they were generated from. changefreq is omitted: Google has said
+    # for years that it ignores the field.
+    content_date = git_date("site/content.py") or TODAY
+    lastmod = {p["slug"]: p.get("lastmod") or content_date for p in [docs_page] + others}
+
     routes = [""] + [DOCS_SLUG] + [p["slug"] for p in others if p["slug"]]
     urls = []
     for r in routes:
         pri = "1.0" if not r else (
             "0.9" if r == DOCS_SLUG or r.startswith("flaky-tests")
-            else "0.8" if r in ("validation", "findings", "design", "changelog", "writing")
+            else "0.8" if r in ("validation", "findings", "design", "changelog",
+                                "writing", "writing/validating-a-flaky-test-detector")
             else "0.7")
-        urls.append(f"<url><loc>{canonical(r)}</loc><lastmod>{TODAY}</lastmod>"
-                    f"<changefreq>weekly</changefreq><priority>{pri}</priority></url>")
+        urls.append(f"<url><loc>{canonical(r)}</loc>"
+                    f"<lastmod>{lastmod.get(r, content_date)}</lastmod>"
+                    f"<priority>{pri}</priority></url>")
     write(os.path.join(OUT, "sitemap.xml"),
           '<?xml version="1.0" encoding="UTF-8"?>\n'
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'

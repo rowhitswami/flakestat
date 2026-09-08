@@ -140,6 +140,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # sitemap lastmod and the "updated" date on each generated page come
+          # from git, so a shallow checkout would silently fall back to today.
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
